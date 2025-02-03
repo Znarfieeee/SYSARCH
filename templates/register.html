@@ -1,0 +1,38 @@
+{% extends 'index.html' %}
+{% block content%}
+    <div class="registration-from">
+        <form >
+            <label>IDNO</label>
+            <input type="text" id="idno" class="idno">
+            <label>Lastname</label>
+            <input type="text" id="lastname" class="lastname">
+            <label>Firstname</label>
+            <input type="text" id="firstname" class="firstname">
+            <label>Middlename</label>
+            <input type="text" id="middlename" class="middlename">
+            <label>Course</label>
+            <select name="course" id="course">
+                <option value="bsit">Bachelor of Science in Information Technology</option>
+                <option value="bscs">Bachelor of Science in Computer Studies</option>
+                <option value="bsce">Bachelor of Science in Civil Engineering</option>
+                <option value="bsba">Bachelor of Science in Business Ads</option>
+                <option value="BSED">Bachelor of Science in Education</option>
+            </select>
+            <label>Year Level</label>
+            <select name="yr_level" id="yr_level">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <label>Email Address</label>
+            <input type="text" id="email" class="email">
+            <label>Username</label>
+            <input type="text" id="username" class="username">
+            <label>Password</label>
+            <input type="password" id="password" class="password">
+
+        </form>
+    </div>
+
+{% endblock %}

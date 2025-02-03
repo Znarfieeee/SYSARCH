@@ -1,0 +1,21 @@
+{% extends 'index.html'%}
+{% block content%}
+<div class="login-container">
+    <div class="box1">
+        <h2>CCS SIT-IN MONITORING SYSTEM</h2>
+    </div>
+    <div class="box2">
+        <form action="{{url_for('login')}}">
+            <label>Username</label>
+            <input type="text" id="username" class="username">
+            <label>Password</label>
+            <input type="password" id="password" class="password">
+            <div class="sub-box">
+                <button class="login-btn">Log-In</button>
+                <a href="{{url_for('register')}}" underline>Register</a>
+            </div>
+        </form>
+    </div>
+    
+</div>
+{% endblock %}
