@@ -1,6 +1,28 @@
-{% extends 'index.html' %}
+{% extends 'index.html'%}
 {% block content%}
-    <div class="home-container">
+    <div class="text-6xl font-semibold text-center mt-40">
         <h1>Hello World!</h1>
     </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        <span>{{ message }}</span>
+                        <!-- <button onclick="this.parentElement.style.display='none';">OK</button> -->
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <script>
+        setTimeout(function() {
+        var flashContainer = document.getElementById('flash-container');
+        if (flashContainer) {
+            flashContainer.style.transition = "opacity 0.5s ease-out";
+            flashContainer.style.opacity = "0";
+            setTimeout(() => flashContainer.remove(), 500);
+        }
+    }, 3000);
+    </script>
 {% endblock %}

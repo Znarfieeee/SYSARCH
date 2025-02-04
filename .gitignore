@@ -1,0 +1,5 @@
+package-lock.json
+node_modules/
+package.json
+sqlite3.exe
+tailwind.config.js

@@ -1,21 +1,41 @@
 {% extends 'index.html'%}
 {% block content%}
-<div class="login-container">
-    <div class="box1">
-        <h2>CCS SIT-IN MONITORING SYSTEM</h2>
-    </div>
-    <div class="box2">
-        <form action="{{url_for('login')}}">
-            <label>Username</label>
-            <input type="text" id="username" class="username">
-            <label>Password</label>
-            <input type="password" id="password" class="password">
-            <div class="sub-box">
-                <button class="login-btn">Log-In</button>
-                <a href="{{url_for('register')}}" underline>Register</a>
+<div class="flex justify-center items-center h-100 bg-zinc-200 z-10">
+    <div  class="flex justify-center items-center mt-40 p-5 ">
+        <form class="bg-zinc-50 shadow-x1 flex flex-col w-4x1 p-4 text-x1 h-90 rounded-2xl" action="{{ url_for('login') }}" method="POST">
+            <h1 class="self-center text-4xl font-semibold p-3">LOGIN</h1>
+            <hr class="p-2">
+            <label class="p-2">Username</label>
+            <input type="text" name="username" class="p-2 text-x1 h-12 w-100 border-black border-1 rounded-2xl">
+            <label class="p-2">Password</label>
+            <input type="password" name="password" class="p-2 text-x1 h-12 w-100 border-black border-1 rounded-2xl">
+            <div class="flex flex-row justify-between items-center p-2 mt-5">
+                <button class="cursor-pointer content-center h-10 w-30 bg-zinc-600 transition ease-in-out hover:bg-zinc-800 text-white self-center rounded-3xl">Log-In</button>
+                <a href="{{url_for('register')}}" class="underline transition ease-in hover:text-zinc-400">Register</a>
             </div>
         </form>
     </div>
-    
 </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        <span>{{ message }}</span>
+                        <!-- <button onclick="this.parentElement.style.display='none';">OK</button> -->
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <script>
+        setTimeout(function() {
+        var flashContainer = document.getElementById('flash-container');
+        if (flashContainer) {
+            flashContainer.style.transition = "opacity 0.5s ease-out";
+            flashContainer.style.opacity = "0";
+            setTimeout(() => flashContainer.remove(), 500);
+        }
+    }, 3000);
+    </script>
 {% endblock %}

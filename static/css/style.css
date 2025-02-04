@@ -1,12 +1,29 @@
 @import "tailwindcss";
 
-@theme {
-    --font-poppins: Poppins, sans-serif;
-}
-
-*{
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-}
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 50%;
+    color: white;
+    padding: 20px;
+  }
+  
+  .flash {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .flash.success {
+    background-color: rgba(40, 167, 69, 0.8);
+  }
+  
+  .flash.error {
+    background-color: rgba(220, 53, 69, 0.8);
+  }
