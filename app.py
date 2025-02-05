@@ -19,19 +19,29 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        sql = "SELECT * FROM users WHERE username = ? AND password = ?"
-        user = getallprocess(sql, (username, password))
-
-        if user:
-            flash("Successfully logged in.", "success")
-            print("login successful")
-            session['user'] = username
-            return redirect(url_for('home'))
+        if not username or not password:
+            flash("Input username and password", "error")
+            
         else:
-            flash("Invalid username or password.", "error")
-            # return redirect(url_for('login'))
+            sql = "SELECT * FROM users WHERE username = ? AND password = ?"
+            user = getallprocess(sql, (username, password))
+
+            if user:
+                flash("Successfully logged in.", "success")
+                print("login successful")
+                session['user'] = username
+                return redirect(url_for('home'))
+            else:
+                flash("Invalid username or password.", "error")
+                # return redirect(url_for('login'))
 
     return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return redirect(url_for('login'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -45,6 +55,10 @@ def register():
         email = request.form.get('email')
         username = request.form.get('username')
         password = request.form.get('password')
+
+        if not idno or not lastname or not firstname or not course or not yr_lvl or not email or not username or not password:
+            flash("All fields are required.", "error")
+            return redirect(url_for('register'))
         
         success = addprocess('users', idno=idno, lastname=lastname, 
                              firstname=firstname, middlename=middlename, 

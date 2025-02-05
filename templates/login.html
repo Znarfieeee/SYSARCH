@@ -2,7 +2,7 @@
 {% block content%}
 <div class="flex justify-center items-center h-100 bg-zinc-200 z-10">
     <div  class="flex justify-center items-center mt-40 p-5 ">
-        <form class="bg-zinc-50 shadow-x1 flex flex-col w-4x1 p-4 text-x1 h-90 rounded-2xl" action="{{ url_for('login') }}" method="POST">
+        <form class="bg-zinc-50 drop-shadow-lg flex flex-col w-4x1 p-4 text-x1 h-90 rounded-2xl" action="{{ url_for('login') }}" method="POST">
             <h1 class="self-center text-4xl font-semibold p-3">LOGIN</h1>
             <hr class="p-2">
             <label class="p-2">Username</label>
@@ -11,7 +11,10 @@
             <input type="password" name="password" class="p-2 text-x1 h-12 w-100 border-black border-1 rounded-2xl">
             <div class="flex flex-row justify-between items-center p-2 mt-5">
                 <button class="cursor-pointer content-center h-10 w-30 bg-zinc-600 transition ease-in-out hover:bg-zinc-800 text-white self-center rounded-3xl">Log-In</button>
-                <a href="{{url_for('register')}}" class="underline transition ease-in hover:text-zinc-400">Register</a>
+                <div class="transition ease-in hover:text-zinc-400">
+                    <a href="{{url_for('register')}}" class="">Register</a>
+                    <i class="fas fa-solid fa-arrow-right"></i>
+                </div>
             </div>
         </form>
     </div>
@@ -28,14 +31,4 @@
             </div>
         {% endif %}
     {% endwith %}
-    <script>
-        setTimeout(function() {
-        var flashContainer = document.getElementById('flash-container');
-        if (flashContainer) {
-            flashContainer.style.transition = "opacity 0.5s ease-out";
-            flashContainer.style.opacity = "0";
-            setTimeout(() => flashContainer.remove(), 500);
-        }
-    }, 3000);
-    </script>
 {% endblock %}

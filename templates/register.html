@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
 {% block content%}
     <div class="flex justify-center items-center p-3 h-220">
-        <form class="bg-zinc-50 shadow-x1 flex flex-col w-4x1 p-2 text-x1 h-210 rounded-2xl" action="/register" method="POST">
+        <form class="bg-zinc-50 drop-shadow-lg flex flex-col w-4x1 p-4 text-x1 h-210 rounded-2xl" action="/register" method="POST">
             <label class="p-2">IDNO</label>
             <input type="text" name="idno" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">LAST NAME</label>
@@ -9,7 +9,7 @@
             <label class="p-2">FIRST NAME</label>
             <input type="text" name="firstname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">MIDDLE NAME</label>
-            <input type="text" id="middlename" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="text" id="middlename" placeholder="If none, leave blank" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">COURSE</label>
             <select name="course" name="course" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
                 <option selected disabled>Select Course</option>
@@ -33,29 +33,24 @@
             <input type="text" name="username" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">PASSWORD</label>
             <input type="password" name="password" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
-            <button type="submit" class="cursor-pointer content-center h-15 w-30 p-2 bg-zinc-600 transition ease-in-out hover:bg-zinc-800 text-white self-center mt-5 rounded-3xl">Register</button>
-        </form>
+            <div class="flex flex-row justify-between items-center p-2 mt-5">
+                <div class="tologin transition ease-in hover:text-zinc-400">
+                    <i class="fas fa-arrow-left fa-solid"></i>
+                    <a href="{{url_for('login')}}" class=" ">Login</a>
+                </div>
+                <button class="cursor-pointer content-center h-10 w-30 bg-zinc-600 transition ease-in-out hover:bg-zinc-800 text-white self-center rounded-3xl">Register</button>
+            </div>
+            </form>
     </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
                 {% for category, message in messages %}
-                    <div class="flash {{ category }} p-3 rounded-lg shadow-md bg-gray-200 text-gray-800">
+                    <div class="flash {{ category }} p-3 rounded-lg shadow-md bg-gray-200 text-gray-800 self-center">
                         <span>{{ message }}</span>
-                        <!-- <button onclick="this.parentElement.style.display='none';">OK</button> -->
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
-    <script>
-        setTimeout(function() {
-        var flashContainer = document.getElementById('flash-container');
-        if (flashContainer) {
-            flashContainer.style.transition = "opacity 0.5s ease-out";
-            flashContainer.style.opacity = "0";
-            setTimeout(() => flashContainer.remove(), 500);
-        }
-    }, 3000);
-    </script>
 {% endblock %}
