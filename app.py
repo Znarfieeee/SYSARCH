@@ -43,6 +43,17 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
 
+@app.route('/staffdb')
+def staffdb():
+    if 'user' in session:
+        sql = "SELECT * FROM users"
+        users = getallprocess(sql)
+        return render_template("staffdb.html", users=users)
+    else:
+    
+    pass
+        
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':

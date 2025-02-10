@@ -3,3 +3,4 @@ node_modules/
 package.json
 sqlite3.exe
 tailwind.config.js
+postcss.config.js
