@@ -4,15 +4,20 @@ from dbhelper import *
 app = Flask(__name__)
 app.secret_key = "!@#$%12345"
 
+@app.after_request
+def addheader(response):
+    response.headers['Content-Type'] = 'no-cache, no-store, must-revalidate, private'
+    response.headers["Pragma"] = 'no-cache'
+    response.headers["Expires"] = "0"
+    return response
+
 @app.route('/home')
 def home():
-    if 'user' in session:
-        return render_template("home.html")
-    else:
+    if session.get('logged_in'):
         return redirect(url_for('login'))
-    
-    
 
+    return render_template("home.html")
+    
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -21,39 +26,29 @@ def login():
 
         if not username or not password:
             flash("Input username and password", "error")
-            
-        else:
-            sql = "SELECT * FROM users WHERE username = ? AND password = ?"
-            user = getallprocess(sql, (username, password))
 
-            if user:
-                flash("Successfully logged in.", "success")
-                print("login successful")
-                session['user'] = username
-                return redirect(url_for('home'))
-            else:
-                flash("Invalid username or password.", "error")
-                # return redirect(url_for('login'))
+        sql = "SELECT * FROM users WHERE username = ? AND password = ?"
+        user = getallprocess(sql, (username, password))
+
+        if user:
+            flash("Successfully logged in.", "success")
+            print("login successful")
+            session['user'] = username
+            return redirect(url_for('home'))
+        else:
+            flash("Invalid username or password.", "error")
 
     return render_template("login.html")
 
 @app.route('/logout')
 def logout():
+    if session.get('logged_in'):
+        return redirect(url_for('login'))
+
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
-
-@app.route('/staffdb')
-def staffdb():
-    if 'user' in session:
-        sql = "SELECT * FROM users"
-        users = getallprocess(sql)
-        return render_template("staffdb.html", users=users)
-    else:
-    
-    pass
         
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':

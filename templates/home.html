@@ -1,14 +1,27 @@
-{% extends 'index.html'%}
-{% block content%}
-    <div class="size-full flex flex-col place-items-center">
-        <div class="text-6xl font-semibold mt-40">
-            <h1>Hello World!</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link rel="stylesheet" href="../static/dist/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Sit-in | Dashboard</title>
+</head>
+<body>
+    <header>
+        <div class="flex items-center h-20 bg-zinc-500 text-white z-10" >
+            <i class="fa fa-bars" style="font-size:24px; margin-left: 30px;" ></i>
+            <img src="../static/img/ccs_logo.png" class="h-10 w-auto" style="margin-left: 20px;">
+            <h2 class="text-3xl font-bold p-2">Dashboard</h2>
         </div>
-        <div class="mt-10 text-xl p-2 w-30 h-10 bg-zinc-600 flex justify-center items-center rounded-4xl text-white cursor-pointer transition ease-in hover:bg-zinc-800">
-            <i class="fas fa-solid fa-sign-out p-1" ></i>
-            <button onclick="logout()" class="p-1">Logout</button>
-        </div>
-    </div>
+    </header>
+    <!-- <div class="mt-10 text-xl p-2 w-30 h-10 bg-zinc-600 flex justify-center items-center rounded-4xl text-white cursor-pointer transition ease-in hover:bg-zinc-800">
+        <i class="fas fa-solid fa-sign-out p-1" ></i>
+        <button onclick="logout()" class="p-1">Logout</button>
+    </div> -->
+    
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
@@ -20,9 +33,17 @@
             </div>
         {% endif %}
     {% endwith %}
-    <script>
-        function logout(){
-            document.location.href = "/logout";
-        }
-    </script>
-{% endblock %}
+</body>
+<script>
+    function logout(){
+        document.location.href = "/logout";
+    }
+
+    setTimeout(() => {
+        const flashMessages = document.querySelectorAll('.flash');
+        flashMessages.forEach(flash => {
+            flash.style.display = 'none';
+        });
+    }, 3000);
+</script>
+</html>
