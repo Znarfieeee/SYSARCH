@@ -1,6 +1,21 @@
-package-lock.json
+# Ignore Python virtual environment
+venv/
+
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment files
+.env
+
+# Ignore Tailwind CSS output
+static/dist/css/output.css
+
+# Ignore Node.js dependencies (if using Tailwind via npm)
 node_modules/
-package.json
-sqlite3.exe
-tailwind.config.js
-postcss.config.js
+
+# Ignore build artifacts
+dist/
+build/
