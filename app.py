@@ -5,36 +5,24 @@ app = Flask(__name__)
 app.secret_key = "!@#$%12345"
 
 @app.after_request
-<<<<<<< HEAD
-def add_header(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
-    response.headers["Pragma"] = "no-cache"
-=======
 def addheader(response):
     response.headers['Content-Type'] = 'no-cache, no-store, must-revalidate, private'
     response.headers["Pragma"] = 'no-cache'
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
     response.headers["Expires"] = "0"
     return response
 
 @app.route('/home')
 def home():
-<<<<<<< HEAD
     if not session.get('logged_in'):
-        return render_template("home.html", pagetitle = 'Dashboard')
-    return redirect(url_for('login'))
-
-=======
-    if session.get('logged_in'):
         return redirect(url_for('login'))
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
-
-    return render_template("home.html")
+    
+    user = session.get('user')
+    return render_template("dashboard.html", user=user)
     
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if session.get('logged_in'):
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -48,8 +36,16 @@ def login():
 
         if user:
             flash("Successfully logged in.", "success")
-            print("login successful")
-            session['user'] = username
+            session['logged_in'] = True
+            session['user'] = {
+                "idno": user[0]['idno'],
+                "firstname": user[0]['firstname'],
+                "lastname": user[0]['lastname'],
+                "username": user[0]['username'],
+                "email": user[0]['email'],
+                "course": user[0]['course'],
+                "yr_lvl": user[0]['yr_lvl']
+            }
             return redirect(url_for('home'))
         else:
             flash("Invalid username or password.", "error")
@@ -58,18 +54,10 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if session.get('logged_in'):
-        return redirect(url_for('login'))
-
-    session.clear()
-    
+    session.clear()    
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
-<<<<<<< HEAD
-
-=======
         
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':

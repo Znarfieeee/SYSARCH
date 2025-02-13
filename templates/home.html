@@ -3,90 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
-    <link rel="stylesheet" href="../static/dist/css/output.css">
-    <link rel="stylesheet" href="../static/css/style.css">
     <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <title> SIT-IN | {{pagetitle}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Sit-in | Dashboard</title>
+    <style>
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 50%;
+            color: white;
+            padding: 20px;
+        }
+
+        .flash {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flash.success {
+            background-color: rgba(40, 167, 69, 0.8);
+        }
+
+        .flash.error {
+            background-color: rgba(220, 53, 69, 0.8);
+        }
+
+        /* From Uiverse.io by JulanDeAlb */ 
+        .hamburger {
+        cursor: pointer;
+        }
+
+        .hamburger input {
+        display: none;
+        }
+
+        .hamburger svg {
+        /* The size of the SVG defines the overall size */
+        height: 3em;
+        /* Define the transition for transforming the SVG */
+        transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line {
+        fill: none;
+        stroke: white;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 3;
+        /* Define the transition for transforming the Stroke */
+        transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line-top-bottom {
+        stroke-dasharray: 12 63;
+        }
+
+        .hamburger input:checked + svg {
+        transform: rotate(-45deg);
+        }
+
+        .hamburger input:checked + svg .line-top-bottom {
+        stroke-dasharray: 20 300;
+        stroke-dashoffset: -32.42;
+        }
+    </style>
 </head>
 <body>
-    <div class="flex items-center h-20 bg-zinc-500 text-white z-10 drop-shadow-lg">
-        <div class="h-10 w-20 flex items-center justify-center cursor-pointer" style="margin-left: 20px;">   
-            <i class="fa fa-bars"></i>
-        </div>
-        <img src="../static/img/ccs_logo.png" class="h-20 w-auto p-3" style="padding-left: 20px;">
-        <h2 class="text-xl font-semibold"> {{ pagetitle }}</h2>
-    </div>
+    <header class="flex items-center h-20 bg-zinc-500 text-white z-10 shadow-md px-4" >
+        <label class="hamburger cursor-pointer">
+            <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
+            <svg class="h-10 w-10" viewBox="0 0 32 32">
+                <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+                <path class="line" d="M7 16 27 16"></path>
+            </svg>
+            </label>
+        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-4">
+        <h2 class="text-3xl font-bold p-2">Dashboard</h2>
+    </header>
 
-    <div class="sidenav">
-        <div class="">
-            <img>
-        </div>
-        <div class="">
-            <i class="fa"></i>
-            <a href="#">Dashboard</a>
-        </div>
-        <div class="">
-            <i class="fa"></i>
-            <a href="#">History</a>
-        </div>
-        <div class="">
-            <i class="fa"></i>
-            <a href="#">Reservation</a>
-        </div>
-        <div class="">
-            <i class="fa"></i>
-            <a href="{{ url_for('logout') }}">Logout</a>
+    <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
+        <div class="flex-1">
+            <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Dashboard
+            </a>
+            <a href="#" class="block text-black p-5 hover:bg-gray-200 transition ease-in  ">
+                <i class="fas fa-user mr-3"></i>
+                History
+            </a>
+            <a href="#" class="block text-black p-5 hover:bg-gray-200 transition ease-in ">
+                <i class="fas fa-book mr-3"></i>
+                Reservation
+            </a>
+            <a href="#" class="block text-black p-5 hover:bg-gray-200 transition ease-in ">
+                <i class="fas fa-calendar mr-3"></i>
+                Schedule
+            </a>
+            <button onclick="logout()" class="block p-5 w-full flex items-center text-black hover:bg-gray-200 transition ease-in">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
         </div>
     </div>
 
     {% block content %}
     {% endblock %}
-=======
-    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
-    <link rel="stylesheet" href="../static/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <title>Sit-in | Dashboard</title>
-</head>
-<body>
-    <header>
-        <div class="flex items-center h-20 bg-zinc-500 text-white z-10" >
-            <i class="fa fa-bars cursor-pointer" onclick="sidenav()" style="font-size:24px; margin-left: 30px;" ></i>
-            <img src="../static/img/ccs_logo.png" class="h-10 w-auto" style="margin-left: 20px;">
-            <h2 class="text-3xl font-bold p-2">Dashboard</h2>
-        </div>
-    </header>
-
-    <div class="sidenav w-50 drop-shadow-lg" style="display: none;">
-        <a href="{{ url_for('home') }}" class="flex items-center p-5 hover:bg-gray-200 transition ease-in mt-15">
-            <i class="fas fa-chart-bar mr-3"></i>
-            Dashboard
-        </a>
-        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in ">
-            <i class="fas fa-user mr-3"></i>
-            History
-        </a>
-        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in">
-            <i class="fas fa-book mr-3"></i>
-            Reservation
-        </a>
-        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in">
-            <i class="fas fa-calendar mr-3"></i>
-            Schedule
-        </a>
-        <div class="flex items-center p-5 hover:bg-gray-200 transition ease-in align-baseline">
-            <i class="fas fa-solid fa-sign-out p-1" ></i>
-            <button onclick="logout()" class="p-1">Logout</button>
-        </div>
-    </div>
-
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -101,26 +132,22 @@
     {% endwith %}
 </body>
 <script>
-<<<<<<< HEAD
-=======
     function logout(){
         document.location.href = "/logout";
     }
 
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
     setTimeout(() => {
         const flashMessages = document.querySelectorAll('.flash');
         flashMessages.forEach(flash => {
             flash.style.display = 'none';
         });
     }, 3000);
-<<<<<<< HEAD
-=======
 
-    function sidenav() {
-    var sidenav = document.querySelector('.sidenav');
-    sidenav.style.display = (sidenav.style.display === 'block') ? 'none' : 'block';
-}
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('-translate-x-full');
+    }
+
+
 </script>
 </html>
