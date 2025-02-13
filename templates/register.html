@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
-{% block content%}
+{% block content %}
     <div class="flex justify-center items-center p-3 h-220">
         <form class="bg-zinc-50 drop-shadow-lg flex flex-col w-4x1 p-4 text-x1 h-210 rounded-2xl" action="/register" method="POST">
             <label class="p-2">IDNO</label>
-            <input type="text" name="idno" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="text" name="idno" onchange="" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">LAST NAME</label>
             <input type="text" name="lastname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">FIRST NAME</label>
@@ -30,7 +30,7 @@
             <label class="p-2">EMAIL ADDRESS</label>
             <input type="text" name="email" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">USERNAME</label>
-            <input type="text" name="username" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <label for=""></label>
             <label class="p-2">PASSWORD</label>
             <input type="password" name="password" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <div class="flex flex-row justify-between items-center p-2 mt-5">
