@@ -4,17 +4,25 @@ from dbhelper import *
 app = Flask(__name__)
 app.secret_key = "!@#$%12345"
 
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 @app.route('/home')
 def home():
-    if 'user' in session:
-        return render_template("home.html")
-    else:
-        return redirect(url_for('login'))
-    
-    
+    if not session.get('logged_in'):
+        return render_template("home.html", pagetitle = 'Dashboard')
+    return redirect(url_for('login'))
+
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    if session.get('logged_in'):
+        return redirect(url_for('login'))
+    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -40,19 +48,9 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
+    
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
-
-@app.route('/staffdb')
-def staffdb():
-    if 'user' in session:
-        sql = "SELECT * FROM users"
-        users = getallprocess(sql)
-        return render_template("staffdb.html", users=users)
-    else:
-    
-    pass
-        
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

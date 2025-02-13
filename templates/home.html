@@ -1,14 +1,49 @@
-{% extends 'index.html'%}
-{% block content%}
-    <div class="size-full flex flex-col place-items-center">
-        <div class="text-6xl font-semibold mt-40">
-            <h1>Hello World!</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/dist/css/output.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title> SIT-IN | {{pagetitle}}</title>
+</head>
+<body>
+    <div class="flex items-center h-20 bg-zinc-500 text-white z-10 drop-shadow-lg">
+        <div class="h-10 w-20 flex items-center justify-center cursor-pointer" style="margin-left: 20px;">   
+            <i class="fa fa-bars"></i>
         </div>
-        <div class="mt-10 text-xl p-2 w-30 h-10 bg-zinc-600 flex justify-center items-center rounded-4xl text-white cursor-pointer transition ease-in hover:bg-zinc-800">
-            <i class="fas fa-solid fa-sign-out p-1" ></i>
-            <button onclick="logout()" class="p-1">Logout</button>
+        <img src="../static/img/ccs_logo.png" class="h-20 w-auto p-3" style="padding-left: 20px;">
+        <h2 class="text-xl font-semibold"> {{ pagetitle }}</h2>
+    </div>
+
+    <div class="sidenav">
+        <div class="">
+            <img>
+        </div>
+        <div class="">
+            <i class="fa"></i>
+            <a href="#">Dashboard</a>
+        </div>
+        <div class="">
+            <i class="fa"></i>
+            <a href="#">History</a>
+        </div>
+        <div class="">
+            <i class="fa"></i>
+            <a href="#">Reservation</a>
+        </div>
+        <div class="">
+            <i class="fa"></i>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </div>
+
+    {% block content %}
+    {% endblock %}
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
@@ -20,9 +55,13 @@
             </div>
         {% endif %}
     {% endwith %}
-    <script>
-        function logout(){
-            document.location.href = "/logout";
-        }
-    </script>
-{% endblock %}
+</body>
+<script>
+    setTimeout(() => {
+        const flashMessages = document.querySelectorAll('.flash');
+        flashMessages.forEach(flash => {
+            flash.style.display = 'none';
+        });
+    }, 3000);
+</script>
+</html>
