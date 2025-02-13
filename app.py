@@ -5,19 +5,32 @@ app = Flask(__name__)
 app.secret_key = "!@#$%12345"
 
 @app.after_request
+<<<<<<< HEAD
 def add_header(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
     response.headers["Pragma"] = "no-cache"
+=======
+def addheader(response):
+    response.headers['Content-Type'] = 'no-cache, no-store, must-revalidate, private'
+    response.headers["Pragma"] = 'no-cache'
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
     response.headers["Expires"] = "0"
     return response
 
 @app.route('/home')
 def home():
+<<<<<<< HEAD
     if not session.get('logged_in'):
         return render_template("home.html", pagetitle = 'Dashboard')
     return redirect(url_for('login'))
 
+=======
+    if session.get('logged_in'):
+        return redirect(url_for('login'))
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 
+    return render_template("home.html")
+    
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if session.get('logged_in'):
@@ -29,29 +42,34 @@ def login():
 
         if not username or not password:
             flash("Input username and password", "error")
-            
-        else:
-            sql = "SELECT * FROM users WHERE username = ? AND password = ?"
-            user = getallprocess(sql, (username, password))
 
-            if user:
-                flash("Successfully logged in.", "success")
-                print("login successful")
-                session['user'] = username
-                return redirect(url_for('home'))
-            else:
-                flash("Invalid username or password.", "error")
-                # return redirect(url_for('login'))
+        sql = "SELECT * FROM users WHERE username = ? AND password = ?"
+        user = getallprocess(sql, (username, password))
+
+        if user:
+            flash("Successfully logged in.", "success")
+            print("login successful")
+            session['user'] = username
+            return redirect(url_for('home'))
+        else:
+            flash("Invalid username or password.", "error")
 
     return render_template("login.html")
 
 @app.route('/logout')
 def logout():
+    if session.get('logged_in'):
+        return redirect(url_for('login'))
+
     session.clear()
     
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':

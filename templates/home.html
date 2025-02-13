@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <link rel="stylesheet" href="../static/dist/css/output.css">
     <link rel="stylesheet" href="../static/css/style.css">
     <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
@@ -43,6 +44,49 @@
 
     {% block content %}
     {% endblock %}
+=======
+    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <title>Sit-in | Dashboard</title>
+</head>
+<body>
+    <header>
+        <div class="flex items-center h-20 bg-zinc-500 text-white z-10" >
+            <i class="fa fa-bars cursor-pointer" onclick="sidenav()" style="font-size:24px; margin-left: 30px;" ></i>
+            <img src="../static/img/ccs_logo.png" class="h-10 w-auto" style="margin-left: 20px;">
+            <h2 class="text-3xl font-bold p-2">Dashboard</h2>
+        </div>
+    </header>
+
+    <div class="sidenav w-50 drop-shadow-lg" style="display: none;">
+        <a href="{{ url_for('home') }}" class="flex items-center p-5 hover:bg-gray-200 transition ease-in mt-15">
+            <i class="fas fa-chart-bar mr-3"></i>
+            Dashboard
+        </a>
+        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in ">
+            <i class="fas fa-user mr-3"></i>
+            History
+        </a>
+        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in">
+            <i class="fas fa-book mr-3"></i>
+            Reservation
+        </a>
+        <a href="#" class="flex items-center p-5 hover:bg-gray-200 transition ease-in">
+            <i class="fas fa-calendar mr-3"></i>
+            Schedule
+        </a>
+        <div class="flex items-center p-5 hover:bg-gray-200 transition ease-in align-baseline">
+            <i class="fas fa-solid fa-sign-out p-1" ></i>
+            <button onclick="logout()" class="p-1">Logout</button>
+        </div>
+    </div>
+
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -57,11 +101,26 @@
     {% endwith %}
 </body>
 <script>
+<<<<<<< HEAD
+=======
+    function logout(){
+        document.location.href = "/logout";
+    }
+
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
     setTimeout(() => {
         const flashMessages = document.querySelectorAll('.flash');
         flashMessages.forEach(flash => {
             flash.style.display = 'none';
         });
     }, 3000);
+<<<<<<< HEAD
+=======
+
+    function sidenav() {
+    var sidenav = document.querySelector('.sidenav');
+    sidenav.style.display = (sidenav.style.display === 'block') ? 'none' : 'block';
+}
+>>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
 </script>
 </html>
