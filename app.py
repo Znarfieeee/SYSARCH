@@ -28,9 +28,6 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        if not username or not password:
-            flash("Input username and password", "error")
-
         sql = "SELECT * FROM users WHERE username = ? AND password = ?"
         user = getallprocess(sql, (username, password))
 
@@ -47,8 +44,14 @@ def login():
                 "yr_lvl": user[0]['yr_lvl']
             }
             return redirect(url_for('home'))
+        elif not username :
+            flash("Input Username", "error")
+        
+        elif not password:
+            flash("Input Password", "error")
+        
         else:
-            flash("Invalid username or password.", "error")
+            flash("Invalid Username or Password.", "error")
 
     return render_template("login.html")
 

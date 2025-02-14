@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,19 +12,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <title>Sit-in | Dashboard</title>
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-
         .flash-messages {
             position: fixed;
-            top: 20px;
+            top: 70px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            width: 50%;
+            width: auto !important;
             color: white;
             padding: 20px;
+            align-items: center;
         }
 
         .flash {
@@ -36,56 +34,59 @@
         }
 
         .flash.success {
-            background-color: rgba(40, 167, 69, 0.8);
+        background-color: rgba(40, 167, 69, 0.8);
         }
 
         .flash.error {
-            background-color: rgba(220, 53, 69, 0.8);
+        background-color: rgba(220, 53, 69, 0.8);
         }
 
         /* From Uiverse.io by JulanDeAlb */ 
         .hamburger {
-        cursor: pointer;
-        }
+            cursor: pointer;
+            }
 
         .hamburger input {
-        display: none;
-        }
+            display: none;
+            }
 
         .hamburger svg {
-        /* The size of the SVG defines the overall size */
-        height: 3em;
-        /* Define the transition for transforming the SVG */
-        transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+            /* The size of the SVG defines the overall size */
+            height: 3em;
+            /* Define the transition for transforming the SVG */
+            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .line {
-        fill: none;
-        stroke: white;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-width: 3;
-        /* Define the transition for transforming the Stroke */
-        transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-                    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+            fill: none;
+            stroke: white;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 3;
+            /* Define the transition for transforming the Stroke */
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .line-top-bottom {
-        stroke-dasharray: 12 63;
+            stroke-dasharray: 12 63;
         }
 
         .hamburger input:checked + svg {
-        transform: rotate(-45deg);
+            transform: rotate(-45deg);
         }
 
         .hamburger input:checked + svg .line-top-bottom {
-        stroke-dasharray: 20 300;
-        stroke-dashoffset: -32.42;
+            stroke-dasharray: 20 300;
+            stroke-dashoffset: -32.42;
+        }
+        #sidebar {
+            z-index: 999;
         }
     </style>
 </head>
 <body>
-    <header class="flex items-center h-20 bg-zinc-500 text-white z-10 shadow-md px-4" >
+    <header class="flex items-center h-20 bg-zinc-500 text-white z-999 shadow-md px-4" >
         <label class="hamburger cursor-pointer">
             <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
             <svg class="h-10 w-10" viewBox="0 0 32 32">
@@ -93,8 +94,8 @@
                 <path class="line" d="M7 16 27 16"></path>
             </svg>
             </label>
-        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-4">
-        <h2 class="text-3xl font-bold p-2">Dashboard</h2>
+        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6">
+        <h2 class="text-2xl font-semibold ml-2">Dashboard</h2>
     </header>
 
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
@@ -115,7 +116,7 @@
                 <i class="fas fa-calendar mr-3"></i>
                 Schedule
             </a>
-            <button onclick="logout()" class="block p-5 w-full flex items-center text-black hover:bg-gray-200 transition ease-in">
+            <button onclick="logout()" class="cursor-pointer block p-5 w-full flex items-center text-black hover:bg-gray-200 transition ease-in">
                 <i class="fas fa-sign-out-alt mr-2"></i>
                 Logout
             </button>
@@ -142,12 +143,13 @@
         document.location.href = "/logout";
     }
 
+    // Timeout for flash messages
     setTimeout(() => {
         const flashMessages = document.querySelectorAll('.flash');
         flashMessages.forEach(flash => {
             flash.style.display = 'none';
         });
-    }, 3000);
+    }, 5000);
 
     function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
