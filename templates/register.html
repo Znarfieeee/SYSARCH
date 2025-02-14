@@ -5,9 +5,9 @@
             <label class="p-2">IDNO *</label>
             <input type="text" name="idno" onchange="usern()" id="idno" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">LAST NAME *</label>
-            <input type="text" name="lastname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="text" name="lastname" required class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">FIRST NAME *</label>
-            <input type="text" name="firstname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="text" name="firstname" required class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">MIDDLE NAME</label>
             <input type="text" id="middlename" placeholder="If none, leave blank" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">COURSE</label>
@@ -34,13 +34,13 @@
                 <option value="4">4th Year</option>
             </select>
             <label class="p-2">EMAIL ADDRESS *</label>
-            <input type="text" name="email" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="text" name="email" required class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2 flex">USERNAME  <p class="text-zinc-500 ml-4">(Username refers to IDNO)</p></label>
             <input type="text" name="username" id="username" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl bg-zinc-200" disabled>
 
             <label for=""></label>
             <label class="p-2">PASSWORD *</label>
-            <input type="password" name="password" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <input type="password" name="password" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl" required>
             <div class="flex flex-row justify-between items-center p-2 mt-5">
                 <div class="tologin transition ease-in hover:text-zinc-400">
                     <i class="fas fa-arrow-left fa-solid"></i>

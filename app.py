@@ -68,9 +68,12 @@ def register():
         course = request.form.get('course')
         yr_lvl = request.form.get('yr_lvl')
         email = request.form.get('email')
-        username = request.form.get('username')
         password = request.form.get('password')
+        username = idno
+        role = 'student'
+        no_session = None
 
+        # para check sa role base sa idno
         if '-' in idno:
             prefix, number = idno.split('-')
             if prefix in ['staff']:
@@ -78,23 +81,35 @@ def register():
             elif prefix in ['admin']:
                 role = 'admin'
                 
-        else:
-            role = 'student'
-            
-        if course == 'bsit' or course == 'bscs' or course == 'bscpe':
-            no_session = 30
-        else:
-            no_session = 15
+        # Validate sa length sa idno
+        if role == 'student' and len(idno) != 8:
+            flash("Invalid ID number. Student IDNO must be 8 digits.", "error")
+            return redirect(url_for('register'))
+        elif role in ['staff', 'admin'] and len(idno) != 14:
+            flash("Invalid ID number. IDNO must be 14 characters.", "error")
+            return redirect(url_for('register'))
+        
+        # Validate course and year level sa students
+        if role == 'student':
+            if not course or not yr_lvl:
+                flash("Course and Year Level are required.", "error")
+                return redirect(url_for('register'))
+                
+            if course in ['bsit', 'bscs', 'bscpe']:
+                no_session = 30
+            else:
+                no_session = 15
+        
+        # Validate email
+        allowed_domains = ['@gmail.com', '@yahoo.com', '@outlook.com', '@hotmail.com']        
+        if not any(email.endswith(domain) for domain in allowed_domains):
+            flash("Invalid email address", "error")
+            return redirect(url_for('register'))
 
+        # Validate required fields
         if not idno or not lastname or not firstname  or not email or not password:
             flash("All fields are required.", "error")
-            
-        if len(idno) != 8 or len(idno) != 13:
-            flash("Invalid ID No.", "error")
-            
-        if not email.endswith('@gmail.com',) or not email.endswith('@yahoo.com') or not email.endswith('@outlook.com') or not email.endswith('@hotmail.com'):
-            flash("Invalid email.", "error")
-        
+                        
         success = addprocess('users', idno=idno, lastname=lastname, 
                             firstname=firstname, middlename=middlename, 
                             course=course, yr_lvl=yr_lvl, email=email, 
