@@ -2,11 +2,11 @@
 {% block content %}
     <div class="flex justify-center items-center p-3 h-220">
         <form class="bg-zinc-50 drop-shadow-lg flex flex-col w-4x1 p-4 text-x1 h-210 rounded-2xl" action="/register" method="POST">
-            <label class="p-2">IDNO</label>
-            <input type="text" name="idno" onchange="" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
-            <label class="p-2">LAST NAME</label>
+            <label class="p-2">IDNO *</label>
+            <input type="text" name="idno" onchange="usern()" id="idno" placeholder="School ID number '22641234'" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
+            <label class="p-2">LAST NAME *</label>
             <input type="text" name="lastname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
-            <label class="p-2">FIRST NAME</label>
+            <label class="p-2">FIRST NAME *</label>
             <input type="text" name="firstname" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <label class="p-2">MIDDLE NAME</label>
             <input type="text" id="middlename" placeholder="If none, leave blank" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
@@ -15,9 +15,15 @@
                 <option selected disabled>Select Course</option>
                 <option value="bsit">Bachelor of Science in Information Technology</option>
                 <option value="bscs">Bachelor of Science in Computer Studies</option>
+                <option value="bscpe">Bachelor of Science in Computer Engineering</option>
                 <option value="bsce">Bachelor of Science in Civil Engineering</option>
-                <option value="bsba">Bachelor of Science in Business Ads</option>
-                <option value="BSED">Bachelor of Science in Education</option>
+                <option value="bscj">Bachelor of Science in Criminal Justice</option>
+                <option value="bsp">Bachelor of Science in Psychology</option>
+                <option value="bap">Bachelor of arts in Psychology</option>
+                <option value="bshm">Bachelor of Science in Hotel Management</option>
+                <option value="bsba">Bachelor of Science in Business Administration</option>
+                <option value="bsed">Bachelor of Science in Education</option>
+
             </select>
             <label class="p-2">YEAR LEVEL</label>
             <select name="yr_lvl" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
@@ -27,11 +33,13 @@
                 <option value="3">3rd Year</option>
                 <option value="4">4th Year</option>
             </select>
-            <label class="p-2">EMAIL ADDRESS</label>
+            <label class="p-2">EMAIL ADDRESS *</label>
             <input type="text" name="email" class="p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
-            <label class="p-2">USERNAME</label>
+            <label class="p-2 flex">USERNAME  <p class="text-zinc-500 ml-4">(Username refers to IDNO)</p></label>
+            <input type="text" name="username" id="username" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl bg-zinc-200" disabled>
+
             <label for=""></label>
-            <label class="p-2">PASSWORD</label>
+            <label class="p-2">PASSWORD *</label>
             <input type="password" name="password" class=" p-2 text-x1 h-15 w-175 border-black border-1 rounded-2xl">
             <div class="flex flex-row justify-between items-center p-2 mt-5">
                 <div class="tologin transition ease-in hover:text-zinc-400">
@@ -53,4 +61,27 @@
             </div>
         {% endif %}
     {% endwith %}
+    <script>
+        function usern(){
+            var idno = document.getElementById('idno').value;
+
+            document.getElementById('username').value = idno;
+
+            const courseField = document.querySelector('select[name="course"]');
+            const yrLvlField = document.querySelector('select[name="yr_lvl"]');
+
+            if (idno.includes('staff-') || idno.includes('admin-')) {
+                courseField.disabled = true;
+                yrLvlField.disabled = true;
+                courseField.classList.add('bg-gray-300');
+                yrLvlField.classList.add('bg-gray-300');
+            } else {
+                courseField.disabled = false;
+                yrLvlField.disabled = false;
+                courseField.classList.remove('bg-gray-300');
+                yrLvlField.classList.remove('bg-gray-300');
+            }
+        }
+        document.getElementById('idno').addEventListener('input', updateForm);
+    </script>
 {% endblock %}
