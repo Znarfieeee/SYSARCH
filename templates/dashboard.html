@@ -1,10 +1,10 @@
 {% extends 'home.html' %}
 {% block content %}
     
-    <div class="flex justify-center min-h-screen bg-gray-100">
-        <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-rows-2 gap-4 px-20 pt-5">
+    <div class="flex justify-center min-h-[700px] bg-gray-200 overflow-y-hidden">
+        <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
             <!-- Account Info -->
-            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer" onclick="expandSection(this)">
+            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]" onclick="expandSection(this)">
                 <div id="header-part" class="flex items-center space-x-4 flex-1">
                     <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                         {% if user.photo %}
@@ -23,12 +23,15 @@
             </div>
             
             <!-- Announcements -->
-            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md cursor-pointer" onclick="expandSection(this)">
-                <p><strong>Announcements</strong><br>Click to expand and blur background</p>
+            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md cursor-pointer h-[250px] max-h-[655px]" onclick="expandSection(this)">
+                <div id="header" class="flex flex-col items-center">
+                    <h2 class="text-2xl font-bold ">Announcements</h2>
+                    <hr class="w-[80%] bg-zinc-500 mt-5 border-none h-[1px]">
+                </div>
             </div>
 
             <!-- Laboratory Rules -->
-            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer" onclick="expandSection(this)">
+            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]" onclick="expandSection(this)">
                 <h2 class="text-lg font-bold">LABORATORY RULES & REGULATIONS</h2>
                 <div class="content hidden mt-4 text-sm">
                     <p>To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
