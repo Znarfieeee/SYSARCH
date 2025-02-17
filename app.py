@@ -41,6 +41,7 @@ def login():
                 "username": user[0]['username'],
                 "email": user[0]['email'],
                 "course": user[0]['course'],
+                "sessions": user[0]['no_session'],
                 "yr_lvl": user[0]['yr_lvl']
             }
             return redirect(url_for('home'))

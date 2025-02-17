@@ -4,7 +4,7 @@
     <div class="flex justify-center min-h-[700px] bg-gray-200 overflow-y-hidden">
         <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
             <!-- Account Info -->
-            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]" onclick="expandSection(this)">
+            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]">
                 <div id="header-part" class="flex items-center space-x-4 flex-1">
                     <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                         {% if user.photo %}
@@ -15,15 +15,42 @@
                     </div>
                     <div id="box2" class="flex justify-between flex-1">
                         <h1><b>{{ user.firstname.upper() }} {{ user.lastname.upper() }}</b></h1>
-                        <div id="edit" class="h-7 w-7 ">
+                        <div id="edit" class="h-5 w-5 ">
                             <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9.134 19.319 11.587-11.588c.171-.171.279-.423.279-.684 0-.229-.083-.466-.28-.662l-3.115-3.104c-.185-.185-.429-.277-.672-.277s-.486.092-.672.277l-11.606 11.566c-.569 1.763-1.555 4.823-1.626 5.081-.02.075-.029.15-.029.224 0 .461.349.848.765.848.511 0 .991-.189 5.369-1.681zm-3.27-3.342 2.137 2.137-3.168 1.046zm.955-1.166 10.114-10.079 2.335 2.327-10.099 10.101z" fill-rule="nonzero"/></svg>
                         </div>
                     </div>
                 </div>
+                <div class="account-info flex  gap-30">
+                    <div class="content ml-15 mt-5 w-[30%]">
+                        <div class="userID flex gap-12 pb-5">
+                            <p>IDNO:</p>
+                            <p class="font-bold text-lg">{{ user.idno}}</p>
+                        </div>
+                        <div class="userCourse flex gap-9 pb-5">
+                            <p>Course:</p>
+                            <p class="font-bold text-lg">{{ user.course.upper() }}</p>
+                        </div>
+                        <div class="userLevel flex items-center gap-4">
+                            <p>Year Level: </p>
+                            <p class="font-bold text-lg">{{ user.yr_lvl }}</p>
+                        </div>
+                    </div>
+                    <div class="content2  mt-5 w-[30%]">
+                        <div class="userSessions flex gap-4 pb-5 items-center">
+                            <p>Number of Sessions:</p>
+                            <p class="font-bold text-lg">{{ user.sessions }}</p>
+                        </div>
+                        <div class="userEmail flex gap-4 items-center">
+                            <p>Email:</p>
+                            <p class="font-bold text-lg">{{ user.email }}</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
             
             <!-- Announcements -->
-            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md cursor-pointer h-[250px] max-h-[655px]" onclick="expandSection(this)">
+            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md cursor-pointer h-[250px] max-h-[655px]">
                 <div id="header" class="flex flex-col items-center">
                     <h2 class="text-2xl font-bold ">Announcements</h2>
                     <hr class="w-[80%] bg-zinc-500 mt-5 border-none h-[1px]">
@@ -31,7 +58,7 @@
             </div>
 
             <!-- Laboratory Rules -->
-            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]" onclick="expandSection(this)">
+            <div class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px]">
                 <h2 class="text-lg font-bold">LABORATORY RULES & REGULATIONS</h2>
                 <div class="content hidden mt-4 text-sm">
                     <p>To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
@@ -67,26 +94,44 @@
             </div>
         </div>
     </div>
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div id="modal-content" class="bg-white p-8 rounded-lg shadow-lg w-[90%] max-w-2xl transform scale-0 transition-transform duration-300">
+            <!-- Content of the Account Info section will be copied here dynamically -->
+        </div>
+    </div>
     <script>
-        function expandSection(element) {
-            let container = document.getElementById('container');
-            let isExpanded = element.classList.contains('expanded');
-            
-            // Remove expanded class from all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('expanded');
+        function openModal(element) {
+            const overlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+
+            // Copy the content of the Account Info section to the modal
+            modalContent.innerHTML = element.innerHTML;
+
+            // Show the modal and scale up the content
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-0');
+                modalContent.classList.add('scale-100');
+            }, 10);
+
+            // Close the modal when clicking outside the content
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeModal();
+                }
             });
-            
-            if (!isExpanded) {
-                element.classList.add('expanded');
-                container.classList.add('blur-bg');
-            } else {
-                container.classList.remove('blur-bg');
-            }
         }
-        function expandSection(section) {
-            var content = section.querySelector(".content");
-            content.classList.toggle("hidden");
+
+        function closeModal() {
+            const overlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+
+            // Scale down the content and hide the modal
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 300);
         }
     </script>
 {% endblock %}
