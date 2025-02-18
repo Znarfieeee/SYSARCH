@@ -83,9 +83,24 @@
         #sidebar {
             z-index: 999;
         }
+
+        /* dashboard css */
+        #lab-info::-webkit-scrollbar {
+            width: 5px;  /* Thin scrollbar */
+        }
+
+        #lab-info::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent */
+            border-radius: 10px;
+        }
+
+        #lab-info::-webkit-scrollbar-track {
+            background: transparent; /* Invisible track */
+        }
+
     </style>
 </head>
-<body>
+<body class="overflow-hidden">
     <header class="flex items-center h-20 bg-zinc-500 text-white z-999 shadow-md px-4" >
         <label class="hamburger cursor-pointer">
             <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
@@ -97,7 +112,6 @@
         <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6">
         <h2 class="text-2xl font-semibold ml-2">Dashboard</h2>
     </header>
-
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
         <div class="flex-1">
             <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
