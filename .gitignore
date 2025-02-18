@@ -9,21 +9,3 @@ __pycache__/
 
 # Ignore environment files
 .env
-
-# Ignore Tailwind CSS output
-static/dist/css/output.css
-
-# Ignore Node.js dependencies (if using Tailwind via npm)
-node_modules/
-<<<<<<< HEAD
-package.json
-sqlite3.exe
-tailwind.config.js
-postcss.config.js
-static/css/output.css
-=======
-
-# Ignore build artifacts
-dist/
-build/
->>>>>>> a245bbb694b22abb2e0413653dee86de1139ee23
