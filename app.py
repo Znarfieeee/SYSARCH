@@ -11,14 +11,6 @@ def addheader(response):
     response.headers["Expires"] = "0"
     return response
 
-@app.route('/home')
-def home():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
-    user = session.get('user')
-    return render_template("dashboard.html", user=user)
-    
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if session.get('logged_in'):
@@ -38,11 +30,13 @@ def login():
                 "idno": user[0]['idno'],
                 "firstname": user[0]['firstname'],
                 "lastname": user[0]['lastname'],
+                "middlename": user[0]['middlename'],
                 "username": user[0]['username'],
                 "email": user[0]['email'],
                 "course": user[0]['course'],
                 "sessions": user[0]['no_session'],
-                "yr_lvl": user[0]['yr_lvl']
+                "yr_lvl": user[0]['yr_lvl'],
+                "photo": user[0]['photo']
             }
             return redirect(url_for('home'))
         elif not username :
@@ -128,6 +122,42 @@ def register():
             return redirect(url_for('register'))
 
     return render_template("register.html")
+
+# Functionalities for Student
+@app.route('/edit', methods=['POST'])
+def editStudent():
+    pass
+
+# Student Navigation
+@app.route('/home')
+def home():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Dashboard'
+    
+    user = session.get('user')
+    return render_template("dashboard.html", user=user, pagetitle=pagetitle)
+    
+
+@app.route('/history')
+def history():
+    pagetitle = 'History'
+    
+    return render_template('history.html', pagetitle=pagetitle)
+
+@app.route('/reservation')
+def reservation():
+    pagetitle = 'Reservation'
+    
+    return render_template('reservation.html', pagetitle=pagetitle)
+
+@app.route('/schedule')
+def schedule():
+    pagetitle = 'Schedule'
+    
+    return render_template('schedule.html', pagetitle=pagetitle)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
