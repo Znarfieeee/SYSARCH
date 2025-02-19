@@ -4,50 +4,61 @@
     <div class="flex justify-center min-h-[700px] bg-gray-200 overflow-hidden">
         <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
             <!-- Account Info -->
-            <div id="acc-modal" class="duration-300 transform origin-top-left relative">
+            <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative">
                 <div id="account-info" class="section bg-white p-4 md:p-8 rounded-lg shadow-md cursor-pointer h-auto md:h-[320px] relative z-10 duration-300">
-                    <div id="header-part" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                        <div class="relative w-20 h-20 md:w-24 md:h-24 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                    <!-- acc header -->
+                    <div id="acc-header" class="flex w-full items-center space-y-4 space-x-4">
+                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600">
                             {% if user.photo %}
-                                <img src="{{ user.photo }}" alt="User Photo" class="w-auto h-full rounded-full">
-                            {% else %}
-                                <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <img src="{{ user.photo }}" alt="User Photo" class="size-24 rounded-full dark:bg-gray-600 object-cover">
+                            {% else%}
+                                <svg class="bg-gray-600 relative size-24 text-gray-200 -left-1 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                                 </svg>
                             {% endif %}
                         </div>
-                        <div class="flex flex-col md:flex-row justify-between w-full items-center space-y-4 md:space-y-0">
-                            <h1 class="text-xl md:text-2xl font-bold text-center md:text-left">{{ user.firstname.upper() }} {{ user.lastname.upper() }}</h1>
-                            <button id="edit" class="size-5">
-                                <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9.134 19.319 11.587-11.588c.171-.171.279-.423.279-.684 0-.229-.083-.466-.28-.662l-3.115-3.104c-.185-.185-.429-.277-.672-.277s-.486.092-.672.277l-11.606 11.566c-.569 1.763-1.555 4.823-1.626 5.081-.02.075-.029.15-.029.224 0 .461.349.848.765.848.511 0 .991-.189 5.369-1.681zm-3.27-3.342 2.137 2.137-3.168 1.046zm.955-1.166 10.114-10.079 2.335 2.327-10.099 10.101z" fill-rule="nonzero"/></svg>
+                        <div id="box" class="flex flex-row justify-between w-[80%] items-center space-y-0">
+                            <div id="userFullName" class="font-bold text-2xl text-center">
+                                {% if user.middlename.upper() != "NONE" %}
+                                    <h2>{{ user.firstname.upper() }} {{ user.middlename.upper() }} {{ user.lastname.upper() }}</h2>
+                                {% else %}
+                                    <h2>{{ user.firstname.upper() }} {{ user.lastname.upper() }}</h2>
+                                {% endif %}
+                            </div>
+                            <button id="edit-btn" class="size-5 hover:fill-red-200 transition duration-300 ease-in-out">
+                                <img src="/static/img/edit.png">
                             </button>
                         </div>
-                    </div>
-                    <div class="account-info flex flex-col md:flex-row gap-4 md:gap-8 mt-6">
+                    </div>               
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-8 mt-2">
                         <div class="content w-full md:w-1/2">
                             <div class="userID flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
                                 <p class="font-medium">IDNO:</p>
-                                <p class="font-bold text-lg">{{ user.idno }}</p>
+                                <p class="font-bold text-base">{{ user.idno }}</p>
                             </div>
                             <div class="userCourse flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
                                 <p class="font-medium">Course:</p>
-                                <p class="font-bold text-lg">{{ user.course.upper() }}</p>
+                                <p class="font-bold text-base">{{ user.course.upper() }}</p>
                             </div>
                             <div class="userLevel flex flex-col md:flex-row gap-2 md:gap-4">
                                 <p class="font-medium">Year Level:</p>
-                                <p class="font-bold text-lg">{{ user.yr_lvl }}</p>
+                                <p class="font-bold text-base">{{ user.yr_lvl }}</p>
                             </div>
                         </div>
                         <div class="content2 w-full md:w-1/2">
                             <div class="userSessions flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
                                 <p class="font-medium">Number of Sessions:</p>
-                                <p class="font-bold text-lg">{{ user.sessions }}</p>
+                                <p class="font-bold text-base">{{ user.sessions }}</p>
                             </div>
                             <div class="userEmail flex flex-col md:flex-row gap-2 md:gap-4">
                                 <p class="font-medium">Email:</p>
-                                <p class="font-bold text-lg">{{ user.email }}</p>
+                                <p class="font-bold text-base">{{ user.email }}</p>
                             </div>
                         </div>
+                    </div>
+                    <div id="action-btn" class="flex flex-row w-full mt-2 opacity-0 duration-500 transition-all justify-end">
+                        <button id="cancel-btn" class="h-6 w-15 text-sm text-white font-semibold p-px bg-red-400 rounded-lg cursor-pointer">CANCEL</button>
+                        <button id="save-btn" class="h-6 w-15 text-sm text-white font-semibold p-px bg-green-500 rounded-lg cursor-pointer">SAVE</button>
                     </div>
                 </div>
             </div>
@@ -104,13 +115,14 @@
         </div>
     </div>
     <script>
+        
         // for Account Info Modal
         document.getElementById('acc-modal',).addEventListener('click', function() {
-            const overlay = document.getElementById('overlay');
             const accInfo = document.getElementById('account-info');
+            const edit = document.getElementById('edit-btn');
 
             this.classList.toggle('scale-170'); // Tailwind's 125% scale class
-            this.classList.toggle('z-10'); // Bring to front
+            this.classList.toggle('z-50'); // Bring to front
             this.classList.toggle('w-full');
             this.classList.toggle('h-full'); // Adjust height if needed
             this.classList.toggle('translate-x-30')
@@ -122,111 +134,45 @@
             accInfo.classList.toggle('p-8');
             accInfo.classList.toggle('backdrop-blur-sm');
             accInfo.classList.toggle('cursor-pointer');
+            
             edit.classList.toggle('cursor-pointer');
-
 
             event.stopPropagation();
         });
-        
-        var editMode = false; // Track edit state
 
-        document.getElementById('edit').addEventListener('click', function(event) {
-            event.stopPropagation(); // Prevent event bubbling
+        // for Edit 
+        document.getElementById('edit-btn').addEventListener('click', function(event) {
+            event.stopPropagation();
 
-            if (editMode) return; // Prevent multiple clicks in edit mode
-            editMode = true;
+            const accModal = document.getElementById('acc-modal');
+            accModal.style.pointerEvents = 'none';
 
-            // Disable acc-modal click event
-            document.getElementById('acc-modal').style.pointerEvents = 'none';
-
-            // Get all user data elements
-            var userFields = {
-                idno: document.querySelector('.userID p.font-bold'),
-                course: document.querySelector('.userCourse p.font-bold'),
-                yr_lvl: document.querySelector('.userLevel p.font-bold'),
-                sessions: document.querySelector('.userSessions p.font-bold'),
-                email: document.querySelector('.userEmail p.font-bold')
-            };
-
-            // Replace text with input fields
-            for (let key in userFields) {
-                let value = userFields[key].innerText;
-                let input = document.createElement('input');
-                input.type = key === 'email' ? 'email' : 'text';
-                input.value = value;
-
-                // Tailwind classes: No background, only underline
-                input.classList.add('border-b', 'border-black', 'outline-none', 'bg-transparent', 'w-full', 'text-lg', 'font-bold');
-
-                userFields[key].replaceWith(input);
-                userFields[key] = input; // Update reference to input field
+            const userFields = {
+                idno: document.querySelector('.userID'),
+                course: document.querySelector('.course'),
             }
 
-            // Create Save and Cancel buttons if not already present
-            if (!document.getElementById('save-btn')) {
-                var buttonContainer = document.createElement('div');
-                buttonContainer.classList.add('flex', 'gap-2', 'mt-3');
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.classList.toggle('opacity-0')
+        })
 
-                var saveButton = document.createElement('button');
-                saveButton.innerText = 'Save';
-                saveButton.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded');
-                saveButton.id = 'save-btn';
+        // for action buttons
+        function cancel(event){
+            event.stopPropagation();
 
-                var cancelButton = document.createElement('button');
-                cancelButton.innerText = 'Cancel';
-                cancelButton.classList.add('bg-gray-400', 'text-white', 'px-4', 'py-2', 'rounded');
-                cancelButton.id = 'cancel-btn';
+            const cancelbtn = document.getElementById('cancel-btn');
+            const accModal = document.getElementById('acc-modal');
 
-                buttonContainer.appendChild(saveButton);
-                buttonContainer.appendChild(cancelButton);
-                document.querySelector('.account-info').appendChild(buttonContainer);
+            accModal.style.pointerEvents = 'auto';
+        }
 
-                // Handle Save
-                saveButton.addEventListener('click', function() {
-                    var updatedData = {
-                        idno: userFields.idno.value,
-                        course: userFields.course.value,
-                        yr_lvl: userFields.yr_lvl.value,
-                        sessions: userFields.sessions.value,
-                        email: userFields.email.value
-                    };
-
-                    // Send data to Flask backend
-                    fetch('/update_user', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatedData)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message);
-                        location.reload(); // Reload page to reflect changes
-                    })
-                    .catch(error => console.error('Error:', error));
-                });
-
-                // Handle Cancel
-                cancelButton.addEventListener('click', function() {
-                    location.reload(); // Refresh page to reset inputs
-                });
-            }
-        });
-
-        // Re-enable acc-modal after save or cancel
-        document.addEventListener('click', function(event) {
-            if (event.target.id === 'save-btn' || event.target.id === 'cancel-btn') {
-                document.getElementById('acc-modal').style.pointerEvents = 'auto';
-                editMode = false;
-            }
-        });
-    
         // for Lab Rules Modal
         document.getElementById('lab-modal').addEventListener('click', function() {
             const labInfo = document.getElementById('lab-info');
             const labCont = document.getElementById('lab-content');
 
             this.classList.toggle('scale-150');
-            this.classList.toggle('z-10');
+            this.classList.toggle('z-50');
             this.classList.toggle('w-full');
             this.classList.toggle('h-full');
             this.classList.toggle('translate-x-40')
@@ -251,26 +197,6 @@
                     labInfo.classList.add('overflow-hidden', 'h-[320px]');
                 })
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            // if (isExpanded) {
-            //     labInfo.scrollTo({ top:0, behavior: 'smooth'})
-
-            //     setTime(() => {
-            //         labInfo.classList.add('overflow-hidden', 'h-[320px]');
-            //         labInfo.classList.remove('overflow-y-auto', 'h-[430px]');
-            //     }, 300);
-            // }else {
-            //     labInfo.classList.remove('overflow-hidden', 'h-[320px]');
-            //     labInfo.classList.add('overflow-y-auto', 'h-[430px]');
-            // }
             
             event.stopPropagation();
         });
