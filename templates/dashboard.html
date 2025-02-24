@@ -4,15 +4,15 @@
     <div class="flex justify-center min-h-[700px] bg-gray-200 overflow-hidden">
         <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
             <!-- Account Info -->
-            <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative">
+            <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative" role="dialog" aria-labelledby="account-info" aria-modal="true" >
                 <div id="account-info" class="section bg-white p-4 md:p-8 rounded-lg shadow-md cursor-pointer h-auto md:h-[320px] relative z-10 duration-300">
                     <!-- acc header -->
                     <div id="acc-header" class="flex w-full items-center space-y-4 space-x-4">
-                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600">
+                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600 ">
                             {% if user.photo %}
-                                <img src="{{ user.photo }}" alt="User Photo" class="size-24 rounded-full dark:bg-gray-600 object-cover">
+                                <img src="{{ user.photo }}" alt="User Photo" class="ring-2 ring-offset-4 ring-gray-400 size-24 rounded-full dark:bg-gray-600 object-cover">
                             {% else%}
-                                <svg class="bg-gray-600 relative size-24 text-gray-200 -left-1 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="ring-2 ring-offset-4 ring-gray-400 bg-gray-600 relative size-24 text-gray-200 -left-1 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                                 </svg>
                             {% endif %}
@@ -20,17 +20,19 @@
                         <div id="box" class="flex flex-row justify-between w-[80%] items-center space-y-0">
                             <div id="userFullName" class="font-bold text-2xl text-center">
                                 {% if user.middlename.upper() != "NONE" %}
-                                    <h2>{{ user.firstname.upper() }} {{ user.middlename.upper() }} {{ user.lastname.upper() }}</h2>
+                                    <h2>{{ user.firstname | upper }} 
+                                        {{ user.middlename | default('') | upper }}
+                                        {{ user.lastname | upper }}</h2>
                                 {% else %}
                                     <h2>{{ user.firstname.upper() }} {{ user.lastname.upper() }}</h2>
                                 {% endif %}
                             </div>
-                            <button id="edit-btn" class="size-5 hover:fill-red-200 transition duration-300 ease-in-out">
-                                <img src="/static/img/edit.png">
+                            <button class="size-5">
+                                <img id="edit-btn" class="opacity-0 transition duration-500 ease-in-out" src="/static/img/edit.png">
                             </button>
                         </div>
                     </div>               
-                    <div class="flex flex-col md:flex-row gap-4 md:gap-8 mt-2">
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-8 mt-2 overflow-hidden">
                         <div class="content w-full md:w-1/2">
                             <div class="userID flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
                                 <p class="font-medium">IDNO:</p>
@@ -38,11 +40,11 @@
                             </div>
                             <div class="userCourse flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
                                 <p class="font-medium">Course:</p>
-                                <p class="font-bold text-base">{{ user.course.upper() }}</p>
+                                <p class=" editable font-bold text-base">{{ user.course.upper() }}</p>
                             </div>
                             <div class="userLevel flex flex-col md:flex-row gap-2 md:gap-4">
                                 <p class="font-medium">Year Level:</p>
-                                <p class="font-bold text-base">{{ user.yr_lvl }}</p>
+                                <p class="editable font-bold text-base">{{ user.yr_lvl }}</p>
                             </div>
                         </div>
                         <div class="content2 w-full md:w-1/2">
@@ -52,19 +54,15 @@
                             </div>
                             <div class="userEmail flex flex-col md:flex-row gap-2 md:gap-4">
                                 <p class="font-medium">Email:</p>
-                                <p class="font-bold text-base">{{ user.email }}</p>
+                                <p class="editable font-bold text-base">{{ user.email }}</p>
                             </div>
                         </div>
-                    </div>
-                    <div id="action-btn" class="flex flex-row w-full mt-2 opacity-0 duration-500 transition-all justify-end">
-                        <button id="cancel-btn" class="h-6 w-15 text-sm text-white font-semibold p-px bg-red-400 rounded-lg cursor-pointer">CANCEL</button>
-                        <button id="save-btn" class="h-6 w-15 text-sm text-white font-semibold p-px bg-green-500 rounded-lg cursor-pointer">SAVE</button>
                     </div>
                 </div>
             </div>
 
             <!-- Announcements -->
-            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md cursor-pointer h-[250px] max-h-[655px]">
+            <div class="section row-span-2 bg-white p-5 rounded-lg shadow-md h-[250px] max-h-[655px]">
                 <div id="header" class="flex flex-col items-center">
                     <h2 class="text-2xl font-bold ">Announcements</h2>
                     <hr class="w-[80%] bg-zinc-500 mt-5 border-none h-[1px]">
@@ -112,15 +110,79 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Account Info Edit Modal -->
+            <div id="editModal" class="hidden fixed inset-0 bg-black/70 z-50 flex justify-center items-center transition-all duration-300 duration-300">
+                <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[40%] transform scale-75 opacity-0 transition-all duration-300">
+                    <form action="/edit" method="POST" enctype="multipart/form-data">
+                        <h2 class="text-2xl font-bold text-center mb-4">Edit Account Information</h2>
+                        <div class="self-center relative size-24 overflow-hidden group mx-auto mb-4">
+                            {% if user.photo %}
+                                <img id="userPhotoPreview" src="{{ user.photo }}" alt="User Photo" class="size-24 rounded-full dark:bg-gray-600 object-cover">
+                            {% else%}
+                                <svg id="userPhotoPreview" class="bg-gray-600 relative size-24 text-gray-200 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-black/50 size-24 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span class="text-white text-sm font-semibold text-center">Upload Photo?</span>
+                            </div>
+                            <input type="file" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" name="photo" onchange="previewImage(event)">
+                        </div>
+                        <div class="space-y-4">
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text"placeholder="First name" value="{{ user.firstname }}" name="firstname" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Middle name" value="{{ user.middlename }}" name="middlename">
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Last name" value="{{ user.lastname }}" name="lastname" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Year Level" value="{{ user.yr_lvl }}" name="yearLevel" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Email Address" value="{{ user.email }}" name="email" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="New Password" name="password">
+                        </div>
+                        <div id="action-btn" class="flex justify-between mt-6">
+                            <button id="cancel-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
+                            <button id="save-btn" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Save</button>
+                        </div>
+                    </form> 
+                </div>
+             </div>
         </div>
     </div>
     <script>
+        const edit = document.getElementById('edit-btn');
+        const close = document.getElementById('close-btn');
+        const actionbtn = document.getElementById('action-btn');
+        const accInfo = document.getElementById('account-info');
+        const modal = document.getElementById('editModal');
+        const modalContent = document.getElementById('modalContent');
+
+        document.getElementById('edit-btn').addEventListener('click', function (event) {
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-75', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }); 
+
+        //close Modal
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-75', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('userPhotoPreview');
+                output.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
         
         // for Account Info Modal
-        document.getElementById('acc-modal',).addEventListener('click', function() {
-            const accInfo = document.getElementById('account-info');
-            const edit = document.getElementById('edit-btn');
-
+        const accModal = document.getElementById('acc-modal',).addEventListener('click', function() {
             this.classList.toggle('scale-170'); // Tailwind's 125% scale class
             this.classList.toggle('z-50'); // Bring to front
             this.classList.toggle('w-full');
@@ -133,41 +195,16 @@
             accInfo.classList.toggle('p-5');
             accInfo.classList.toggle('p-8');
             accInfo.classList.toggle('backdrop-blur-sm');
-            accInfo.classList.toggle('cursor-pointer');
             
             edit.classList.toggle('cursor-pointer');
+            edit.classList.toggle('opacity-0');
 
             event.stopPropagation();
         });
 
-        // for Edit 
-        document.getElementById('edit-btn').addEventListener('click', function(event) {
-            event.stopPropagation();
-
-            const accModal = document.getElementById('acc-modal');
-            accModal.style.pointerEvents = 'none';
-
-            const userFields = {
-                idno: document.querySelector('.userID'),
-                course: document.querySelector('.course'),
-            }
-
-            const actionBtn = document.getElementById('action-btn');
-            actionBtn.classList.toggle('opacity-0')
-        })
-
-        // for action buttons
-        function cancel(event){
-            event.stopPropagation();
-
-            const cancelbtn = document.getElementById('cancel-btn');
-            const accModal = document.getElementById('acc-modal');
-
-            accModal.style.pointerEvents = 'auto';
-        }
 
         // for Lab Rules Modal
-        document.getElementById('lab-modal').addEventListener('click', function() {
+        const labModal = document.getElementById('lab-modal').addEventListener('click', function() {
             const labInfo = document.getElementById('lab-info');
             const labCont = document.getElementById('lab-content');
 

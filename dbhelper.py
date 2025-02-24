@@ -31,6 +31,6 @@ def addprocess(table, **kwargs) -> dict:
     
     return postprocess(sql)
 
-def getallrecords(table:str)-> list:
+# def getallrecords(table:str)-> list:
     sql:str = f"SELECT * FROM `{table}`"
     return getallprocess(sql)
