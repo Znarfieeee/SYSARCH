@@ -133,9 +133,9 @@
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text"placeholder="First name" value="{{ user.firstname }}" name="firstname" required>
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Middle name" value="{{ user.middlename }}" name="middlename">
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Last name" value="{{ user.lastname }}" name="lastname" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Year Level" value="{{ user.yr_lvl }}" name="yearLevel" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Email Address" value="{{ user.email }}" name="email" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="New Password" name="password">
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="YEAR LEVEL" value="{{ user.yr_lvl }}" name="yearLevel" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="email" placeholder="EMAIL ADDRESS" value="{{ user.email }}" name="email" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="NEW PASSWORD" name="password">
                         </div>
                         <div id="action-btn" class="flex justify-between mt-6">
                             <button id="cancel-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
@@ -157,6 +157,7 @@
         document.getElementById('edit-btn').addEventListener('click', function (event) {
 
             modal.classList.remove('hidden');
+            document.querySelector('#editModal form').querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="file"]').forEach(input=> {input.dataset.originalValue = input.value});
             setTimeout(() => {
                 modalContent.classList.remove('scale-75', 'opacity-0');
                 modalContent.classList.add('scale-100', 'opacity-100');
@@ -169,6 +170,7 @@
             modalContent.classList.add('scale-75', 'opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
+                modal.querySelector('form').querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="file"]').forEach(input=> {input.value = input.dataset.originalValue});
             }, 300);
         }
 
