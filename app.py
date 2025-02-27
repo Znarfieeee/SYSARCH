@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, session, url_for, request, flash
+from flask import Flask, render_template, redirect, session, url_for, request, flash, jsonify
 from dbhelper import *
 import urllib.request, os
 from werkzeug.utils import secure_filename
@@ -216,6 +216,47 @@ def reservation():
     
     return render_template('reservation.html', pagetitle=pagetitle)
 
+@app.route('/get_reservations')
+def get_reservations():
+    idno = session['user']['idno']
+    sql = "SELECT * FROM reservations WHERE idno = ?"
+    reservations = getallprocess(sql, (idno,))
+    
+    data  = []
+    for res in reservations:
+        data.append({
+            "id": res['id'],
+            "date": res['date'],
+            "time_start": res['time_start'],
+            "time_end": res['time_end'],
+            "labno": res['labno'],
+            "purpose": res['purpose'],
+            "status": res['status'],
+            "date_created": res['created_at']
+        })
+    
+    return jsonify(data)
+
+@app.route('/book', methods=['POST'])
+def book():
+    idno = session.get('idno') or session['user']['idno']
+    date = request.form.get('date')
+    time_start = request.form.get('time-start')
+    time_end = request.form.get('time-end')
+    labno = request.form.get('labno')
+    purpose = request.form.get('purpose')
+    status = "pending"
+
+    success = addprocess('reservations', idno=idno, date=date, 
+                         time_start=time_start, time_end=time_end, 
+                         labno=labno, purpose=purpose, status=status)
+    
+    if success:
+        flash("Reservation successful.", "success")
+    else:
+        flash("Reservation failed.", "error")
+
+    return redirect(url_for('reservation'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
     <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/js/dashboard.js">
+    <link rel="stylesheet" href="../static/js/home.js">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,10 +103,22 @@
             background: transparent; /* Invisible track */
         }
 
+        #schedule-table::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        #schedule-table::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.0); /*transparent */
+            border-radius: 10px;
+        }
+        #schedule-table::-webkit-scrollbar-track {
+            background: transparent; /* Invisible track */
+        }
+
     </style>
 </head>
-<body class="overflow-hidden">
-    <header class="flex items-center h-20 bg-zinc-500 text-white z-999 shadow-md px-4" >
+<body class="overflow-hidden bg-gray-200">
+    <header class="flex items-center h-20 bg-zinc-500 text-white z-15 shadow-md px-4" >
         <label class="hamburger cursor-pointer">
             <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
             <svg class="h-10 w-10" viewBox="0 0 32 32">
@@ -119,21 +131,21 @@
     </header>
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
         <div class="flex-1">
-            <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
-                <i class="fas fa-chart-bar mr-3"></i>
-                Dashboard
+            <a href="{{ url_for('home') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <img src="/static/img/dashboard.png" class="size-5 mx-4">
+                <span>Dashboard</span>
             </a>
-            <a href="{{ url_for('history')}}" class="block text-black p-5 hover:bg-gray-200 transition ease-in  ">
-                <i class="fas fa-user mr-3"></i>
-                History
+            <a href="{{ url_for('history')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in  ">
+                <img src="/static/img/history.png" class="size-5 mx-4">
+                <span>History</span>
             </a>
-            <a href="{{ url_for('reservation')}}" class="block text-black p-5 hover:bg-gray-200 transition ease-in ">
-                <i class="fas fa-book mr-3"></i>
-                Reservation
+            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+                <img src="/static/img/booking.png" class="size-5 mx-4">
+                <span>Reservation</span>
             </a>
-            <button onclick="logout()" class="cursor-pointer block p-5 w-full flex items-center text-black hover:bg-gray-200 transition ease-in">
-                <i class="fas fa-sign-out-alt mr-2"></i>
-                Logout
+            <button onclick="logout()" class="flex items-center cursor-pointer block p-5 w-full text-black hover:bg-gray-200 transition ease-in">
+                <i class="fas fa-sign-out-alt mx-4 size-5"></i>
+                <span>Logout</span>
             </button>
         </div>
     </div>
