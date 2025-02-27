@@ -1,20 +1,18 @@
 {% extends 'home.html'%}
 {% block content %}
     
-    <div class="flex justify-center min-h-screen bg-gray-200 overflow-hidden">
-        <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
+    <div class="flex justify-center min-h-screen overflow-hidden">
+        <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-30 pt-5">
             <!-- Account Info -->
             <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative" role="dialog" aria-labelledby="account-info" aria-modal="true" >
-                <div id="account-info" class="section bg-white p-4 md:p-8 rounded-lg shadow-md cursor-pointer md:h-[320px] lg:h-[400px]  relative z-10 duration-300">
+                <div id="account-info" class="flex flex-col justify-center section bg-white md:p-8 rounded-lg shadow-md cursor-pointer md:h-[320px] relative z-10 duration-300 hover:bg-gray-100">
                     <!-- acc header -->
                     <div id="acc-header" class="flex w-full items-center space-y-4 space-x-4">
-                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600 ">
+                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600">
                             {% if user.photo %}
                                 <img src="{{ user.photo }}" alt="User Photo" class="ring-2 ring-offset-4 ring-gray-400 size-24 rounded-full dark:bg-gray-600 object-cover">
                             {% else%}
-                                <svg class="ring-2 ring-offset-4 ring-gray-400 bg-gray-600 relative size-24 text-gray-200 -left-1 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                </svg>
+                                <img src="/static/user_img/default/def-user.png" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
                             {% endif %}
                         </div>
                         <div id="box" class="flex flex-row justify-between w-[80%] items-center space-y-0">
@@ -32,29 +30,29 @@
                             </button>
                         </div>
                     </div>               
-                    <div class="flex flex-col md:flex-row gap-4 md:gap-8 mt-2 overflow-hidden">
+                    <div class="flex flex-row gap-2 md:gap-8 mt-2 w-[90%] mx-auto">
                         <div class="content w-full md:w-1/2">
                             <div class="userID flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
-                                <p class="font-medium">IDNO:</p>
-                                <p class="font-bold text-base">{{ user.idno }}</p>
+                                <p class="font-medium w-[50%]">ID No:</p>
+                                <p class="font-bold text-base w-[50%]">{{ user.idno }}</p>
                             </div>
                             <div class="userCourse flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
-                                <p class="font-medium">Course:</p>
-                                <p class=" editable font-bold text-base">{{ user.course.upper() }}</p>
+                                <p class="font-medium  w-[50%]">Course:</p>
+                                <p class=" editable font-bold text-base  w-[50%]">{{ user.course.upper() }}</p>
                             </div>
                             <div class="userLevel flex flex-col md:flex-row gap-2 md:gap-4">
-                                <p class="font-medium">Year Level:</p>
-                                <p class="editable font-bold text-base">{{ user.yr_lvl }}</p>
+                                <p class="font-medium w-[50%]">Year Level:</p>
+                                <p class="editable font-bold text-base  w-[50%]">{{ user.yr_lvl }}</p>
                             </div>
                         </div>
                         <div class="content2 w-full md:w-1/2">
-                            <div class="userSessions flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
-                                <p class="font-medium">Number of Sessions:</p>
-                                <p class="font-bold text-base">{{ user.sessions }}</p>
+                            <div class="userSessions flex flex-row items-center gap-2 md:gap-4 pb-4">
+                                <p class="font-medium  w-[50%]">No. of Sessions:</p>
+                                <p class="font-bold text-base w-[50%]">{{ user.sessions }}</p>
                             </div>
                             <div class="userEmail flex flex-col md:flex-row gap-2 md:gap-4">
-                                <p class="font-medium">Email:</p>
-                                <p class="editable font-bold text-base">{{ user.email }}</p>
+                                <p class="font-medium  w-[50%]">Email:</p>
+                                <p class="editable font-semibold text-sm  w-[50%] truncate">{{ user.email }}</p>
                             </div>
                         </div>
                     </div>
@@ -71,58 +69,58 @@
 
             <!-- Laboratory Rules -->
              <div id="lab-modal" class="duration-300 transform origin-bottom-left relative">
-                <div id="lab-info" class="section bg-white p-5 rounded-lg shadow-md cursor-pointer md:h-[320px] lg:h-[400px] overflow-hidden duration-300">
-                    <div id="lab-header" class="flex justify-between px-5 items-center py-2">
-                        <img src="../static/img/uc-logo.PNG" class="h-15 w-auto pt-2">
-                        <h2 class="text-lg font-bold">LABORATORY RULES & REGULATIONS</h2>
-                        <img src="../static/img/ccs_logo.png" class="size-12">
-                    </div>
-                    <div id="lab-content" class="relative mt-4 text-sm pr-3">
-                        <p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
-                        <ol class="list-decimal pl-5">
-                            <li>Maintain silence, proper decorum, and discipline inside the laboratory. Mobile phones, walkmans, and other personal equipment must be switched off.</li>
-                            <li>Games are not allowed inside the lab. This includes computer-related games, card games, and others that may disturb the operation of the lab.</li>
-                            <li>Surfing the Internet is allowed only with the permission of the instructor. Downloading and installing software are strictly prohibited.</li>
-                            <li>Accessing websites not related to the course (especially pornographic and illicit sites) is strictly prohibited.</li>
-                            <li>Deleting computer files and changing the setup of the computer is a major offense.</li>
-                            <li>Observe computer time usage carefully. A fifteen-minute allowance is given for each use. Otherwise, the unit will be given to those who wish to "sit in".</li>
-                            <li>Observe proper decorum while inside the laboratory.
-                                <ul class="list-disc pl-5">
-                                    <li>Do not enter the lab unless the instructor is present.</li>
-                                    <li>All bags, knapsacks, and similar items must be deposited at the counter.</li>
-                                    <li>Follow the seating arrangement of your instructor.</li>
-                                    <li>At the end of class, all software programs must be closed.</li>
-                                    <li>Return all chairs to their proper places after use.</li>
-                                </ul>
-                            </li>
-                            <li>Chewing gum, eating, drinking, smoking, and other forms of vandalism are prohibited inside the lab.</li>
-                            <li>Anyone causing a continual disturbance will be asked to leave the lab. Acts or gestures offensive to the community, including public displays of physical intimacy, are not tolerated.</li>
-                            <li>Persons exhibiting hostile or threatening behavior, such as yelling, swearing, or disregarding requests from lab personnel, will be asked to leave.</li>
-                            <li>For serious offenses, lab personnel may call the Civil Security Office (CSU) for assistance.</li>
-                            <li>Any technical problem or difficulty must be addressed to the laboratory supervisor, student assistant, or instructor immediately.</li>
-                        </ol>
-                
-                        <h3 class="font-bold mt-4">DISCIPLINARY ACTION</h3>
-                        <ul class="list-disc pl-5">
-                            <li><b>First Offense:</b> The Head, Dean, or OIC recommends suspension from classes for the offender.</li>
-                            <li><b>Second and Subsequent Offenses:</b> A heavier sanction will be recommended to the Guidance Center.</li>
-                        </ul>
+                <div id="lab-info" class="section bg-white rounded-lg shadow-md cursor-pointer h-[320px] overflow-hidden duration-300 hover:bg-gray-100">
+                    <div id="lab-box" class="flex flex-col w-full max-w-lg mx-auto">
+                        <div id="lab-header" class="flex justify-between items-center py-4">
+                            <img src="../static/img/uc-logo.PNG" class="h-15 w-auto pt-2">
+                            <h2 class="text-lg font-bold text-center">LABORATORY RULES & REGULATIONS</h2>
+                            <img src="../static/img/ccs_logo.png" class="h-12 w-auto">
+                        </div>
+                        <div id="lab-content" class="relative text-sm pr-3 leading-6 text-justify">
+                            <p class="mb-4">To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
+                            <ol class="list-decimal pl-5 space-y-2">
+                                <li>Maintain silence, proper decorum, and discipline inside the laboratory. Mobile phones, walkmans, and other personal equipment must be switched off.</li>
+                                <li>Games are not allowed inside the lab. This includes computer-related games, card games, and others that may disturb the operation of the lab.</li>
+                                <li>Surfing the Internet is allowed only with the permission of the instructor. Downloading and installing software are strictly prohibited.</li>
+                                <li>Accessing websites not related to the course (especially pornographic and illicit sites) is strictly prohibited.</li>
+                                <li>Deleting computer files and changing the setup of the computer is a major offense.</li>
+                                <li>Observe computer time usage carefully. A fifteen-minute allowance is given for each use. Otherwise, the unit will be given to those who wish to "sit in".</li>
+                                <li>Observe proper decorum while inside the laboratory.
+                                    <ul class="list-disc pl-5">
+                                        <li>Do not enter the lab unless the instructor is present.</li>
+                                        <li>All bags, knapsacks, and similar items must be deposited at the counter.</li>
+                                        <li>Follow the seating arrangement of your instructor.</li>
+                                        <li>At the end of class, all software programs must be closed.</li>
+                                        <li>Return all chairs to their proper places after use.</li>
+                                    </ul>
+                                </li>
+                                <li>Chewing gum, eating, drinking, smoking, and other forms of vandalism are prohibited inside the lab.</li>
+                                <li>Anyone causing a continual disturbance will be asked to leave the lab. Acts or gestures offensive to the community, including public displays of physical intimacy, are not tolerated.</li>
+                                <li>Persons exhibiting hostile or threatening behavior, such as yelling, swearing, or disregarding requests from lab personnel, will be asked to leave.</li>
+                                <li>For serious offenses, lab personnel may call the Civil Security Office (CSU) for assistance.</li>
+                                <li>Any technical problem or difficulty must be addressed to the laboratory supervisor, student assistant, or instructor immediately.</li>
+                            </ol>
+                    
+                            <h3 class="font-bold mt-4">DISCIPLINARY ACTION</h3>
+                            <ul class="list-disc pl-5">
+                                <li><b>First Offense:</b> The Head, Dean, or OIC recommends suspension from classes for the offender.</li>
+                                <li><b>Second and Subsequent Offenses:</b> A heavier sanction will be recommended to the Guidance Center.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Account Info Edit Modal -->
-            <div id="editModal" class="hidden fixed inset-0 bg-black/70 z-50 flex justify-center items-center transition-all duration-300 duration-300">
-                <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[40%] transform scale-75 opacity-0 transition-all duration-300">
+            <div id="editModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
+                <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300 overflow-hidden">
                     <form action="/edit" method="POST" enctype="multipart/form-data">
                         <h2 class="text-2xl font-bold text-center mb-4">Edit Account Information</h2>
                         <div class="self-center relative size-24 overflow-hidden group mx-auto mb-4 transition ease-in-out duration-500 hover:ring-2 hover:ring-offset-4 hover:ring-gray-600 rounded-full">
                             {% if user.photo %}
                                 <img id="userPhotoPreview" src="{{ user.photo }}" alt="User Photo" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
                             {% else%}
-                                <svg id="userPhotoPreview" class="bg-gray-600 relative size-24 text-gray-200 rounded-full " fill="currentColor" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                </svg>
+                                <img id="userPhotoPreview" src="/static/user_img/default/def-user.png" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
                             {% endif %}
                             <div class="absolute inset-0 bg-black/50 size-24 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <span class="text-white text-sm font-semibold text-center">Upload Photo?</span>
@@ -133,13 +131,13 @@
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text"placeholder="First name" value="{{ user.firstname }}" name="firstname" required>
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Middle name" value="{{ user.middlename }}" name="middlename">
                             <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Last name" value="{{ user.lastname }}" name="lastname" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Year Level" value="{{ user.yr_lvl }}" name="yearLevel" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="Email Address" value="{{ user.email }}" name="email" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="New Password" name="password">
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="YEAR LEVEL" value="{{ user.yr_lvl }}" name="yearLevel" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="EMAIL ADDRESS" value="{{ user.email }}" name="email" required>
+                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="NEW PASSWORD" name="password">
                         </div>
                         <div id="action-btn" class="flex justify-between mt-6">
                             <button id="cancel-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
-                            <button id="save-btn" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Save</button>
+                            <button id="save-btn" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Save</button>
                         </div>
                     </form> 
                 </div>
@@ -153,7 +151,9 @@
         const accInfo = document.getElementById('account-info');
         const modal = document.getElementById('editModal');
         const modalContent = document.getElementById('modalContent');
+        let originalPhotoSrc = document.getElementById('userPhotoPreview').src;
 
+        // Open Edit Modal
         document.getElementById('edit-btn').addEventListener('click', function (event) {
 
             modal.classList.remove('hidden');
@@ -163,15 +163,18 @@
             }, 50);
         }); 
 
-        //close Modal
+        //close Edit Modal
         function closeModal() {
             modalContent.classList.remove('scale-100', 'opacity-100');
             modalContent.classList.add('scale-75', 'opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
+                document.querySelector('#editModal form').reset();
+                document.getElementById('userPhotoPreview').src = originalPhotoSrc;
             }, 300);
         }
 
+        // Preview Image upon upload || change
         function previewImage(event) {
             const reader = new FileReader();
             reader.onload = function() {
@@ -195,6 +198,7 @@
             accInfo.classList.toggle('p-5');
             accInfo.classList.toggle('p-8');
             accInfo.classList.toggle('backdrop-blur-sm');
+            accInfo.classList.toggle('hover:bg-gray-100');
             
             edit.classList.toggle('cursor-pointer');
             edit.classList.toggle('opacity-0');
@@ -215,10 +219,11 @@
             this.classList.toggle('translate-x-40')
             this.classList.toggle('translate-y-[-120px]')
             
+
             labInfo.classList.toggle('bg-white');
             labInfo.classList.toggle('bg-white/20');
             labInfo.classList.toggle('backdrop-blur-sm');
-            
+            labInfo.classList.toggle('hover:bg-gray-100');
             
             // Scroll behavior
             const notExpanded = labInfo.classList.contains('overflow-hidden');
@@ -237,5 +242,19 @@
             
             event.stopPropagation();
         });
+    
+        document.getElementById('save-btn').addEventListener('click', (e) => {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-75', 'opacity-0');
+        });
+
+
+        // Close unta sa modal if pisliton sa gawas
+        // window.addEventListener('click', (e) => {
+        //     if (e.target === modal) {
+        //         closeModal();
+        //     }
+        // });
+        
     </script>
 {% endblock %}
