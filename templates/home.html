@@ -118,7 +118,8 @@
         <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
     </header>
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
-        <div class="flex-1">
+        {% if user.role == "student" %}
+        <div class="flex-1 h-auto">
             <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
                 <i class="fas fa-chart-bar mr-3"></i>
                 Dashboard
@@ -140,6 +141,26 @@
                 Logout
             </button>
         </div>
+        {% elif user.role == "staff" %}
+        <div class="flex-1 h-auto">
+            <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Dashboard
+            </a>
+            <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Sit-in Record
+            </a>
+            <a href="{{ url_for('home') }}" class="block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <i class="fas fa-chart-bar mr-3"></i>
+                Generate Reports
+            </a>
+            <button onclick="logout()" class="cursor-pointer block p-5 w-full flex items-center text-black hover:bg-gray-200 transition ease-in">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
+        </div>
+        {% endif %}
     </div>
 
     {% block content %}

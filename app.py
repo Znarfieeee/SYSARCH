@@ -46,7 +46,8 @@ def login():
                 "course": user[0]['course'],
                 "sessions": user[0]['no_session'],
                 "yr_lvl": user[0]['yr_lvl'],
-                "photo": user[0]['photo']
+                "photo": user[0]['photo'],
+                "role": user[0]['role']
             }
             return redirect(url_for('home'))
         elif not username :
@@ -201,7 +202,11 @@ def home():
     pagetitle = 'Dashboard'
     
     user = session.get('user')
-    return render_template("dashboard.html", user=user, pagetitle=pagetitle)
+    
+    if user['role'] =='student':
+        return render_template("dashboard.html", user=user, pagetitle=pagetitle)
+    elif user['role'] =='staff':
+        return render_template("/staff/sDashboard.html", user=user, pagetitle=pagetitle)
     
 
 @app.route('/history')
