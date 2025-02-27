@@ -221,12 +221,6 @@ def reservation():
     
     return render_template('reservation.html', pagetitle=pagetitle)
 
-@app.route('/schedule')
-def schedule():
-    pagetitle = 'Schedule'
-    
-    return render_template('schedule.html', pagetitle=pagetitle)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

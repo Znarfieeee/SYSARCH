@@ -1,11 +1,11 @@
 {% extends 'home.html'%}
 {% block content %}
     
-    <div class="flex justify-center min-h-[700px] bg-gray-200 overflow-hidden">
+    <div class="flex justify-center min-h-screen bg-gray-200 overflow-hidden">
         <div id="container" class="relative w-full min-w-4xl grid grid-cols-2 grid-cols-2 grid-rows-[auto_1fr] gap-4 px-20 pt-5">
             <!-- Account Info -->
             <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative" role="dialog" aria-labelledby="account-info" aria-modal="true" >
-                <div id="account-info" class="section bg-white p-4 md:p-8 rounded-lg shadow-md cursor-pointer h-auto md:h-[320px] relative z-10 duration-300">
+                <div id="account-info" class="section bg-white p-4 md:p-8 rounded-lg shadow-md cursor-pointer md:h-[320px] lg:h-[400px]  relative z-10 duration-300">
                     <!-- acc header -->
                     <div id="acc-header" class="flex w-full items-center space-y-4 space-x-4">
                         <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600 ">
@@ -71,7 +71,7 @@
 
             <!-- Laboratory Rules -->
              <div id="lab-modal" class="duration-300 transform origin-bottom-left relative">
-                <div id="lab-info" class="section bg-white p-5 rounded-lg shadow-md cursor-pointer h-[320px] overflow-hidden duration-300">
+                <div id="lab-info" class="section bg-white p-5 rounded-lg shadow-md cursor-pointer md:h-[320px] lg:h-[400px] overflow-hidden duration-300">
                     <div id="lab-header" class="flex justify-between px-5 items-center py-2">
                         <img src="../static/img/uc-logo.PNG" class="h-15 w-auto pt-2">
                         <h2 class="text-lg font-bold">LABORATORY RULES & REGULATIONS</h2>
