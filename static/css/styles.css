@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 * {
     font-family: 'Inter', sans-serif;
 }
@@ -6,3 +8,4 @@
 #ayy{
     color: #b20808;
 }
+

@@ -1,0 +1,24 @@
+{
+  "name": "sysarch",
+  "version": "1.0.0",
+  "description": "System architecture school project",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx @tailwindcss/cli -i ./static/css/styles.css -o ./static/css/main.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Znarfieeee/SYSARCH.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Znarfieeee/SYSARCH/issues"
+  },
+  "homepage": "https://github.com/Znarfieeee/SYSARCH#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.9",
+    "tailwindcss": "^4.0.9"
+  }
+}

@@ -150,12 +150,20 @@
             scheduleTable.innerHTML = '';
 
             data.forEach(reservation => {
+                let statusClass = '';
+                if (reservation.status === 'approved') {
+                    statusClass = 'status-approved';
+                } else if (reservation.status === 'pending') {
+                    statusClass = 'status-pending';
+                } else if (reservation.status === 'denied') {
+                    statusClass = 'status-denied';
+                }
                 const reservationCard = `
 
                         <div class="p-4">
-                            <div class="flex  justify-between font-bold">
-                                <span>${reservation.date}</span>
-                                <span>${reservation.status}</span>    
+                            <div class="flex  justify-between">
+                                <span class="font-bold">${reservation.date}</span>
+                                <span class="text-md ${statusClass}">${reservation.status}</span>    
                             </div>    
                             <div class="text-sm text-gray-700 mt-2"> 
                                 <span>${reservation.purpose}</span>

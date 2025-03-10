@@ -2,12 +2,13 @@ from flask import Flask, render_template, redirect, session, url_for, request, f
 from dbhelper import *
 import urllib.request, os
 from werkzeug.utils import secure_filename
-
+from staff_app import staff_app
 
 app = Flask(__name__)
 app.secret_key = "!@#$%12345"
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'static/user_img'
+app.register_blueprint(staff_app)
 
 def allowed_file(filename):
     allowed_externsions = set(['png', 'jpg', 'jpeg', 'gif'])    
@@ -48,7 +49,10 @@ def login():
                 "yr_lvl": user[0]['yr_lvl'],
                 "photo": user[0]['photo']
             }
-            return redirect(url_for('home'))
+            if session['user']['role'] == 'staff' or session['user']['role'] == 'admin':
+                return redirect(url_for('staff_app.staff_dashboard'))
+            else:
+                return redirect(url_for('home'))
         elif not username :
             flash("Input Username", "error")
         

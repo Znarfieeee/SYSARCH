@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="../static/js/home.js">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <title>Sit-in | {{ pagetitle }}</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .status-approved {
+            color: rgb(40, 167, 69);
+        }
+        .status-pending {
+            color: #FFDE21;
+        }
+        .status-denied {
+            color: rgb(220, 53, 69);
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: auto !important;
+            color: white;
+            padding: 20px;
+            align-items: center;
+        }
+
+        .flash {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flash.success {
+        background-color: rgba(40, 167, 69, 0.8);
+        }
+
+        .flash.error {
+        background-color: rgba(220, 53, 69, 0.8);
+        }
+
+        /* From Uiverse.io by JulanDeAlb */ 
+        .hamburger {
+            cursor: pointer;
+            }
+
+        .hamburger input {
+            display: none;
+            }
+
+        .hamburger svg {
+            /* The size of the SVG defines the overall size */
+            height: 3em;
+            /* Define the transition for transforming the SVG */
+            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line {
+            fill: none;
+            stroke: white;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 3;
+            /* Define the transition for transforming the Stroke */
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line-top-bottom {
+            stroke-dasharray: 12 63;
+        }
+
+        .hamburger input:checked + svg {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger input:checked + svg .line-top-bottom {
+            stroke-dasharray: 20 300;
+            stroke-dashoffset: -32.42;
+        }
+        #sidebar {
+            z-index: 999;
+        }
+
+        /* dashboard css */
+        #lab-info::-webkit-scrollbar {
+            width: 5px;  /* Thin scrollbar */
+        }
+
+        #lab-info::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent */
+            border-radius: 10px;
+        }
+
+        #lab-info::-webkit-scrollbar-track {
+            background: transparent; /* Invisible track */
+        }
+
+        #schedule-table::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        #schedule-table::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.0); /*transparent */
+            border-radius: 10px;
+        }
+        #schedule-table::-webkit-scrollbar-track {
+            background: transparent; /* Invisible track */
+        }
+
+    </style>
+</head>
+<body class="overflow-hidden bg-gray-200">
+    <header class="flex items-center h-20 bg-zinc-500 text-white z-15 shadow-md px-4" >
+        <label class="hamburger cursor-pointer">
+            <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
+            <svg class="h-10 w-10" viewBox="0 0 32 32">
+                <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+                <path class="line" d="M7 16 27 16"></path>
+            </svg>
+            </label>
+        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6">
+        <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
+    </header>
+    <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
+        <div class="flex-1">
+            <a href="{{ url_for('home') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                <img src="/static/img/dashboard.png" class="size-5 mx-4">
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('history')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in  ">
+                <img src="/static/img/sticky-note.png" class="size-5 mx-4">
+                <span>Students</span>
+            </a>
+            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+                <img src="/static/img/seo-report.png" class="size-5 mx-4">
+                <span>Reports</span>
+            </a>
+            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+                <img src="/static/img/feedback.png" class="size-5 mx-4">
+                <span>Feedbacks</span>
+            </a>
+            <button onclick="logout()" class="flex items-center cursor-pointer block p-5 w-full text-black hover:bg-gray-200 transition ease-in">
+                <i class="fas fa-sign-out-alt mx-4 size-5"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</body>
+<script>
+    function logout(){
+        document.location.href = "/logout";
+    }
+
+    // Timeout for flash messages
+    setTimeout(() => {
+        const flashMessages = document.querySelectorAll('.flash');
+        flashMessages.forEach(flash => {
+            flash.style.display = 'none';
+        });
+    }, 5000);
+
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('-translate-x-full');
+    }
+
+
+</script>
+</html>
