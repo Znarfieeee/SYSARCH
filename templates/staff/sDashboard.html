@@ -25,9 +25,12 @@
         </div>
         <!-- Announcement -->
         <div id="container-2" class="col-span-4 row-span-6 w-full justify-center bg-white p-6 rounded-lg shadow-md">
-            <form action="">
-                <h1 class="font-semibold text-xl py-auto">Create Announcement</h1>
-                <hr class="py-4">
+            <h1 class="font-semibold text-xl py-auto p-2">Announcement</h1>
+            <hr class="py-4">
+            { % for  %}
+
+            {% endfor %}
+            <form action="" class="hidden">             
                 <div id="announcement-form" class="bg-gray-50 shadow-sm rounded-lg p-4">
                     <div class="input-group">
                         <input required="" type="text" name="text" autocomplete="off" class="input w-full">
@@ -38,7 +41,7 @@
                         <label class="user-label">Content</label>
                     </div>
                     <div id="post" class="flex justify-center pt-8">
-                        <button type="submit" class="cursor-pointer hover:text-gray-200 transition duration-300 w-15 h-10 bg-gray-400">Post</button>
+                        <button type="submit" class="cursor-pointer hover:text-gray-200 transition duration-300 w-15 h-10 bg-gray-400 rounded-lg">Post</button>
                     </div>
                 </div>
             </form>
