@@ -1,6 +1,7 @@
 from sqlite3 import connect, Row
+import sqlite3
 
-database = 'firstActivity.db'
+database = 'app.db'
 
 def getallprocess(sql: str, params=()) -> list:
     db = connect(database)
@@ -31,6 +32,11 @@ def addprocess(table, **kwargs) -> dict:
     
     return postprocess(sql)
 
-# def getallrecords(table:str)-> list:
-    sql:str = f"SELECT * FROM `{table}`"
-    return getallprocess(sql)
+def getstat(sql, params=())-> list:
+    conn = connect(database)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+    conn.close()
+    return rows

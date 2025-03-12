@@ -47,7 +47,8 @@ def login():
                 "course": user[0]['course'],
                 "sessions": user[0]['no_session'],
                 "yr_lvl": user[0]['yr_lvl'],
-                "photo": user[0]['photo']
+                "photo": user[0]['photo'],
+                "role": user[0]['role']
             }
             if session['user']['role'] == 'staff' or session['user']['role'] == 'admin':
                 return redirect(url_for('staff_app.staff_dashboard'))
@@ -205,20 +206,20 @@ def home():
     pagetitle = 'Dashboard'
     
     user = session.get('user')
-    return render_template("dashboard.html", user=user, pagetitle=pagetitle)
+    return render_template("student/dashboard.html", user=user, pagetitle=pagetitle)
     
 
 @app.route('/history')
 def history():
     pagetitle = 'History'
     
-    return render_template('history.html', pagetitle=pagetitle)
+    return render_template('student/history.html', pagetitle=pagetitle)
 
 @app.route('/reservation')
 def reservation():
     pagetitle = 'Reservation'
     
-    return render_template('reservation.html', pagetitle=pagetitle)
+    return render_template('student/reservation.html', pagetitle=pagetitle)
 
 @app.route('/get_reservations')
 def get_reservations():
@@ -264,3 +265,4 @@ def book():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(debug=True, host='192.168.1.5', port=5000)

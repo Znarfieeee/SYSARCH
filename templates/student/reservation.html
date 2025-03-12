@@ -29,7 +29,7 @@
 </div>
 
 <!-- Reservation Modal -->
-<div id="modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300 duration-300">
+<div id="modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
     <div id="modalContent" class="bg-gray-200 shadow-md p-10 rounded-lg w-[500px] transform scale-20 opacity-0 transition-all duration-300">
         <form action="/book" method="post" name="reservation-form"> 
             <input type="hidden" id="selectedDate" name="date">
@@ -69,8 +69,8 @@
                     </div>
                 </div>
                 <div id="action-btn-container" class="flex justify-between mt-6 gap-2">
-                    <button id="close-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg h-13 w-24 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
-                    <button id="save-btn" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg h-13 w-24 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Reserve</button>
+                    <button id="close-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg h-10 w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
+                    <button id="save-btn" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg h-10 w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Reserve</button>
                 </div>
             </div>
         </form>

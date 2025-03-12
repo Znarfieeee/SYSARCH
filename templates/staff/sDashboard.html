@@ -1,202 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="../static/js/home.js">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <title>Sit-in | {{ pagetitle }}</title>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .status-approved {
-            color: rgb(40, 167, 69);
-        }
-        .status-pending {
-            color: #FFDE21;
-        }
-        .status-denied {
-            color: rgb(220, 53, 69);
-        }
-
-        .flash-messages {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: auto !important;
-            color: white;
-            padding: 20px;
-            align-items: center;
-        }
-
-        .flash {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .flash.success {
-        background-color: rgba(40, 167, 69, 0.8);
-        }
-
-        .flash.error {
-        background-color: rgba(220, 53, 69, 0.8);
-        }
-
-        /* From Uiverse.io by JulanDeAlb */ 
-        .hamburger {
-            cursor: pointer;
-            }
-
-        .hamburger input {
-            display: none;
-            }
-
-        .hamburger svg {
-            /* The size of the SVG defines the overall size */
-            height: 3em;
-            /* Define the transition for transforming the SVG */
-            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .line {
-            fill: none;
-            stroke: white;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-width: 3;
-            /* Define the transition for transforming the Stroke */
-            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .line-top-bottom {
-            stroke-dasharray: 12 63;
-        }
-
-        .hamburger input:checked + svg {
-            transform: rotate(-45deg);
-        }
-
-        .hamburger input:checked + svg .line-top-bottom {
-            stroke-dasharray: 20 300;
-            stroke-dashoffset: -32.42;
-        }
-        #sidebar {
-            z-index: 999;
-        }
-
-        /* dashboard css */
-        #lab-info::-webkit-scrollbar {
-            width: 5px;  /* Thin scrollbar */
-        }
-
-        #lab-info::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent */
-            border-radius: 10px;
-        }
-
-        #lab-info::-webkit-scrollbar-track {
-            background: transparent; /* Invisible track */
-        }
-
-        #schedule-table::-webkit-scrollbar{
-            width: 5px;
-        }
-
-        #schedule-table::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.0); /*transparent */
-            border-radius: 10px;
-        }
-        #schedule-table::-webkit-scrollbar-track {
-            background: transparent; /* Invisible track */
-        }
-
-    </style>
-</head>
-<body class="overflow-hidden bg-gray-200">
-    <header class="flex items-center h-20 bg-zinc-500 text-white z-15 shadow-md px-4" >
-        <label class="hamburger cursor-pointer">
-            <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
-            <svg class="h-10 w-10" viewBox="0 0 32 32">
-                <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
-                <path class="line" d="M7 16 27 16"></path>
-            </svg>
-            </label>
-        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6">
-        <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
-    </header>
-    <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
-        <div class="flex-1">
-            <a href="{{ url_for('home') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
-                <img src="/static/img/dashboard.png" class="size-5 mx-4">
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ url_for('history')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in  ">
-                <img src="/static/img/sticky-note.png" class="size-5 mx-4">
-                <span>Students</span>
-            </a>
-            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
-                <img src="/static/img/seo-report.png" class="size-5 mx-4">
-                <span>Reports</span>
-            </a>
-            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
-                <img src="/static/img/feedback.png" class="size-5 mx-4">
-                <span>Feedbacks</span>
-            </a>
-            <button onclick="logout()" class="flex items-center cursor-pointer block p-5 w-full text-black hover:bg-gray-200 transition ease-in">
-                <i class="fas fa-sign-out-alt mx-4 size-5"></i>
-                <span>Logout</span>
-            </button>
+{% extends 'staff.html'%}
+{% block content %}
+    <div id="main-container" class="grid grid-cols-10 grid-rows-6 gap-4 py-10 px-20 h-[90vh]">
+        <!-- Statistics Data -->
+        <div id="container-1" class="col-span-6 row-span-6 grid h-[90vh] gap-4 grid-rows-20 rounded-md">
+            <div id="box1" class="row-span-5 grid grid-cols-3 h-[20%] gap-4">
+                <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg">
+                    <p>Registered Students: </p>
+                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4"></span>
+                </div>
+                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg">
+                    <p>Currently Sit-in: </p>
+                    <span id="curSitIn" class="flex justify-center text-7xl p-4"></span>
+                </div>
+                <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg">
+                    <p>Total Sit-in: </p>
+                    <span id="totalSitIn" class="flex justify-center text-7xl p-4"></span>
+                </div>
+            </div>
+            <div id="box2" class="flex flex-row row-span-15 p-4 h-[85%] bg-white shadow-md text-xs rounded-lg">
+                <div id="chart-container" class="flex justify-center w-full">
+                    <canvas id="myChart" class="w-full"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Announcement -->
+        <div id="container-2" class="col-span-4 row-span-6 w-full justify-center bg-white p-6 rounded-lg shadow-md">
+            <form action="">
+                <h1 class="font-semibold text-xl py-auto">Create Announcement</h1>
+                <hr class="py-4">
+                <div id="announcement-form" class="bg-gray-50 shadow-sm rounded-lg p-4">
+                    <div class="input-group">
+                        <input required="" type="text" name="text" autocomplete="off" class="input w-full">
+                        <label class="user-label">Title</label>
+                    </div>
+                    <div class="input-group py-4">
+                        <input required="" type="textbox" name="text" autocomplete="off" class="input w-full">
+                        <label class="user-label">Content</label>
+                    </div>
+                    <div id="post" class="flex justify-center pt-8">
+                        <button type="submit" class="cursor-pointer hover:text-gray-200 transition duration-300 w-15 h-10 bg-gray-400">Post</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/statistics')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalRegStuds').textContent = data.total_registered_students;
+                    document.getElementById('curSitIn').textContent = data.currently_sit_in;
+                    document.getElementById('totalSitIn').textContent = data.total_sit_in;
+                })
+                .catch(err => console.error('Error fetching statistics: ', err))
 
-    {% block content %}
-    {% endblock %}
+            fetch('/statisticchart')
+                .then(response => response.json())
+                .then(data => {
+                    const labels = data.map(item => item.purpose.replace(' programming', ''));
+                    const counts = data.map(item => item.count);
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-</body>
-<script>
-    function logout(){
-        document.location.href = "/logout";
-    }
-
-    // Timeout for flash messages
-    setTimeout(() => {
-        const flashMessages = document.querySelectorAll('.flash');
-        flashMessages.forEach(flash => {
-            flash.style.display = 'none';
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    const myChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Reservations by Purpose',
+                                data: counts,
+                                backgroundColor: [
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)',
+                                    'rgba(255, 159, 64, 0.2)',
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(201, 203, 207, 0.2)',
+                                    'rgba(255, 205, 86, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(153, 102, 255, 1)',
+                                    'rgba(255, 159, 64, 1)',
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(201, 203, 207, 1)',
+                                    'rgba(255, 205, 86, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        padding: 20
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.raw !== null) {
+                                                label += context.raw;
+                                            }
+                                            const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                            const percentage = ((context.raw / total) * 100).toFixed(2);
+                                            label += ` (${percentage}%)`;
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error('Error fetching reservation statistics:', err));
         });
-    }, 5000);
-
-    function toggleSidebar() {
-        var sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-    }
-
-
-</script>
-</html>
+    </script>
+{% endblock %}
