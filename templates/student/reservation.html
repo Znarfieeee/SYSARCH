@@ -2,7 +2,7 @@
 {% block content %}
 <div id="main-container" class="flex flex-row justify-center min-h-screen py-10 gap-4 mx-auto">
 
-    <div id="calendar-container" class="bg-white p-8 rounded-md shadow-md w-[65%] h-155">
+    <div id="calendar-container" class="bg-white p-8 rise-up rounded-md shadow-md w-[65%] h-155">
         <div id="header" class="flex justify-between items-center mb-4">
             <button id="previous" class="text-gray-600 hover:text-black"><i class="fas fa-chevron-left cursor-pointer size-10"></i></button>
             <div id="current-month-year" class="text-lg font-bold"></div>
@@ -19,7 +19,7 @@
         </div>
         <div id="dates" class="grid grid-cols-7 gap-4"></div>
     </div>
-    <div id="schedule-container" class="flex flex-col bg-white p-6 rounded-lg shadow-md w-[300px] min-h-[150px] max-h-155 overflow-hidden">
+    <div id="schedule-container" class="flex flex-col rise-up bg-white p-6 rounded-lg shadow-md w-[300px] min-h-[150px] max-h-155 overflow-hidden">
         <h1 class="mt-3 font-bold text-lg">Schedule</h1>
         <hr class="py-px mt-4">
         <div id="schedule-table" class="space-y-2 h-full overflow-y-auto">
@@ -163,7 +163,7 @@
                         <div class="p-4">
                             <div class="flex  justify-between">
                                 <span class="font-bold">${reservation.date}</span>
-                                <span class="text-md ${statusClass}">${reservation.status}</span>    
+                                <span class="text-sm ${statusClass}">${reservation.status}</span>    
                             </div>    
                             <div class="text-sm text-gray-700 mt-2"> 
                                 <span>${reservation.purpose}</span>

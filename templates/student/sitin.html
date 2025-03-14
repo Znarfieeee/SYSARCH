@@ -1,0 +1,125 @@
+{% extends 'home.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 rise-up">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold mb-6">Active Reservations</h2>
+        
+        {% if reservations %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.time_start }} - {{ reservation.time_end }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.labno }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.purpose }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if reservation.check_in_time and not reservation.check_out_time %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                            {% elif reservation.check_out_time %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    Completed
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Not Started
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if not reservation.check_in_time %}
+                                <button onclick="startSitIn({{ reservation.id }})"
+                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Start Sit-in
+                                </button>
+                            {% elif not reservation.check_out_time %}
+                                <button onclick="endSitIn({{ reservation.id }})"
+                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                    End Sit-in
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No approved reservations found.</p>
+            <a href="{{ url_for('reservation') }}" 
+               class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Make a Reservation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+async function startSitIn(reservationId) {
+    const pcNumber = prompt('Enter PC Number:');
+    if (!pcNumber) return;
+
+    try {
+        const response = await fetch(`/api/check-in/${reservationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pc_number: pcNumber })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Sit-in started successfully');
+            window.location.reload();
+        } else {
+            throw new Error(result.error || 'Failed to start sit-in');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+}
+
+async function endSitIn(reservationId) {
+    if (!confirm('Are you sure you want to end this sit-in?')) return;
+
+    try {
+        const response = await fetch(`/api/check-out/${reservationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Sit-in ended successfully');
+            window.location.reload();
+        } else {
+            throw new Error(result.error || 'Failed to end sit-in');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+}
+</script>
+{% endblock %}
