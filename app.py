@@ -205,8 +205,16 @@ def home():
     
     pagetitle = 'Dashboard'
     
+    sql = "select id, title, content, created_at from announcement order by created_at desc"
+    success = getallprocess(sql)
+    
+    if success:
+        announcements = [dict(row) for row in success]
+    else:
+        announcements = []
+    
     user = session.get('user')
-    return render_template("student/dashboard.html", user=user, pagetitle=pagetitle)
+    return render_template("student/dashboard.html", user=user, pagetitle=pagetitle, announcements=announcements)
     
 
 @app.route('/history')
@@ -224,7 +232,7 @@ def reservation():
 @app.route('/get_reservations')
 def get_reservations():
     idno = session['user']['idno']
-    sql = "SELECT * FROM reservations WHERE idno = ?"
+    sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY date DESC"
     reservations = getallprocess(sql, (idno,))
     
     data  = []
@@ -262,6 +270,77 @@ def book():
         flash("Reservation failed.", "error")
 
     return redirect(url_for('reservation'))
+
+@app.route('/sitin')
+def sitin():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Sit-in'
+    user = session.get('user')
+    
+    # Get approved reservations for the current user
+    sql = """
+        SELECT r.*, a.check_in_time, a.check_out_time
+        FROM reservations r
+        LEFT JOIN attendancelog a ON r.id = a.reserve_id
+        WHERE r.idno = ? AND r.status = 'approved'
+        AND r.date >= date('now')
+        ORDER BY r.date ASC, r.time_start ASC
+    """
+    reservations = getallprocess(sql, (user['idno'],))
+    
+    return render_template('student/sitin.html', 
+                         pagetitle=pagetitle, 
+                         user=user,
+                         reservations=reservations)
+
+@app.route('/api/check-in/<int:reservation_id>', methods=['POST'])
+def check_in(reservation_id):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        # Get the reservation details
+        reservation = get_reservation_details(reservation_id)
+        if not reservation:
+            return jsonify({'error': 'Reservation not found'}), 404
+            
+        # Start the sit-in
+        pc_number = request.json.get('pc_number')
+        if not pc_number:
+            return jsonify({'error': 'PC number is required'}), 400
+            
+        success = start_sitin(reservation_id, pc_number)
+        
+        if success:
+            return jsonify({'message': 'Check-in successful'}), 200
+        return jsonify({'error': 'Failed to check in'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/check-out/<int:reservation_id>', methods=['POST'])
+def check_out(reservation_id):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        # Get the active sit-in for this reservation
+        sql = "SELECT id FROM active_sitin WHERE reservation_id = ? AND status = 'active'"
+        sitin = getallprocess(sql, (reservation_id,))
+        
+        if not sitin:
+            return jsonify({'error': 'No active sit-in found'}), 404
+            
+        success = end_sitin(sitin[0]['id'])
+        
+        if success:
+            return jsonify({'message': 'Check-out successful'}), 200
+        return jsonify({'error': 'Failed to check out'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

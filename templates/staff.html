@@ -99,6 +99,18 @@
         #sidebar {
             z-index: 999;
         }
+        #announcements-container::-webkit-scrollbar, #studentTableBody::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        #announcements-container::-webkit-scrollbar-thumb, #studentTableBody::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.3); /*transparent */
+            border-radius: 10px;
+            
+        }
+        #announcements-container::-webkit-scrollbar-track, #studentTableBody::-webkit-scrollbar-track {
+            background: transparent; /* Invisible track */
+        }
 
         /* dashboard css */
         .hover-underline-animation {
@@ -148,6 +160,7 @@
         }
 
         .input {
+        border: 1px solid #a0a0a0;
         border-radius: 1rem;
         background: none;
         padding: 10px;
@@ -161,22 +174,367 @@
         left: 15px;
         color: #b9b9b9;
         pointer-events: none;
-        transform: translateY(1rem);
+        transform: translateY(10px);
         transition: 150ms cubic-bezier(0.4,0,0.2,1);
         }
 
-        .input:focus, input:valid {
+        .input:focus, .input:valid {
         outline: none;
-        border: 1.5px solid #1a73e8;
+        border: 1.5px solid #303030;
         }
 
-        .input:focus ~ label, input:valid ~ label {
-        transform: translateY(-50%) scale(0.8);
-        background-color: var(--color-gray-50);
+        .input:focus ~ label, .input:valid ~ label {
+        transform: translateY(-50%) scale(0.9);
         padding: 0 .2em;
-        color: #2196f3;
+        color: #303030;
         }
         
+        /* From Uiverse.io by vinodjangid07 */ 
+        .editBtn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            background-color: var(--color-gray-500);
+            
+        }
+        .editBtn::before {
+            content: "";
+            width: 200%;
+            height: 200%;
+            color: white;
+            position: absolute;
+            z-index: 1;
+            transform: scale(0);
+            transition: all 0.3s;
+            border-radius: 50%;
+            filter: blur(10px);
+            left: -13px;
+            top: 22px;
+
+        }
+        .editBtn:hover::before {
+            transform: scale(1);
+        }
+        .editBtn svg {
+            height: 15px;
+            fill: white;
+            z-index: 3;
+            transition: all 0.2s;
+            transform-origin: bottom;
+        }
+        .editBtn:hover svg {
+            transform: rotate(-15deg) translateX(5px);
+            fill: rgb(255, 255, 255)
+        }
+        .editBtn::after {
+            content: "";
+            width: 25px;
+            height: 1.5px;
+            position: absolute;
+            /* left: -13px; */
+            top: 22px;
+            left: -13px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 2px;
+            z-index: 2;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease-out;
+        }
+        .editBtn:hover::after {
+            transform: scaleX(1);
+            left: -13px;
+            top: 22px;
+            transform-origin: right;
+        }
+
+        /* From Uiverse.io by aaronross1 */ 
+        .delete-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: var(--color-gray-500);
+        border: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
+        cursor: pointer;
+        transition-duration: 0.3s;
+        overflow: hidden;
+        position: relative;
+        }
+
+        .delete-svgIcon {
+        width: 15px;
+        transition-duration: 0.3s;
+        }
+
+        .delete-svgIcon path {
+        fill: white;
+        }
+
+        .delete-button:hover {
+        width: 90px;
+        border-radius: 50px;
+        transition-duration: 0.3s;
+        background-color: rgb(255, 69, 69);
+        align-items: center;
+        }
+
+        .delete-button:hover .delete-svgIcon {
+        width: 20px;
+        transition-duration: 0.3s;
+        transform: translateY(60%);
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+        }
+
+        .delete-button::before {
+        display: none;
+        content: "Delete";
+        color: white;
+        transition-duration: 0.3s;
+        font-size: 2px;
+        }
+
+        .delete-button:hover::before {
+        display: block;
+        padding-right: 10px;
+        font-size: 13px;
+        opacity: 1;
+        transform: translateY(0px);
+        transition-duration: 0.3s;
+        }
+
+        /* From Uiverse.io by Admin12121 */ 
+        .switch-button {
+        display: inline-flex;
+        align-items: center;
+        height: 40px;
+        }
+
+        .switch-button .switch-outer {
+        height: 100%;
+        background: #252532;
+        width: 60px;
+        border-radius: 165px;
+        box-shadow: inset 0px 5px 10px 0px #16151c, 0px 3px 6px -2px #403f4e;
+        border: 1px solid #32303e;
+        padding: 4px;
+        box-sizing: border-box;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        }
+
+        .switch-button .switch-outer input[type="checkbox"] {
+        opacity: 0;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        position: absolute;
+        }
+
+        .switch-button .switch-outer .button-toggle {
+        height: 15px;
+        width: 15px;
+        background: linear-gradient(#3b3a4e, #272733);
+        border-radius: 100%;
+        box-shadow: inset 0px 5px 4px 0px #424151, 0px 4px 15px 0px #0f0e17;
+        position: relative;
+        z-index: 2;
+        transition: left 0.3s ease-in;
+        left: 0;
+        }
+
+        .switch-button .switch-outer input[type="checkbox"]:checked + .button .button-toggle {
+        left: 40%;
+        }
+
+        .switch-button .switch-outer input[type="checkbox"]:checked + .button .button-indicator {
+        animation: indicator 1s forwards;
+        }
+
+        .switch-button .switch-outer .button {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        position: relative;
+        justify-content: space-between;
+        }
+
+        .switch-button .switch-outer .button-indicator {
+        height: 15px;
+        width: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 50%;
+        border: 3px solid #ef565f;
+        box-sizing: border-box;
+        right: 5px;
+        position: relative;
+        }
+
+        @keyframes indicator {
+        30% {
+            opacity: 0;
+        }
+
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 1;
+            border: 3px solid #60d480;
+            left: -68%;
+        }
+        }
+
+        /* Update the existing styles */
+        .view-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Modal content transitions */
+        #reservationsModal .bg-gray-200 {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Smooth table transitions */
+        #reservationsView, #sitInView {
+            transition: all 0.3s ease-in-out;
+            will-change: transform, opacity;
+            transform-origin: top;
+            position: absolute;
+            width: 100%;
+        }
+
+        /* Container for views */
+        .relative.overflow-hidden {
+            min-height: 400px;
+            position: relative;
+        }
+
+        /* From Uiverse.io by vinodjangid07 */ 
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(156, 163, 175, 0.8); /* gray-400 with opacity */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loader {
+        width: fit-content;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+        .wrapper {
+        width: fit-content;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        }
+        .catContainer {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        }
+        .catbody {
+        width: 80px;
+        }
+        .tail {
+        position: absolute;
+        width: 17px;
+        top: 50%;
+        animation: tail 0.5s ease-in infinite alternate-reverse;
+        transform-origin: top;
+        }
+        @keyframes tail {
+        0% {
+            transform: rotateZ(60deg);
+        }
+        50% {
+            transform: rotateZ(0deg);
+        }
+        100% {
+            transform: rotateZ(-20deg);
+        }
+        }
+        .wall {
+        width: 300px;
+        }
+        .text {
+        display: flex;
+        flex-direction: column;
+        width: 50px;
+        position: absolute;
+        margin: 0px 0px 100px 120px;
+        }
+        .zzz {
+        color: black;
+        font-weight: 700;
+        font-size: 15px;
+        animation: zzz 2s linear infinite;
+        }
+        .bigzzz {
+        color: black;
+        font-weight: 700;
+        font-size: 25px;
+        margin-left: 10px;
+        animation: zzz 2.3s linear infinite;
+        }
+        @keyframes zzz {
+        0% {
+            color: transparent;
+        }
+        50% {
+            color: black;
+        }
+        100% {
+            color: transparent;
+        }
+        }
+
+        @keyframes riseUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rise-up {
+            animation: riseUp 0.5s ease-out forwards;
+        }
 
     </style>
 </head>
@@ -231,6 +589,49 @@
             </div>
         {% endif %}
     {% endwith %}
+
+    <!-- From Uiverse.io by vinodjangid07 --> 
+    <div id="loader" class="loader-container">
+    <div class="loader">
+        <div class="wrapper">
+            <div class="catContainer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 733 673" class="catbody">
+                    <path fill="#212121" d="M111.002 139.5C270.502 -24.5001 471.503 2.4997 621.002 139.5C770.501 276.5 768.504 627.5 621.002 649.5C473.5 671.5 246 687.5 111.002 649.5C-23.9964 611.5 -48.4982 303.5 111.002 139.5Z"></path>
+                    <path fill="#212121" d="M184 9L270.603 159H97.3975L184 9Z"></path>
+                    <path fill="#212121" d="M541 0L627.603 150H454.397L541 0Z"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 158 564" class="tail">
+                    <path fill="#191919" d="M5.97602 76.066C-11.1099 41.6747 12.9018 0 51.3036 0V0C71.5336 0 89.8636 12.2558 97.2565 31.0866C173.697 225.792 180.478 345.852 97.0691 536.666C89.7636 553.378 73.0672 564 54.8273 564V564C16.9427 564 -5.4224 521.149 13.0712 488.085C90.2225 350.15 87.9612 241.089 5.97602 76.066Z"></path>
+                </svg>
+                <div class="text">
+                    <span class="bigzzz">Z</span>
+                    <span class="zzz">Z</span>
+                </div>
+            </div>
+            <div class="wallContainer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 500 126" class="wall">
+                    <line stroke-width="6" stroke="#7C7C7C" y2="3" x2="450" y1="3" x1="50"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="85" x2="400" y1="85" x1="100"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="122" x2="375" y1="122" x1="125"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="500" y1="43"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="1.99391" x2="115.5" y1="43.0061" x1="115.5"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="2.00002" x2="189" y1="43.0122" x1="189"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="2.00612" x2="262.5" y1="43.0183" x1="262.5"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="2.01222" x2="336" y1="43.0244" x1="336"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="2.01833" x2="409.5" y1="43.0305" x1="409.5"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="153" y1="84.0122" x1="153"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="228" y1="84.0122" x1="228"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="303" y1="84.0122" x1="303"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="378" y1="84.0122" x1="378"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="192" y1="125.012" x1="192"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="267" y1="125.012" x1="267"></line>
+                    <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="342" y1="125.012" x1="342"></line>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+    
 </body>
 <script>
     function logout(){
@@ -250,6 +651,74 @@
         sidebar.classList.toggle('-translate-x-full');
     }
 
+    function toggleView() {
+        const toggle = document.getElementById('viewToggle');
+        const label = document.getElementById('viewToggleLabel');
+        const reservationsView = document.getElementById('reservationsView');
+        const sitInView = document.getElementById('sitInView');
+        
+        currentView = toggle.checked ? 'sitIn' : 'reservations';
+        label.textContent = toggle.checked ? 'Sit-in' : 'Reservations';
+        
+        // Add fade and slide effect
+        if (toggle.checked) {
+            reservationsView.style.transform = 'translateY(-20px)';
+            reservationsView.style.opacity = '0';
+            setTimeout(() => {
+                reservationsView.classList.add('hidden');
+                sitInView.classList.remove('hidden');
+                sitInView.style.transform = 'translateY(20px)';
+                sitInView.style.opacity = '0';
+                // Trigger reflow
+                void sitInView.offsetWidth;
+                sitInView.style.transform = 'translateY(0)';
+                sitInView.style.opacity = '1';
+                loadSitInData(currentStudentId);
+            }, 300);
+        } else {
+            sitInView.style.transform = 'translateY(-20px)';
+            sitInView.style.opacity = '0';
+            setTimeout(() => {
+                sitInView.classList.add('hidden');
+                reservationsView.classList.remove('hidden');
+                reservationsView.style.transform = 'translateY(20px)';
+                reservationsView.style.opacity = '0';
+                // Trigger reflow
+                void reservationsView.offsetWidth;
+                reservationsView.style.transform = 'translateY(0)';
+                reservationsView.style.opacity = '1';
+                loadReservationsData(currentStudentId);
+            }, 300);
+        }
+    }
 
+    // Add this to your DOMContentLoaded event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const reservationsView = document.getElementById('reservationsView');
+        const sitInView = document.getElementById('sitInView');
+        
+        // Set initial styles
+        reservationsView.style.transform = 'translateY(0)';
+        reservationsView.style.opacity = '1';
+        sitInView.style.opacity = '0';
+        
+        // Ensure container height adjusts smoothly
+        const observer = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                const height = entry.contentRect.height;
+                entry.target.parentElement.style.height = `${height}px`;
+            }
+        });
+        
+        observer.observe(reservationsView);
+        observer.observe(sitInView);
+    });
+
+    window.addEventListener('load', function() {
+        const loader = document.getElementById('loader');
+        if (loader) {
+            loader.style.display = 'none';
+        }
+    });
 </script>
 </html>
