@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="../static/js/home.js">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
@@ -534,6 +534,13 @@
 
         .rise-up {
             animation: riseUp 0.5s ease-out forwards;
+        }
+
+        input[type="date"]:in-range::-webkit-datetime-edit-year-field, 
+        input[type="date"]:in-range::-webkit-datetime-edit-month-field, 
+        input[type="date"]:in-range::-webkit-datetime-edit-day-field, 
+        input[type="date"]:in-range::-webkit-datetime-edit-text { 	
+            color: transparent; 
         }
 
     </style>
