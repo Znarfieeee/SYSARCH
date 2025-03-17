@@ -263,6 +263,48 @@
             </div>
         </div>
     </div>
+
+    <!-- Sit-in Modal -->
+    <div id="addSitinModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
+        <div class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300">
+            <form id="addSitinForm" class="space-y-4">
+                <h2 class="text-2xl font-bold text-center mb-6">Add New Sit-in</h2>
+                <div class="space-y-4">
+                    <input type="hidden" id="sitinStudentId" name="idno">
+                    <div class="input-group">
+                        <input required="" type="date" name="date" class="input w-full">
+                        <label class="user-label bg-gray-200 px-2">Date</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="time" name="time_start" class="input w-full py-2">
+                        <label class="user-label bg-gray-200">Start Time</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="time" name="time_end" class="input w-full">
+                        <label class="user-label bg-gray-200">End Time</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" name="labno" class="input w-full">
+                        <label class="user-label bg-gray-200">Lab Number</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" name="pc_number" class="input w-full">
+                        <label class="user-label bg-gray-200">PC Number</label>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-6 text-sm">
+                    <button type="button" onclick="closeAddSitinModal()" 
+                            class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -531,9 +573,56 @@ function toggleView() {
 }
 
 function showAddSitinModal() {
-    // Implement the logic to show the add sit-in modal
-    alert('Show Add Sit-in Modal');
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modal.classList.remove('hidden');
+    document.getElementById('addSitinForm').reset();
+    document.getElementById('sitinStudentId').value = currentStudentId;
+    setTimeout(() => {
+        modalContent.classList.remove('scale-75', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 50);
 }
+
+function closeAddSitinModal() {
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-75', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('addSitinForm').reset();
+    }, 300);
+}
+
+document.getElementById('addSitinForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('/api/sitin/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);
+            closeAddSitinModal();
+            loadSitInData(currentStudentId);
+        } else {
+            throw new Error(result.error || 'Failed to add sit-in');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+});
 
 // Add these styles to the views
 document.addEventListener('DOMContentLoaded', function() {
