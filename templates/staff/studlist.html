@@ -21,14 +21,14 @@
             
         </div>
         <button onclick="showAddStudentModal()" 
-                    class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Add Student
-            </button>
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+                        transition duration-300 ease-in-out flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add Student
+        </button>
     </div>
 
     <!-- Student Table -->
@@ -132,7 +132,7 @@
                         <label class="user-label bg-gray-200">First Name</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="text" name="middlname" autocomplete="off" class="input w-full">
+                        <input required="none" type="text" name="middlname" autocomplete="off" class="input w-full">
                         <label class="user-label bg-gray-200">Middle Name</label>
                     </div>
                     <div class="input-group">
@@ -140,7 +140,20 @@
                         <label class="user-label bg-gray-200">Last Name</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="text" name="course" autocomplete="off" class="input w-full">
+                        <!-- <input required="" type="text" name="course" autocomplete="off" class="input w-full"> -->
+                        <select name="course" class="input w-full" required="">
+                            <option value="" selected disabled></option>
+                            <option value="bsit">Bachelor of Science in Information Technology</option>
+                            <option value="bscs">Bachelor of Science in Computer Studies</option>
+                            <option value="bscpe">Bachelor of Science in Computer Engineering</option>
+                            <option value="bsce">Bachelor of Science in Civil Engineering</option>
+                            <option value="bscj">Bachelor of Science in Criminal Justice</option>
+                            <option value="bsp">Bachelor of Science in Psychology</option>
+                            <option value="bap">Bachelor of arts in Psychology</option>
+                            <option value="bshm">Bachelor of Science in Hotel Management</option>
+                            <option value="bsba">Bachelor of Science in Business Administration</option>
+                            <option value="bsed">Bachelor of Science in Education</option>
+                        </select>
                         <label class="user-label bg-gray-200">Course</label>
                     </div>
                     <div class="input-group">
@@ -166,7 +179,7 @@
         </div>
     </div>
 
-    <!-- Reservations Modal -->
+    <!-- Student's Modal -->
     <div id="reservationsModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
         <div class="bg-gray-200 shadow-md p-5 rounded-lg w-[80%] max-h-[80vh] overflow-y-auto transform scale-75 opacity-0 transition-all duration-300">
             <div class="flex justify-between items-center mb-4">
@@ -176,13 +189,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
+                
             </div>
-            <div class="flex items-center gap-4 mb-4">
+            <div class="flex items-center justify-between px-3 gap-4 mb-4">
                 <div class="flex items-center gap-2">
                     <label class="switch-button">
                         <div class="switch-outer">
                             <input id="viewToggle" type="checkbox" onchange="toggleView()">
-                            <div class="button">
+                            <div class="button ml-1">
                                 <span class="button-toggle"></span>
                                 <span class="button-indicator"></span>
                             </div>
@@ -190,6 +204,7 @@
                     </label>
                     <span class="text-sm font-medium text-gray-900" id="viewToggleLabel">Reservations</span>
                 </div>
+                
             </div>
             <div class="relative overflow-hidden">
                 <div id="reservationsView" class="transition-opacity duration-300 ease-in-out">
@@ -218,7 +233,16 @@
                 <div id="sitInView" class="hidden transition-opacity duration-300 ease-in-out">
                     <div class="bg-white rounded-lg p-4">
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <button onclick="showAddSitinModal()"
+                                    class="px-3 py-2 rounded-lg cursor-pointer float-end hover:text-blue-700 text-blue-500
+                                            transition duration-300 ease-in-out flex items-center gap-2">
+                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Sit-in
+                            </button>
+                            <table class="min-w-full divide-y divide-gray-200 mt-2">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Date</th>
@@ -465,6 +489,7 @@ function toggleView() {
     const label = document.getElementById('viewToggleLabel');
     const reservationsView = document.getElementById('reservationsView');
     const sitInView = document.getElementById('sitInView');
+    const sitinbtn = document.getElementById('sitin-btn');
     
     currentView = toggle.checked ? 'sitIn' : 'reservations';
     label.textContent = toggle.checked ? 'Sit-in' : 'Reservations';
@@ -472,21 +497,28 @@ function toggleView() {
     // Add fade out effect
     if (toggle.checked) {
         reservationsView.style.opacity = '0';
+        sitinbtn.style.opacity='1'
         setTimeout(() => {
             reservationsView.classList.add('hidden');
             sitInView.classList.remove('hidden');
+            sitinbtn.classList.remove('hidden');
             // Trigger reflow
             void sitInView.offsetWidth;
             sitInView.style.opacity = '1';
+            sitinbtn.style.opacity='1'
         }, 300);
     } else {
         sitInView.style.opacity = '0';
+        sitinbtn.style.opacity='0'
         setTimeout(() => {
             sitInView.classList.add('hidden');
             reservationsView.classList.remove('hidden');
+            sitinbtn.classList.add('hidden');
+
             // Trigger reflow
             void reservationsView.offsetWidth;
             reservationsView.style.opacity = '1';
+            sitinbtn.style.opacity = '0';
         }, 300);
     }
 
@@ -498,10 +530,17 @@ function toggleView() {
     }
 }
 
+function showAddSitinModal() {
+    // Implement the logic to show the add sit-in modal
+    alert('Show Add Sit-in Modal');
+}
+
 // Add these styles to the views
 document.addEventListener('DOMContentLoaded', function() {
     const reservationsView = document.getElementById('reservationsView');
     const sitInView = document.getElementById('sitInView');
+    // const sitinbtn = document.getElementById('sitin-btn')
+    
     
     // Add transition styles
     reservationsView.style.transition = 'opacity 0.3s ease-in-out';
@@ -510,6 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set initial opacity
     reservationsView.style.opacity = '1';
     sitInView.style.opacity = '0';
+    // sitinbtn.style.opacity = '0';
 });
 
 async function startSitIn(reservationId) {
