@@ -5,6 +5,7 @@ node_modules/
 venv/
 
 # Ignore Python bytecode
+__pycache__/dbhelper.cpython-313.pyc
 __pycache__/
 *.pyc
 *.pyo
