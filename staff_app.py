@@ -508,3 +508,30 @@ def check_out(reservation_id):
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@staff_app.route('/api/sitin/add', methods=['POST'])
+def add_sitin():
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        data = request.json
+        idno = data.get('idno')
+        date = data.get('date')
+        time_start = data.get('time_start')
+        time_end = data.get('time_end')
+        # labno = data.get('labno')
+        pc_number = data.get('pc_number') + data.get('labno')
+        # status = data.get('status') or 'active'
+
+        if not all([idno, date, time_start, time_end, labno, pc_number]):
+            return jsonify({'error': 'Missing required data'}), 400
+
+        success = addprocess('active_sitin', idno=idno, date=date, start_time=time_start, expected_end_time=time_end, lab_pc_number=pc_number)
+
+        if success:
+            return jsonify({'message': 'Sit-in added successfully'}), 200
+        return jsonify({'error': 'Failed to add sit-in'}), 400
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

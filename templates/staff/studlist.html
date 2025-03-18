@@ -21,14 +21,14 @@
             
         </div>
         <button onclick="showAddStudentModal()" 
-                    class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Add Student
-            </button>
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+                        transition duration-300 ease-in-out flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add Student
+        </button>
     </div>
 
     <!-- Student Table -->
@@ -132,7 +132,7 @@
                         <label class="user-label bg-gray-200">First Name</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="text" name="middlname" autocomplete="off" class="input w-full">
+                        <input required="none" type="text" name="middlname" autocomplete="off" class="input w-full">
                         <label class="user-label bg-gray-200">Middle Name</label>
                     </div>
                     <div class="input-group">
@@ -140,7 +140,20 @@
                         <label class="user-label bg-gray-200">Last Name</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="text" name="course" autocomplete="off" class="input w-full">
+                        <!-- <input required="" type="text" name="course" autocomplete="off" class="input w-full"> -->
+                        <select name="course" class="input w-full" required="">
+                            <option value="" selected disabled></option>
+                            <option value="bsit">Bachelor of Science in Information Technology</option>
+                            <option value="bscs">Bachelor of Science in Computer Studies</option>
+                            <option value="bscpe">Bachelor of Science in Computer Engineering</option>
+                            <option value="bsce">Bachelor of Science in Civil Engineering</option>
+                            <option value="bscj">Bachelor of Science in Criminal Justice</option>
+                            <option value="bsp">Bachelor of Science in Psychology</option>
+                            <option value="bap">Bachelor of arts in Psychology</option>
+                            <option value="bshm">Bachelor of Science in Hotel Management</option>
+                            <option value="bsba">Bachelor of Science in Business Administration</option>
+                            <option value="bsed">Bachelor of Science in Education</option>
+                        </select>
                         <label class="user-label bg-gray-200">Course</label>
                     </div>
                     <div class="input-group">
@@ -166,7 +179,7 @@
         </div>
     </div>
 
-    <!-- Reservations Modal -->
+    <!-- Student's Modal -->
     <div id="reservationsModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
         <div class="bg-gray-200 shadow-md p-5 rounded-lg w-[80%] max-h-[80vh] overflow-y-auto transform scale-75 opacity-0 transition-all duration-300">
             <div class="flex justify-between items-center mb-4">
@@ -176,13 +189,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
+                
             </div>
-            <div class="flex items-center gap-4 mb-4">
+            <div class="flex items-center justify-between px-3 gap-4 mb-4">
                 <div class="flex items-center gap-2">
                     <label class="switch-button">
                         <div class="switch-outer">
                             <input id="viewToggle" type="checkbox" onchange="toggleView()">
-                            <div class="button">
+                            <div class="button ml-1">
                                 <span class="button-toggle"></span>
                                 <span class="button-indicator"></span>
                             </div>
@@ -190,6 +204,7 @@
                     </label>
                     <span class="text-sm font-medium text-gray-900" id="viewToggleLabel">Reservations</span>
                 </div>
+                
             </div>
             <div class="relative overflow-hidden">
                 <div id="reservationsView" class="transition-opacity duration-300 ease-in-out">
@@ -218,7 +233,16 @@
                 <div id="sitInView" class="hidden transition-opacity duration-300 ease-in-out">
                     <div class="bg-white rounded-lg p-4">
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <button onclick="showAddSitinModal()"
+                                    class="px-3 py-2 rounded-lg cursor-pointer float-end hover:text-blue-700 text-blue-500
+                                            transition duration-300 ease-in-out flex items-center gap-2">
+                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Sit-in
+                            </button>
+                            <table class="min-w-full divide-y divide-gray-200 mt-2">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Date</th>
@@ -237,6 +261,48 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Sit-in Modal -->
+    <div id="addSitinModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
+        <div class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300">
+            <form id="addSitinForm" class="space-y-4">
+                <h2 class="text-2xl font-bold text-center mb-6">Add New Sit-in</h2>
+                <div class="space-y-4">
+                    <input type="hidden" id="sitinStudentId" name="idno">
+                    <div class="input-group">
+                        <input required="" type="date" name="date" class="input w-full">
+                        <label class="user-label bg-gray-200 px-2">Date</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="time" name="time_start" class="input w-full py-2">
+                        <label class="user-label bg-gray-200">Start Time</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="time" name="time_end" class="input w-full">
+                        <label class="user-label bg-gray-200">End Time</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" name="labno" class="input w-full">
+                        <label class="user-label bg-gray-200">Lab Number</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" name="pc_number" class="input w-full">
+                        <label class="user-label bg-gray-200">PC Number</label>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-6 text-sm">
+                    <button type="button" onclick="closeAddSitinModal()" 
+                            class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Save
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -465,6 +531,7 @@ function toggleView() {
     const label = document.getElementById('viewToggleLabel');
     const reservationsView = document.getElementById('reservationsView');
     const sitInView = document.getElementById('sitInView');
+    const sitinbtn = document.getElementById('sitin-btn');
     
     currentView = toggle.checked ? 'sitIn' : 'reservations';
     label.textContent = toggle.checked ? 'Sit-in' : 'Reservations';
@@ -472,21 +539,28 @@ function toggleView() {
     // Add fade out effect
     if (toggle.checked) {
         reservationsView.style.opacity = '0';
+        sitinbtn.style.opacity='1'
         setTimeout(() => {
             reservationsView.classList.add('hidden');
             sitInView.classList.remove('hidden');
+            sitinbtn.classList.remove('hidden');
             // Trigger reflow
             void sitInView.offsetWidth;
             sitInView.style.opacity = '1';
+            sitinbtn.style.opacity='1'
         }, 300);
     } else {
         sitInView.style.opacity = '0';
+        sitinbtn.style.opacity='0'
         setTimeout(() => {
             sitInView.classList.add('hidden');
             reservationsView.classList.remove('hidden');
+            sitinbtn.classList.add('hidden');
+
             // Trigger reflow
             void reservationsView.offsetWidth;
             reservationsView.style.opacity = '1';
+            sitinbtn.style.opacity = '0';
         }, 300);
     }
 
@@ -498,10 +572,64 @@ function toggleView() {
     }
 }
 
+function showAddSitinModal() {
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modal.classList.remove('hidden');
+    document.getElementById('addSitinForm').reset();
+    document.getElementById('sitinStudentId').value = currentStudentId;
+    setTimeout(() => {
+        modalContent.classList.remove('scale-75', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 50);
+}
+
+function closeAddSitinModal() {
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-75', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('addSitinForm').reset();
+    }, 300);
+}
+
+document.getElementById('addSitinForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('/api/sitin/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);
+            closeAddSitinModal();
+            loadSitInData(currentStudentId);
+        } else {
+            throw new Error(result.error || 'Failed to add sit-in');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+});
+
 // Add these styles to the views
 document.addEventListener('DOMContentLoaded', function() {
     const reservationsView = document.getElementById('reservationsView');
     const sitInView = document.getElementById('sitInView');
+    // const sitinbtn = document.getElementById('sitin-btn')
+    
     
     // Add transition styles
     reservationsView.style.transition = 'opacity 0.3s ease-in-out';
@@ -510,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set initial opacity
     reservationsView.style.opacity = '1';
     sitInView.style.opacity = '0';
+    // sitinbtn.style.opacity = '0';
 });
 
 async function startSitIn(reservationId) {
