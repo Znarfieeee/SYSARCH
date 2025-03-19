@@ -543,3 +543,27 @@ def get_reservation_count():
     count = get_pending_reservation_count()
     return jsonify({'count': count})
 
+@staff_app.route('/api/reservation_students', methods=['GET'])
+def get_reservation_students():
+    try:
+        sql = """
+            SELECT 
+                u.idno,
+                u.firstname,
+                u.lastname,
+                u.course,
+                u.yr_lvl,
+                COUNT(r.id) as total_reservations,
+                SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) as completed_reservations,
+                SUM(CASE WHEN r.status = 'pending' THEN 1 ELSE 0 END) as pending_reservations
+            FROM users u
+            LEFT JOIN reservations r ON u.idno = r.idno
+            WHERE u.role = 'student'
+            GROUP BY u.idno, u.firstname, u.lastname, u.course, u.yr_lvl
+            ORDER BY u.idno
+        """
+        students = getallprocess(sql)
+        return jsonify([dict(student) for student in students] if students else [])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
