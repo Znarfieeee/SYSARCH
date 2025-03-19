@@ -116,27 +116,20 @@ def update_reservation_status(reservation_id, status, staff_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     success = False
-    
     try:
         # Update reservation status
         cursor.execute("""
             UPDATE reservations 
-            SET status = ? 
+            SET status = ?, updated_at = datetime('now', 'localtime')
             WHERE id = ?
         """, (status, reservation_id))
-        
-        # Add entry to history table
-        cursor.execute("""
-            INSERT INTO history (reservation_id, status, updated_at)
-            VALUES (?, ?, datetime('now', 'localtime'))
-        """, (reservation_id, status))
-        
-        # Log staff verification
+
+        # Log staff action
         cursor.execute("""
             INSERT INTO staffverlog (staff_id, reservation_id, action, timestamp)
             VALUES (?, ?, ?, datetime('now', 'localtime'))
         """, (staff_id, reservation_id, f"Reservation {status}"))
-        
+
         conn.commit()
         success = True
     except Exception as e:
@@ -144,7 +137,6 @@ def update_reservation_status(reservation_id, status, staff_id):
         raise e
     finally:
         conn.close()
-    
     return success
 
 def get_reservation_history():
@@ -345,7 +337,6 @@ def start_sitin(reservation_id, pc_number):
             SET currently_sit_in = currently_sit_in + 1,
                 total_sit_in = total_sit_in + 1,
                 updated_at = datetime('now', 'localtime')
-            WHERE id = 1
         """)
         
         conn.commit()
