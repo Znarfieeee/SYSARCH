@@ -479,6 +479,34 @@ def get_sitin_details(sitin_id):
     """
     return getallprocess(sql, (sitin_id,))
 
+def get_sitin_history():
+    sql = """
+        SELECT 
+            r.id,
+            r.idno,
+            u.firstname,
+            u.lastname,
+            r.date,
+            r.time_start,
+            r.time_end,
+            r.purpose,
+            r.labno,
+            a.check_in_time,
+            a.check_out_time,
+            h.updated_at as status_updated_at,
+            s.firstname as staff_firstname,
+            s.lastname as staff_lastname
+        FROM reservations r
+        JOIN users u ON r.idno = u.idno
+        JOIN attendancelog a ON r.id = a.reserve_id
+        LEFT JOIN history h ON r.id = h.reservation_id
+        LEFT JOIN staffverlog sv ON r.id = sv.reservation_id
+        LEFT JOIN users s ON sv.staff_id = s.idno
+        WHERE r.status = 'completed'
+        ORDER BY h.updated_at DESC
+    """
+    return getallprocess(sql)
+
 def get_active_sitin_for_reservation(reservation_id):
     sql = """
         SELECT s.*, r.date, r.time_start, r.time_end, r.labno
@@ -496,3 +524,8 @@ def get_student_active_sitins(idno):
         WHERE s.idno = ? AND s.status = 'active'
     """
     return getallprocess(sql, (idno,))
+
+def get_pending_reservation_count():
+    sql = "SELECT COUNT(DISTINCT idno) as count FROM reservations WHERE status = 'pending'"
+    result = getallprocess(sql)
+    return result[0]['count'] if result else 0

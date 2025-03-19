@@ -4,7 +4,7 @@ import urllib.request, os
 from werkzeug.utils import secure_filename
 from staff_app import staff_app
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = "!@#$%12345"
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'static/user_img'
@@ -219,9 +219,16 @@ def home():
 
 @app.route('/history')
 def history():
-    pagetitle = 'History'
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     
-    return render_template('student/history.html', pagetitle=pagetitle)
+    pagetitle = 'Sit-in History'
+    user = session.get('user')
+    
+    # Fetch sit-in history
+    history = get_sitin_history()
+    
+    return render_template('student/history.html', pagetitle=pagetitle, history=history, user=user)
 
 @app.route('/reservation')
 def reservation():
@@ -339,6 +346,39 @@ def check_out(reservation_id):
             return jsonify({'message': 'Check-out successful'}), 200
         return jsonify({'error': 'Failed to check out'}), 400
             
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/reservation/<int:reservation_id>/edit', methods=['POST'])
+def edit_reservation(reservation_id):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    try:
+        # Retrieve form data
+        date = request.form.get('date')
+        time_start = request.form.get('time_start')
+        time_end = request.form.get('time_end')
+        labno = request.form.get('labno')
+        purpose = request.form.get('purpose')
+
+        # Prepare data for update
+        update_data = {
+            'id': reservation_id,  # Use 'id' as the key for the reservation ID
+            'date': date,
+            'time_start': time_start,
+            'time_end': time_end,
+            'labno': labno,
+            'purpose': purpose
+        }
+
+        # Call updateprocess function
+        success = updateprocess('reservations', **update_data)
+
+        if success:
+            return jsonify({'message': 'Reservation updated successfully'}), 200
+        return jsonify({'error': 'Failed to update reservation'}), 400
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

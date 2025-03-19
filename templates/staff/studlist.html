@@ -22,7 +22,7 @@
         </div>
         <button onclick="showAddStudentModal()" 
                 class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                        transition duration-300 ease-in-out flex items-center gap-2">
+                        transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer delay-50">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -266,7 +266,7 @@
 
     <!-- Sit-in Modal -->
     <div id="addSitinModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
-        <div class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300">
+        <div class="bg-gray-200 shadow-md p-5 rounded-xl w-[20%] transform scale-75 opacity-0 transition-all duration-300">
             <form id="addSitinForm" class="space-y-4">
                 <h2 class="text-2xl font-bold text-center mb-6">Add New Sit-in</h2>
                 <div class="space-y-4">
@@ -281,10 +281,19 @@
                     </div>
                     <div class="input-group">
                         <input required="" type="time" name="time_end" class="input w-full">
-                        <label class="user-label bg-gray-200">End Time</label>
+                        <label class="user-label bg-gray-200">Expected End Time</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="text" name="labno" class="input w-full">
+                        <!-- <input required="" type="text" name="labno" class="input w-full"> -->
+                        <select name="labno" class="input w-full" required="">
+                        <option value="" disabled selected></option>
+                        <option value="542">542</option>
+                        <option value="524">524</option>
+                        <option value="526">526</option>
+                        <option value="528">528</option>
+                        <option value="530">530</option>
+                        <option value="Mac Laboratory">Mac Laboratory</option>
+                        </select>
                         <label class="user-label bg-gray-200">Lab Number</label>
                     </div>
                     <div class="input-group">
@@ -902,65 +911,4 @@ function closeReservationsModal() {
     }, 300);
 }
 </script>
-
-<style>
-/* Add to the existing style section */
-.view-transition {
-    transition: opacity 0.3s ease-in-out;
-}
-
-.fade-enter {
-    opacity: 0;
-}
-
-.fade-enter-active {
-    opacity: 1;
-}
-
-.fade-exit {
-    opacity: 1;
-}
-
-.fade-exit-active {
-    opacity: 0;
-}
-
-/* Update the modal content transition */
-#reservationsModal .bg-gray-200 {
-    transition: all 0.3s ease-in-out;
-}
-
-/* Smooth table transitions */
-#reservationsView, #sitInView {
-    transition: opacity 0.3s ease-in-out;
-    will-change: opacity;
-}
-
-/* Improve toggle switch alignment */
-.switch-button {
-    display: inline-flex;
-    align-items: center;
-    margin: 0;
-    height: auto;
-}
-
-.switch-button .switch-outer {
-    margin: 0;
-    height: 24px;
-    width: 48px;
-}
-
-.switch-button .button-toggle {
-    height: 20px;
-    width: 20px;
-}
-
-/* Align the toggle text */
-#viewToggleLabel {
-    margin-left: 8px;
-    font-size: 14px;
-    line-height: 1;
-    vertical-align: middle;
-}
-</style>
 {% endblock %}

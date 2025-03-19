@@ -6,8 +6,8 @@
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="../static/js/home.js">
+    <link rel="stylesheet" href="../src/output.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -541,6 +541,64 @@
         input[type="date"]:in-range::-webkit-datetime-edit-day-field, 
         input[type="date"]:in-range::-webkit-datetime-edit-text { 	
             color: transparent; 
+        }
+
+        .view-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .fade-enter {
+            opacity: 0;
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+        }
+
+        .fade-exit {
+            opacity: 1;
+        }
+
+        .fade-exit-active {
+            opacity: 0;
+        }
+
+        /* Update the modal content transition */
+        #reservationsModal .bg-gray-200 {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Smooth table transitions */
+        #reservationsView, #sitInView {
+            transition: opacity 0.3s ease-in-out;
+            will-change: opacity;
+        }
+
+        /* Improve toggle switch alignment */
+        .switch-button {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
+            height: auto;
+        }
+
+        .switch-button .switch-outer {
+            margin: 0;
+            height: 24px;
+            width: 48px;
+        }
+
+        .switch-button .button-toggle {
+            height: 20px;
+            width: 20px;
+        }
+
+        /* Align the toggle text */
+        #viewToggleLabel {
+            margin-left: 8px;
+            font-size: 14px;
+            line-height: 1;
+            vertical-align: middle;
         }
 
     </style>

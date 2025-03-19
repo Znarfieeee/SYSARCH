@@ -73,7 +73,7 @@ def staff_reports():
 def staff_feedbacks():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template("staff/feedback.html", pagetitle='Feedbacks')
+    return render_template("staff/feedbacks.html", pagetitle='Feedbacks')
 
 @staff_app.route('/staff/history')
 def staff_history():
@@ -162,7 +162,6 @@ def get_statistics():
         return jsonify(statistics_dict)
     else:
         return jsonify({"error": "No statistics data found"}), 404
-    
     
 @staff_app.route('/statisticchart', methods=['GET'])
 def get_statisticchart():
@@ -535,3 +534,12 @@ def add_sitin():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@staff_app.route('/api/reservation_count', methods=['GET'])
+def get_reservation_count():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    count = get_pending_reservation_count()
+    return jsonify({'count': count})
+
