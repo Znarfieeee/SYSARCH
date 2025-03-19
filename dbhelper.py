@@ -516,7 +516,28 @@ def get_student_active_sitins(idno):
     """
     return getallprocess(sql, (idno,))
 
+def get_pending_reservations():
+    sql = """
+        SELECT 
+            r.id as reservation_id,
+            u.idno,
+            u.firstname,
+            u.lastname,
+            r.date,
+            r.time_start,
+            r.time_end,
+            r.purpose,
+            r.labno,
+            r.created_at
+        FROM reservations r
+        JOIN users u ON r.idno = u.idno
+        WHERE r.status = 'pending'
+        ORDER BY r.date ASC, r.time_start ASC
+    """
+    return getallprocess(sql)
+
 def get_pending_reservation_count():
-    sql = "SELECT COUNT(DISTINCT idno) as count FROM reservations WHERE status = 'pending'"
+    sql = "SELECT COUNT(*) as count FROM reservations WHERE status = 'pending'"
     result = getallprocess(sql)
     return result[0]['count'] if result else 0
+

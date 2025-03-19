@@ -4,21 +4,21 @@
         <!-- Statistics Data -->
         <div id="container-1" class="col-span-6 row-span-6 grid gap-4 grid-rows-20 rounded-md">
             <div id="box1" class="row-span-5 grid grid-cols-4 gap-4">
-                <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg">
+                <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Registered Students</p>
-                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600"></span>
+                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600 "></span>
                 </div>
-                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg">
+                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Currently Sit-in</p>
-                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600"></span>
+                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600 "></span>
                     <p id="curSitInPercent" class="text-sm text-center text-gray-500"></p>
                 </div>
-                <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg">
+                <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Total Sit-in</p>
-                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600"></span>
+                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600 "></span>
                     <p id="dailyAverage" class="text-sm text-center text-gray-500"></p>
                 </div>
-                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer" onclick="showReservationStudents()">
+                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50" onclick="window.location.href='/staff/students'">
                     <p class="text-gray-600 font-medium">Pending Reservations</p>
                     <span id="reservationCount" class="flex justify-center text-7xl p-4 text-red-600"></span>
                 </div>
@@ -79,22 +79,6 @@
         </div>
 
         
-    </div>
-    <!-- Modal for Viewing Students -->
-    <div id="reservationStudentsModal" class="hidden fixed inset-0 bg-black/50 z-999 overflow-y-auto h-full w-full items-center justify-center mx-auto my-auto">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white w-[50%]">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Students with Pending Reservations</h3>
-                <div class="mt-2">
-                    <ul id="reservationStudentsList" class="text-sm text-gray-500">
-                        <!-- Students will be loaded here -->
-                    </ul>
-                </div>
-                <div class="mt-4">
-                    <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Close</button>
-                </div>
-            </div>
-        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -351,18 +335,53 @@
                 .then(data => {
                     const studentsList = document.getElementById('reservationStudentsList');
                     studentsList.innerHTML = '';
+                    
                     data.forEach(student => {
-                        const listItem = document.createElement('li');
-                        listItem.className = 'py-2 flex justify-between items-center';
-                        listItem.innerHTML = `
-                            <span>${student.firstname} ${student.lastname} - ${student.date} ${student.time_start} to ${student.time_end}</span>
-                            <div>
-                                <button onclick="updateReservationStatus(${student.id}, 'approved')" class="bg-green-500 text-white px-2 py-1 rounded">Approve</button>
-                                <button onclick="updateReservationStatus(${student.id}, 'denied')" class="bg-red-500 text-white px-2 py-1 rounded">Deny</button>
-                            </div>
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50';
+                        
+                        // Format the date
+                        const date = new Date(student.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        
+                        // Format the time
+                        const timeStart = student.time_start; // Remove seconds
+                        const timeEnd = student.time_end; // Remove seconds
+                        
+                        row.innerHTML = `
+                            <td class="px-4 py-3 text-sm text-gray-900">${student.idno}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 uppercase">${student.firstname} ${student.lastname}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">${date}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">${timeStart} - ${timeEnd}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">${student.purpose}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">Lab ${student.labno}</td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                <button onclick="updateReservationStatus(${student.reservation_id}, 'approved')" 
+                                        class="bg-green-500 hover:bg-green-700 text-white px-2 py-1 rounded-lg w-20 transition duration-300">
+                                    Approve
+                                </button>
+                                <button onclick="updateReservationStatus(${student.reservation_id}, 'denied')" 
+                                        class="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-lg w-20 transition duration-300">
+                                    Deny
+                                </button>
+                            </td>
                         `;
-                        studentsList.appendChild(listItem);
+                        studentsList.appendChild(row);
                     });
+                    
+                    if (data.length === 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td colspan="6" class="px-4 py-3 text-sm text-gray-600 text-center">
+                                No pending reservations found
+                            </td>
+                        `;
+                        studentsList.appendChild(row);
+                    }
+                    
                     document.getElementById('reservationStudentsModal').classList.remove('hidden');
                 });
         }
