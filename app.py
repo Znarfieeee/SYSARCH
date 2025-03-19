@@ -219,9 +219,16 @@ def home():
 
 @app.route('/history')
 def history():
-    pagetitle = 'History'
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     
-    return render_template('student/history.html', pagetitle=pagetitle)
+    pagetitle = 'Sit-in History'
+    user = session.get('user')
+    
+    # Fetch sit-in history
+    history = get_sitin_history()
+    
+    return render_template('student/history.html', pagetitle=pagetitle, history=history, user=user)
 
 @app.route('/reservation')
 def reservation():

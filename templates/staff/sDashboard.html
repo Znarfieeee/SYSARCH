@@ -3,23 +3,27 @@
     <div id="main-container" class="grid grid-cols-10 grid-rows-6 gap-4 py-10 px-20 h-[90vh]">
         <!-- Statistics Data -->
         <div id="container-1" class="col-span-6 row-span-6 grid h-[90vh] gap-4 grid-rows-20 rounded-md">
-            <div id="box1" class="row-span-5 grid grid-cols-3 max-h-40 gap-4">
+            <div id="box1" class="row-span-5 grid grid-cols-4 gap-4">
                 <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg">
                     <p class="text-gray-600 font-medium">Registered Students</p>
-                    <span id="totalRegStuds" class="flex justify-center text-6xl p-4 text-blue-600"></span>
+                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600"></span>
                 </div>
                 <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg">
                     <p class="text-gray-600 font-medium">Currently Sit-in</p>
-                    <span id="curSitIn" class="flex justify-center text-6xl p-4 text-green-600"></span>
+                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600"></span>
                     <p id="curSitInPercent" class="text-sm text-center text-gray-500"></p>
                 </div>
                 <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg">
                     <p class="text-gray-600 font-medium">Total Sit-in</p>
-                    <span id="totalSitIn" class="flex justify-center text-6xl p-4 text-purple-600"></span>
+                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600"></span>
                     <p id="dailyAverage" class="text-sm text-center text-gray-500"></p>
                 </div>
+                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer" onclick="showReservationStudents()">
+                    <p class="text-gray-600 font-medium">Pending Reservations</p>
+                    <span id="reservationCount" class="flex justify-center text-7xl p-4 text-red-600"></span>
+                </div>
             </div>
-            <div id="box2" class="flex flex-row row-span-15 p-4 h-[85%] bg-white shadow-md text-xs rounded-lg">
+            <div id="box2" class="flex flex-row row-span-15 p-4 h-[85%] py-2 bg-white shadow-md text-xs rounded-lg">
                 <div id="chart-container" class="flex justify-center w-full">
                     <canvas id="myChart" class="w-full"></canvas>
                 </div>
@@ -75,6 +79,22 @@
         </div>
 
         
+    </div>
+    <!-- Modal for Viewing Students -->
+    <div id="reservationStudentsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Students with Pending Reservations</h3>
+                <div class="mt-2">
+                    <ul id="reservationStudentsList" class="text-sm text-gray-500">
+                        <!-- Students will be loaded here -->
+                    </ul>
+                </div>
+                <div class="mt-4">
+                    <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -315,5 +335,34 @@
         }
 
         setInterval(updateChart, 60000);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/reservation_count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('reservationCount').textContent = data.count;
+                })
+                .catch(err => console.error('Error fetching reservation count: ', err));
+        });
+
+        function showReservationStudents() {
+            fetch('/api/reservation_students')
+                .then(response => response.json())
+                .then(data => {
+                    const studentsList = document.getElementById('reservationStudentsList');
+                    studentsList.innerHTML = '';
+                    data.forEach(student => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'py-2';
+                        listItem.textContent = `${student.firstname} ${student.lastname} - ${student.date} ${student.time_start} to ${student.time_end}`;
+                        studentsList.appendChild(listItem);
+                    });
+                    document.getElementById('reservationStudentsModal').classList.remove('hidden');
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('reservationStudentsModal').classList.add('hidden');
+        }
     </script>
 {% endblock %}
