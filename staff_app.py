@@ -171,13 +171,30 @@ def edit_announcement(id):
 
 @staff_app.route('/api/statistics', methods=['GET'])
 def get_statistics():
-    sql = "SELECT total_registered_students, currently_sit_in, total_sit_in FROM statistics WHERE id = 1"
-    statistics = getallprocess(sql)
-    if statistics:
-        statistics_dict = dict(statistics[0])
-        return jsonify(statistics_dict)
-    else:
-        return jsonify({"error": "No statistics data found"}), 404
+    try:
+        stats = get_dashboard_statistics()
+        if stats:
+            stats_dict = dict(stats[0])
+            # Ensure values are not None and non-negative
+            stats_dict = {
+                'total_registered_students': max(0, stats_dict.get('total_registered_students', 0) -1),
+                'currently_sit_in': max(0, stats_dict.get('currently_sit_in', 0)),
+                'total_sit_in': max(0, stats_dict.get('currently_sit_in', 0) + stats_dict.get('completed_sit_ins', 0) -1)
+            }
+            return jsonify(stats_dict)
+        return jsonify({
+            'total_registered_students': 0,
+            'currently_sit_in': 0,
+            'total_sit_in': 0
+        })
+    except Exception as e:
+        print(f"Error in get_statistics: {str(e)}")
+        return jsonify({
+            'error': 'Failed to fetch statistics',
+            'total_registered_students': 0,
+            'currently_sit_in': 0,
+            'total_sit_in': 0
+        }), 500
     
 @staff_app.route('/statisticchart', methods=['GET'])
 def get_statisticchart():
@@ -377,8 +394,8 @@ def get_history_route():
 @staff_app.route('/api/statistics')
 def get_statistics_route():
     try:
-        stats = get_dashboard_statistics()
-        return jsonify(dict(stats[0]) if stats else {})
+        stats = get_reservation_statistics()
+        return jsonify([dict(row) for row in stats] if stats else [])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -397,13 +414,30 @@ def start_sitin_route():
             return jsonify({'error': 'Not authenticated'}), 401
             
         data = request.json
+        idno = data.get('idno')
+        expected_end_time = data.get('expected_end_time')
+        notes = data.get('notes')
         reservation_id = data.get('reservation_id')
-        pc_number = data.get('pc_number')
+        lab_pc_number = data.get('lab_pc_number')
+        purpose = data.get('purpose')
         
-        if not all([reservation_id, pc_number]):
+        # Validate required fields
+        if not all([lab_pc_number, purpose, idno, expected_end_time]):
             return jsonify({'error': 'Missing required data'}), 400
-            
-        success = start_sitin(reservation_id, pc_number)
+        
+        # Ensure proper formatting of time
+        if not expected_end_time:
+            return jsonify({'error': 'Expected end time is required'}), 400
+        
+        # Start the sit-in
+        success = start_sitin(
+            idno=idno,
+            expected_end_time=expected_end_time,
+            notes=notes,
+            reservation_id=reservation_id,
+            pc_number=lab_pc_number,
+            purpose=purpose
+        )
         
         if success:
             return jsonify({'message': 'Sit-in started successfully'}), 200
@@ -460,21 +494,15 @@ def get_active_sitins_route():
             return jsonify({'error': 'Not authenticated'}), 401
             
         sitins = get_active_sitins()
-        return jsonify([dict(row) for row in sitins] if sitins else [])
+        
+        # Add additional debugging information
+        if sitins:
+            return jsonify([dict(row) for row in sitins])
+        return jsonify([])
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@staff_app.route('/api/sitin/<int:sitin_id>')
-def get_sitin_details_route(sitin_id):
-    try:
-        if not session.get('logged_in'):
-            return jsonify({'error': 'Not authenticated'}), 401
-            
-        sitin = get_sitin_details(sitin_id)
-        return jsonify(dict(sitin[0]) if sitin else {})
-        
-    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in get_active_sitins_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @staff_app.route('/api/check-in/<int:reservation_id>', methods=['POST'])
@@ -532,23 +560,54 @@ def add_sitin():
 
         data = request.json
         idno = data.get('idno')
-        date = data.get('date')
-        time_start = data.get('time_start')
-        time_end = data.get('time_end')
-        # labno = data.get('labno')
-        pc_number = data.get('pc_number') + data.get('labno')
-        # status = data.get('status') or 'active'
+        
+        
+        # First, check if the student exists
+        student = check_student_exist(idno)
+        
+        if not student:
+            return jsonify({'error': 'Student not registered in the system'}), 404
+        
+        # Format date and time properly
+        date = data.get('date', '')
+        expected_end_time = data.get('expected_end_time', '')
+                
+        # Extract the data from the request
+        sitin_data = {
+            'idno': idno,
+            'lab_pc_number': data.get('lab_pc_number'),
+            'expected_end_time': expected_end_time,
+            'notes': data.get('notes'),
+            'status': 'active',
+            'purpose': data.get('purpose'),
+            'reservation_id': data.get('reservation_id')
+        }
 
-        if not all([idno, date, time_start, time_end, labno, pc_number]):
-            return jsonify({'error': 'Missing required data'}), 400
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE statistics
+                SET currently_sit_in = currently_sit_in + 1,
+                    total_sit_in = total_sit_in + 1,
+                    updated_at = datetime('now', 'localtime')
+                WHERE id = 1
+            """)
+            conn.commit()
+        except Exception as e:
+            print(f"Statistics update error: {str(e)}")
+        finally:
+            conn.close()
 
-        success = addprocess('active_sitin', idno=idno, date=date, start_time=time_start, expected_end_time=time_end, lab_pc_number=pc_number)
+        # Add the sit-in record to the database
+        success = addprocess('active_sitin', **sitin_data)
 
         if success:
             return jsonify({'message': 'Sit-in added successfully'}), 200
         return jsonify({'error': 'Failed to add sit-in'}), 400
 
     except Exception as e:
+        print(f"Add sit-in error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @staff_app.route('/api/reservation_count', methods=['GET'])

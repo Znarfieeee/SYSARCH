@@ -22,7 +22,7 @@
         
         <!-- Navigation Buttons -->
         <div class="radio-inputs flex flex-wrap justify-center gap-2">
-            <a href="/staff/students" class="radio">
+            <a href="/staff/students" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
                 <input type="radio" name="radio">
                 <span class="name">All Students</span>
             </a>
@@ -30,12 +30,12 @@
                 <input type="radio" name="radio" checked="">
                 <span class="name">Current Sit-in</span>
             </a>
-            <a href="/staff/students/pending" class="radio">
+            <a href="/staff/students/pending" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
                 <input type="radio" name="radio">
                 <span class="name">Pending Reservations</span>
             </a>
         </div>
-        <button onclick="showAddStudentModal()" 
+        <button onclick="showAddSitinModal()" 
                 class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
                         transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,23 +48,25 @@
     
 
     <!-- Current Sit-in Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
+    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[95%] mx-auto rise-up">
         <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Course & Year</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Expected End Time</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
                     <tr id="loadingRow" class="animate-pulse">
-                        <td colspan="7" class="px-6 py-4">
+                        <td colspan="8" class="px-6 py-4">
                             <div class="flex flex-col items-center justify-center py-12">
                                 <div class="flex items-center justify-center space-x-2 mb-4">
                                     <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
@@ -78,6 +80,68 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Add Sit-in Modal -->
+<div id="addSitinModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
+    <div class="bg-gray-200 shadow-md p-5 rounded-xl w-[500px] transform scale-75 opacity-0 transition-all duration-300">
+        <form id="addSitinForm" class="space-y-4">
+            <h2 class="text-2xl font-bold text-center mb-6">Add New Sit-in</h2>
+            <div class="space-y-4">
+                <div class="input-group">
+                    <input required="" type="text" name="idno" autocomplete="off" class="input w-full">
+                    <label class="user-label bg-gray-200">Student ID</label>
+                </div>
+                <div class="input-group">
+                    <select name="purpose" class="input w-full" required="">
+                        <option value="" disabled selected></option>
+                        <option value="Java programming">Java Programming</option>
+                        <option value="C programming">C Programming</option>
+                        <option value="C# programming">C# Programming</option>
+                        <option value="Php programming">Php Programming</option>
+                        <option value="Python programming">Python Programming</option>
+                        <option value="Javascript programming">Javascript Programming</option>
+                        <option value="ASP.Net programming">ASP.Net Programming</option>
+                    </select>
+                    <label class="user-label bg-gray-200">Purpose</label>
+                </div>
+                <div class="input-group">
+                    <input required="" type="time" name="expected_end_time" class="input w-full">
+                    <label class="user-label bg-gray-200">Expected End Time</label>
+                </div>
+                <div class="input-group">
+                    <select name="labno" class="input w-full" required="">
+                        <option value="" disabled selected></option>
+                        <option value="542">542</option>
+                        <option value="524">524</option>
+                        <option value="526">526</option>
+                        <option value="528">528</option>
+                        <option value="530">530</option>
+                        <option value="Mac Laboratory">Mac Laboratory</option>
+                    </select>
+                    <label class="user-label bg-gray-200">Lab Number</label>
+                </div>
+                <div class="input-group">
+                    <input required="" type="text" autocomplete="off" name="pc_number" class="input w-full">
+                    <label class="user-label bg-gray-200">PC Number</label>
+                </div>
+                <div class="input-group">
+                    <textarea name="notes" class="input w-full" rows="2"></textarea>
+                    <label class="user-label bg-gray-200">Notes (Optional)</label>
+                </div>
+            </div>
+            <div class="flex justify-between mt-6 text-sm">
+                <button type="button" onclick="closeAddSitinModal()" 
+                        class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                    Save
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -102,12 +166,31 @@ function filterStudents() {
     }
 }
 
+function formatDateTime(dateTimeStr) {
+    if (!dateTimeStr || dateTimeStr === 'N/A') return 'N/A';
+    try {
+        const date = new Date(dateTimeStr);
+        if (isNaN(date.getTime())) {
+            const [datePart, timePart] = dateTimeStr.split(' ');
+            return timePart || 'N/A';
+        }
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    } catch (e) {
+        console.error('Date parsing error:', e);
+        return 'N/A';
+    }
+}
+
 async function loadCurrentSitIns() {
     const tableBody = document.getElementById('tableBody');
     // Show loading state
     tableBody.innerHTML = `
         <tr id="loadingRow" class="animate-pulse">
-            <td colspan="7" class="px-6 py-4">
+            <td colspan="8" class="px-6 py-4">
                 <div class="flex flex-col items-center justify-center py-12">
                     <div class="flex items-center justify-center space-x-2 mb-4">
                         <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
@@ -121,37 +204,63 @@ async function loadCurrentSitIns() {
 
     try {
         const response = await fetch('/api/sitin/active');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("Received sit-in data:", data);
         
         // Clear loading state
         tableBody.innerHTML = '';
         
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="px-6 py-4 text-center">
+                    <td colspan="8" class="px-6 py-4 text-center">
                         <p class="text-2xl text-gray-500 text-center p-4">No students currently sitting in</p>
                     </td>
                 </tr>`;
+            
+            // Update statistics to ensure 0 current sit-ins
+            if (typeof updateStatistics === 'function') {
+                updateStatistics();
+            }
             return;
         }
 
         // Render data
         data.forEach(student => {
+            // Parse lab_pc_number
+            let [labNumber, pcNumber] = (student.lab_pc_number || '').split('-');
+            if (!pcNumber) {
+                pcNumber = labNumber;
+                labNumber = 'N/A';
+            }
+            
             const row = document.createElement('tr');
             row.className = 'sitin-row hover:bg-gray-50';
             row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.course.toUpperCase()}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.yr_lvl}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${student.labno}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.time_start} - ${student.time_end}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname ? student.firstname.toUpperCase() : ''} ${student.lastname ? student.lastname.toUpperCase() : ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.course ? student.course.toUpperCase() : 'N/A'} - ${student.yr_lvl || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${labNumber} (PC ${pcNumber})</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${new Date(student.start_time).toLocaleString('en-US', {  hour: '2-digit', minute: '2-digit', hour12: false })}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.expected_end_time}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.purpose}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <button onclick="endSitIn(${student.id})" 
-                            class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
-                        End Sit-in
-                    </button>
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${student.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                        ${student.status ? student.status.charAt(0).toUpperCase() + student.status.slice(1) : 'Unknown'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                    ${student.status === 'active' ? `
+                        <button onclick="endSitIn(${student.id})" 
+                                class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                            End Sit-in
+                        </button>
+                    ` : ''}
                 </td>
             `;
             tableBody.appendChild(row);
@@ -159,16 +268,21 @@ async function loadCurrentSitIns() {
     } catch (error) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-4 text-center text-red-500">
-                    Error loading data. Please try again.
+                <td colspan="8" class="px-6 py-4 text-center text-red-500">
+                    Error loading data: ${error.message}
                 </td>
             </tr>`;
         console.error('Error:', error);
+        
+        // Update statistics to ensure proper display on error
+        if (typeof updateStatistics === 'function') {
+            updateStatistics();
+        }
     }
 }
 
 async function endSitIn(sitInId) {
-    if (!confirm('Are you sure you want to end this sit-in?')) return;
+    if (!confirm('Are you sure you want to end this sit-in session?')) return;
 
     try {
         const response = await fetch(`/api/sitin/${sitInId}/end`, {
@@ -181,8 +295,13 @@ async function endSitIn(sitInId) {
         const result = await response.json();
 
         if (response.ok) {
-            alert(result.message);
+            alert('Sit-in session ended successfully');
+            // Reload the current sit-ins instead of logging out
             loadCurrentSitIns();
+            // Also update the statistics
+            if (typeof updateStatistics === 'function') {
+                updateStatistics();
+            }
         } else {
             throw new Error(result.error || 'Failed to end sit-in');
         }
@@ -191,5 +310,84 @@ async function endSitIn(sitInId) {
         alert(error.message);
     }
 }
+
+function showAddSitinModal() {
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modal.classList.remove('hidden');
+    document.getElementById('addSitinForm').reset();
+    setTimeout(() => {
+        modalContent.classList.remove('scale-75', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 50);
+}
+
+function closeAddSitinModal() {
+    const modal = document.getElementById('addSitinModal');
+    const modalContent = modal.children[0];
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-75', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('addSitinForm').reset();
+    }, 300);
+}
+
+document.getElementById('addSitinForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const idno = formData.get('idno');
+    
+    try {
+        const checkResponse = await fetch(`/api/student/${idno}`);
+        if (!checkResponse.ok) {
+            alert('Student not registered in the system. Please register the student first.');
+            return;
+        }
+        
+        const labno = formData.get('labno');
+        const pcNumber = formData.get('pc_number');
+
+        // Format datetime properly for SQLite
+        const formatDateTime = (date, time) => {
+            return `${date} ${time}:00`;
+        };
+        
+        const data = {
+            idno: idno,
+            lab_pc_number: `${labno}-${pcNumber}`,
+            expected_end_time: formData.get('expected_end_time'),
+            notes: formData.get('notes') || null,
+            purpose: formData.get('purpose'),
+            status: 'active'
+        };
+
+        console.log("Sending sit-in data:", data);
+
+        const response = await fetch('/api/sitin/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);
+            closeAddSitinModal();
+            loadCurrentSitIns();
+        } else {
+            throw new Error(result.error || 'Failed to add sit-in');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+});
+
+// Add auto-refresh for current sit-ins
+setInterval(loadCurrentSitIns, 30000); // Refresh every 30 seconds
 </script>
 {% endblock %}

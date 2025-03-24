@@ -225,10 +225,33 @@ def history():
     pagetitle = 'Sit-in History'
     user = session.get('user')
     
-    # Fetch sit-in history
-    history = get_sitin_history()
+    # Fetch completed sit-in history with all related information
+    sql = """
+        SELECT 
+            r.date, r.time_start, r.time_end, r.labno, r.purpose,
+            a.start_time, a.end_time,
+            acs.lab_pc_number,
+            sv.action as verification_status,
+            sv.timestamp as verified_at,
+            u.firstname AS staff_firstname, 
+            u.lastname AS staff_lastname
+        FROM reservations r
+        INNER JOIN attendancelog a ON r.id = a.reserve_id
+        LEFT JOIN active_sitin acs ON r.id = acs.reservation_id
+        LEFT JOIN staffverlog sv ON r.id = sv.reservation_id 
+            AND sv.action = 'approved'
+        LEFT JOIN users u ON sv.staff_id = u.idno
+        WHERE r.idno = ? 
+            AND a.start_time IS NOT NULL 
+            AND a.end_time IS NOT NULL
+        ORDER BY r.date DESC, r.time_start DESC
+    """
+    history = getallprocess(sql, (user['idno'],))
     
-    return render_template('student/history.html', pagetitle=pagetitle, history=history, user=user)
+    return render_template('student/history.html', 
+                         pagetitle=pagetitle, 
+                         history=history, 
+                         user=user)
 
 @app.route('/reservation')
 def reservation():
@@ -288,7 +311,7 @@ def sitin():
     
     # Get approved reservations for the current user
     sql = """
-        SELECT r.*, a.check_in_time, a.check_out_time
+        SELECT r.*, a.start_time, a.end_time
         FROM reservations r
         LEFT JOIN attendancelog a ON r.id = a.reserve_id
         WHERE r.idno = ? AND r.status = 'approved'
@@ -381,6 +404,51 @@ def edit_reservation(reservation_id):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/history')
+def get_history():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        user = session.get('user')
+        
+        sql = """
+            SELECT 
+                r.date, r.time_start, r.time_end, r.labno, r.purpose,
+                a.check_in_time as start_time, a.check_out_time as end_time,
+                acs.lab_pc_number
+            FROM reservations r
+            INNER JOIN attendancelog a ON r.id = a.reserve_id
+            LEFT JOIN active_sitin acs ON r.id = acs.reservation_id
+            WHERE r.idno = ? 
+                AND a.check_in_time IS NOT NULL 
+                AND a.check_out_time IS NOT NULL
+            ORDER BY r.date DESC, r.time_start DESC
+        """
+        
+        history = getallprocess(sql, (user['idno'],))
+        
+        # Convert the results to a list of dictionaries
+        if history:
+            result = []
+            for row in history:
+                result.append({
+                    'date': row['date'],
+                    'time_start': row['time_start'],
+                    'time_end': row['time_end'],
+                    'labno': row['labno'],
+                    'purpose': row['purpose'],
+                    'start_time': row['start_time'],
+                    'end_time': row['end_time'],
+                    'lab_pc_number': row['lab_pc_number']
+                })
+            return jsonify(result)
+        return jsonify([])
+        
+    except Exception as e:
+        print(f"Error in get_history: {str(e)}")  # For debugging
+        return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
