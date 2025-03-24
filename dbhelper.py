@@ -70,6 +70,19 @@ def getstat(sql, params=())-> list:
     conn.close()
     return rows
 
+def check_student_exist(idno):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    success = False
+    cursor.execute("SELECT idno FROM users WHERE idno = ? AND role = 'student'", (idno,))
+    
+    if cursor.fetchone():
+        success = True
+    
+    conn.close()
+    
+    return success
+
 def get_db_connection():
     conn = connect(database)
     conn.row_factory = Row
@@ -169,16 +182,15 @@ def get_reservation_history():
     return getallprocess(sql)
 
 def get_dashboard_statistics():
+    """Get dashboard statistics including total students, current sit-ins, and completed sit-ins"""
     sql = """
         SELECT 
-            total_registered_students,
-            currently_sit_in,
-            total_sit_in,
-            updated_at
-        FROM statistics 
-        WHERE id = 1
+            (SELECT COUNT(*) FROM users WHERE role = 'student') as total_registered_students,
+            (SELECT COUNT(*) FROM active_sitin WHERE status = 'active') as currently_sit_in,
+            (SELECT COUNT(*) FROM active_sitin WHERE status = 'completed') as completed_sit_ins
+        FROM (SELECT 1) dummy
     """
-    return getallprocess(sql)
+    return getstat(sql)
 
 def get_reservation_statistics():
     sql = """
@@ -273,7 +285,7 @@ def get_detailed_history():
     """
     return getallprocess(sql)
 
-def start_sitin(reservation_id, pc_number):
+def start_sitin(idno, expected_end_time, notes, reservation_id, pc_number, purpose):
     conn = get_db_connection()
     cursor = conn.cursor()
     success = False
@@ -308,14 +320,18 @@ def start_sitin(reservation_id, pc_number):
                 lab_pc_number, 
                 start_time,
                 expected_end_time,
-                status
+                status,
+                notes,
+                purpose
             )
-            VALUES (?, ?, ?, datetime('now', 'localtime'), ?, 'active')
+            VALUES (?, ?, ?, datetime('now', 'localtime'), ?, 'active', ?, ?)
         """, (
             reservation_id, 
             reservation['idno'], 
             pc_number,
-            reservation['time_end']
+            expected_end_time,
+            notes,
+            purpose
         ))
         
         # Update reservation status
@@ -357,9 +373,8 @@ def end_sitin(sitin_id):
     try:
         # Get sit-in details
         cursor.execute("""
-            SELECT s.*, r.id as reservation_id, r.idno
+            SELECT s.*
             FROM active_sitin s
-            JOIN reservations r ON s.reservation_id = r.id
             WHERE s.id = ? AND s.status = 'active'
         """, (sitin_id,))
         sitin = cursor.fetchone()
@@ -374,20 +389,6 @@ def end_sitin(sitin_id):
                 end_time = datetime('now', 'localtime')
             WHERE id = ?
         """, (sitin_id,))
-        
-        # Update reservation status
-        cursor.execute("""
-            UPDATE reservations 
-            SET status = 'completed' 
-            WHERE id = ?
-        """, (sitin['reservation_id'],))
-        
-        # Update attendancelog
-        cursor.execute("""
-            UPDATE attendancelog 
-            SET check_out_time = datetime('now', 'localtime')
-            WHERE reserve_id = ?
-        """, (sitin['reservation_id'],))
         
         # Update statistics
         cursor.execute("""
@@ -427,20 +428,22 @@ def get_student_sitins(idno):
     return getallprocess(sql, (idno,))
 
 def get_active_sitins():
+    """Get all active sit-ins with student information"""
     sql = """
-        SELECT 
-            s.*,
-            r.date,
-            r.labno,
-            r.time_start,
-            r.time_end,
-            r.purpose,
+            SELECT 
+            s.id,
+            s.idno,
+            s.lab_pc_number,
+            s.start_time,
+            s.expected_end_time,
+            s.notes,
+            s.status,
+            s.purpose,
             u.firstname,
             u.lastname,
             u.course,
             u.yr_lvl
         FROM active_sitin s
-        JOIN reservations r ON s.reservation_id = r.id
         JOIN users u ON s.idno = u.idno
         WHERE s.status = 'active'
         ORDER BY s.start_time DESC
@@ -540,4 +543,20 @@ def get_pending_reservation_count():
     sql = "SELECT COUNT(*) as count FROM reservations WHERE status = 'pending'"
     result = getallprocess(sql)
     return result[0]['count'] if result else 0
+
+def get_direct_active_sitins():
+    """Get active sit-ins directly from the active_sitin table without requiring reservation links"""
+    sql = """
+        SELECT 
+            s.*,
+            u.firstname,
+            u.lastname,
+            u.course,
+            u.yr_lvl
+        FROM active_sitin s
+        JOIN users u ON s.idno = u.idno
+        WHERE s.status = 'active'
+        ORDER BY s.start_time DESC
+    """
+    return getallprocess(sql)
 

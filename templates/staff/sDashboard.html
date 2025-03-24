@@ -6,19 +6,24 @@
             <div id="box1" class="row-span-5 grid grid-cols-4 gap-4">
                 <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Registered Students</p>
-                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600 "></span>
+                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600 ">
+                        {{ total_registered_students }}
+                    </span>
                 </div>
-                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
+                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50 cursor-pointer" onclick="window.location.href='/staff/students/current'">
                     <p class="text-gray-600 font-medium">Currently Sit-in</p>
-                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600 "></span>
+                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600 ">
+                        {{ currently_sit_in }}
+                    </span>
                     <p id="curSitInPercent" class="text-sm text-center text-gray-500"></p>
                 </div>
                 <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Total Sit-in</p>
-                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600 "></span>
-                    <p id="dailyAverage" class="text-sm text-center text-gray-500"></p>
+                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600 ">
+                        {{ total_sit_in }}
+                    </span>
                 </div>
-                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50" onclick="window.location.href='/staff/students'">
+                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50" onclick="window.location.href='/staff/students/pending'">
                     <p class="text-gray-600 font-medium">Pending Reservations</p>
                     <span id="reservationCount" class="flex justify-center text-7xl p-4 text-red-600"></span>
                 </div>
@@ -280,27 +285,46 @@
             fetch('/api/statistics')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('totalRegStuds').textContent = data.total_registered_students;
-                    document.getElementById('curSitIn').textContent = data.currently_sit_in;
-                    document.getElementById('totalSitIn').textContent = data.total_sit_in;
+                    // Ensure values are never negative
+                    const currentSitIn = Math.max(0, data.currently_sit_in || 0);
+                    const totalRegistered = Math.max(0, data.total_registered_students || 0);
+                    const totalSitIn = Math.max(0, data.total_sit_in || 0);
                     
-                    // Calculate and display percentages
-                    const currentPercent = ((data.currently_sit_in / data.total_registered_students) * 100).toFixed(1);
-                    document.getElementById('curSitInPercent').textContent = 
-                        `${currentPercent}% of registered students`;
+                    document.getElementById('totalRegStuds').textContent = totalRegistered;
+                    document.getElementById('curSitIn').textContent = currentSitIn;
+                    document.getElementById('totalSitIn').textContent = totalSitIn;
                     
-                    // Calculate daily average if we have the data
-                    if (data.days_active) {
-                        const dailyAvg = (data.total_sit_in / data.days_active).toFixed(1);
-                        document.getElementById('dailyAverage').textContent = 
-                            `${dailyAvg} average daily visits`;
+                    // Calculate percentage only if there are registered students
+                    if (totalRegistered > 0) {
+                        const currentPercent = ((currentSitIn / totalRegistered) * 100).toFixed(1);
+                        document.getElementById('curSitInPercent').textContent = 
+                            `${currentPercent}% of registered students`;
+                    } else {
+                        document.getElementById('curSitInPercent').textContent = '0% of registered students';
                     }
                 })
-                .catch(err => console.error('Error fetching statistics: ', err));
+                .catch(err => {
+                    console.error('Error fetching statistics: ', err);
+                    // Set default values on error
+                    document.getElementById('totalRegStuds').textContent = '0';
+                    document.getElementById('curSitIn').textContent = '0';
+                    document.getElementById('totalSitIn').textContent = '0';
+                    document.getElementById('curSitInPercent').textContent = '0% of registered students';
+                });
         }
 
+        // Update statistics immediately when page loads
+        document.addEventListener('DOMContentLoaded', updateStatistics);
+
+        // Update statistics every 30 seconds
         setInterval(updateStatistics, 30000);
-        updateStatistics(); // Initial call
+
+        // Update when tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateStatistics();
+            }
+        });
 
         function updateChart() {
             fetch('/statisticchart')

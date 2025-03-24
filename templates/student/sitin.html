@@ -1,75 +1,157 @@
 {% extends 'home.html' %}
 {% block content %}
 <div class="container mx-auto px-4 py-8 rise-up">
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold mb-6">Active Reservations</h2>
+    <!-- Active Sit-in Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-6">Current Active Sit-in</h2>
+        <div id="activeSitinSection">
+            <!-- Active sit-in content will be loaded here -->
+            <div class="animate-pulse">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                </div>
+                <p class="text-center text-gray-500">Loading active sit-in...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approved Reservations Section -->
+    <div class="bg-white rounded-lg shadow overflow-hidden w-full mx-auto rise-up p-6">
+        <h2 class="text-2xl font-bold mb-6">Approved Reservations</h2>
         
-        {% if reservations %}
-        <div class="overflow-x-auto">
+        <div id="reservationsSection" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <thead>
+                    <tr class="bg-gray-50 sticky top-0 z-10">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for reservation in reservations %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.time_start }} - {{ reservation.time_end }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.labno }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reservation.purpose }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if reservation.check_in_time and not reservation.check_out_time %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Active
-                                </span>
-                            {% elif reservation.check_out_time %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    Completed
-                                </span>
-                            {% else %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Not Started
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if not reservation.check_in_time %}
-                                <button onclick="startSitIn({{ reservation.id }})"
-                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                    Start Sit-in
-                                </button>
-                            {% elif not reservation.check_out_time %}
-                                <button onclick="endSitIn({{ reservation.id }})"
-                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                    End Sit-in
-                                </button>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="reservationsTableBody">
+                    <!-- Approved reservations will be loaded here -->
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="text-center py-8">
-            <p class="text-gray-500">No approved reservations found.</p>
+        <div class="text-center py-6">
             <a href="{{ url_for('reservation') }}" 
                class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Make a Reservation
             </a>
         </div>
-        {% endif %}
     </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Load active sit-in session on page load
+    loadActiveSitIn();
+    fetch('/get_reservations')
+        .then(response => response.json())
+        .then(data => {
+            const reservationsTableBody = document.getElementById('reservationsTableBody');
+            const approvedReservations = data.filter(reservation => reservation.status === 'approved');
+            if (approvedReservations.length > 0) {
+                reservationsTableBody.innerHTML = approvedReservations.map(reservation => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.labno}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.time_start} - ${reservation.time_end}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.purpose}</td>
+                    </tr>
+                `).join('');
+            } else {
+                reservationsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-gray-500 py-4">No approved reservations found.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching reservations:', error);
+            const reservationsTableBody = document.getElementById('reservationsTableBody');
+            reservationsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-red-500 py-4">Error loading reservations.</td>
+                </tr>
+            `;
+        });
+});
+
+async function loadActiveSitIn() {
+    const activeSitinSection = document.getElementById('activeSitinSection');
+    
+    try {
+        const response = await fetch('/api/sitin/active');
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            const sitin = data[0]; // Get the first active sit-in
+            const [labNumber, pcNumber] = (sitin.lab_pc_number || '').split('-');
+            
+            activeSitinSection.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Lab & PC</p>
+                            <p class="font-semibold">Lab ${labNumber || 'N/A'} (PC ${pcNumber || 'N/A'})</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Start Time</p>
+                            <p class="font-semibold">${formatDateTime(sitin.start_time)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Expected End Time</p>
+                            <p class="font-semibold">${formatDateTime(sitin.expected_end_time)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Purpose</p>
+                            <p class="font-semibold">${sitin.purpose}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="endSitIn(${sitin.id})"
+                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            End Session
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            activeSitinSection.innerHTML = `
+                <p class="text-center text-gray-500">No active sit-in session.</p>
+            `;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        activeSitinSection.innerHTML = `
+            <p class="text-center text-red-500">Error loading active sit-in data.</p>
+        `;
+    }
+}
+
+function formatDateTime(dateTimeStr) {
+    if (!dateTimeStr) return 'N/A';
+    const parts = dateTimeStr.split(' ');
+    if (parts.length < 2) return dateTimeStr;
+    
+    const date = new Date(parts[0]);
+    const formattedDate = date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+    return `${formattedDate} ${parts[1]}`;
+}
+
 async function startSitIn(reservationId) {
     const pcNumber = prompt('Enter PC Number:');
     if (!pcNumber) return;
@@ -97,11 +179,9 @@ async function startSitIn(reservationId) {
     }
 }
 
-async function endSitIn(reservationId) {
-    if (!confirm('Are you sure you want to end this sit-in?')) return;
-
+async function endSitIn(sitInId) {
     try {
-        const response = await fetch(`/api/check-out/${reservationId}`, {
+        const response = await fetch(`/api/sitin/${sitInId}/end`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -111,10 +191,11 @@ async function endSitIn(reservationId) {
         const result = await response.json();
 
         if (response.ok) {
-            alert('Sit-in ended successfully');
-            window.location.reload();
+            alert('Session ended successfully');
+            // Redirect to logout
+            window.location.href = '/history';
         } else {
-            throw new Error(result.error || 'Failed to end sit-in');
+            throw new Error(result.error || 'Failed to end session');
         }
     } catch (error) {
         console.error('Error:', error);

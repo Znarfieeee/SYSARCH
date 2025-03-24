@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="../static/js/home.js">
-    <link rel="stylesheet" href="../src/output.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -155,11 +153,11 @@
         }
 
         /* From Uiverse.io by alexruix */ 
-        .input-group {
+        .input-group, .input-group2 {
         position: relative;
         }
 
-        .input {
+        .input, .input2 {
         border: 1px solid #a0a0a0;
         border-radius: 1rem;
         background: none;
@@ -169,7 +167,7 @@
         transition: border 150ms cubic-bezier(0.4,0,0.2,1);
         }
 
-        .user-label {
+        .user-label, .user-label2 {
         position: absolute;
         left: 15px;
         color: #b9b9b9;
@@ -178,7 +176,7 @@
         transition: 150ms cubic-bezier(0.4,0,0.2,1);
         }
 
-        .input:focus, .input:valid {
+        .input:focus, .input:valid{
         outline: none;
         border: 1.5px solid #303030;
         }
@@ -188,6 +186,19 @@
         padding: 0 .2em;
         color: #303030;
         }
+
+        /* Style for optional middlename field */
+        .input:focus, .input2[value]:not([value=""]){
+        outline: none;
+        border: 1.5px solid #303030;
+        }
+
+        .input2:focus ~ label,
+        .input2[value]:not([value=""]) ~ label {
+            transform: translateY(-50%) scale(0.9);
+            padding: 0 .2em;
+            color: #303030;
+        }   
         
         /* From Uiverse.io by vinodjangid07 */ 
         .editBtn {
@@ -654,7 +665,7 @@
                 <path class="line" d="M7 16 27 16"></path>
             </svg>
             </label>
-        <img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6">
+        <img src="/static/img/ccs_logo.png" class="h-10 w-auto ml-6">
         <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
     </header>
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
