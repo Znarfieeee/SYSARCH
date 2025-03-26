@@ -560,3 +560,10 @@ def get_direct_active_sitins():
     """
     return getallprocess(sql)
 
+def update_sessions(idno):
+    sql = """
+        UPDATE users
+        SET no_session = no_session - 1
+        WHERE idno = ? and no_session > 0
+    """
+    return postprocess(sql, (idno,))

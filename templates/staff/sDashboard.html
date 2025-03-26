@@ -3,7 +3,7 @@
     <div id="main-container" class="grid grid-cols-10 grid-rows-6 gap-4 py-10 px-20 h-[90vh]">
         <!-- Statistics Data -->
         <div id="container-1" class="col-span-6 row-span-6 grid gap-4 grid-rows-20 rounded-md">
-            <div id="box1" class="row-span-5 grid grid-cols-4 gap-4">
+            <div id="box1" class="row-span-5 grid grid-cols-4 gap-4 rise-up">
                 <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Registered Students</p>
                     <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600 ">
@@ -15,7 +15,6 @@
                     <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600 ">
                         {{ currently_sit_in }}
                     </span>
-                    <p id="curSitInPercent" class="text-sm text-center text-gray-500"></p>
                 </div>
                 <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
                     <p class="text-gray-600 font-medium">Total Sit-in</p>
@@ -28,14 +27,14 @@
                     <span id="reservationCount" class="flex justify-center text-7xl p-4 text-red-600"></span>
                 </div>
             </div>
-            <div id="box2" class="flex flex-row row-span-15 p-4 py-2 bg-white shadow-md text-xs rounded-lg">
+            <div id="box2" class="flex flex-row row-span-15 p-4 py-2 bg-white shadow-md text-xs rounded-lg rise-up">
                 <div id="chart-container" class="flex justify-center w-full">
                     <canvas id="myChart" class="w-full"></canvas>
                 </div>
             </div>
         </div>
         <!-- Announcement -->
-        <div id="container-2" class="col-span-4 row-span-6 w-full justify-center bg-white p-6 rounded-lg shadow-md overflow-hidden">
+        <div id="container-2" class="col-span-4 row-span-6 w-full overflow-y-auto justify-center bg-white p-6 rounded-lg shadow-md overflow-hidden rise-up">
             <div id="header" class="flex justify-between">
                 <h1 class="font-semibold text-xl py-auto p-2">Announcement</h1>
                 <button id="toggleFormBtn" class="w-35 h-10 p-2 text-sm rounded-2xl cursor-pointer hover:bg-gray-500/50 hover:text-gray-50 hover:shadow-md transition ease-in-out duration-300">+ Announcement</button>
@@ -58,7 +57,7 @@
                     </div>
                 </div>
             </form>
-            <div id="announcements-container" class="relative overflow-y-auto max-h-auto pb-6">
+            <div id="announcements-container" class="relative overflow-y-auto pb-6">
                 {% for announcement in announcements %}
                     <div class="bg-white shadow-md p-4 rounded-lg mb-4 border-l-4 border-gray-400">
                         <div id="header" class="flex justify-between ">
@@ -257,7 +256,6 @@
                 let url = '/announcement';
                 let method = 'POST';
                 
-                // If we have an announcement ID, it's an edit
                 if (announcementId) {
                     url = `/announcement/${announcementId}/edit`;
                 }
@@ -269,15 +267,15 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert(result.message);
+                    alert(result.message || 'Announcement saved successfully');
                     window.location.reload();
                 } else {
                     const error = await response.json();
-                    throw new Error(error.message || 'Failed to save announcement');
+                    alert(error.message || 'Failed to save announcement');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert(error.message || 'An error occurred while saving the announcement');
+                alert('An error occurred while saving the announcement');
             }
         }
 
@@ -294,14 +292,6 @@
                     document.getElementById('curSitIn').textContent = currentSitIn;
                     document.getElementById('totalSitIn').textContent = totalSitIn;
                     
-                    // Calculate percentage only if there are registered students
-                    if (totalRegistered > 0) {
-                        const currentPercent = ((currentSitIn / totalRegistered) * 100).toFixed(1);
-                        document.getElementById('curSitInPercent').textContent = 
-                            `${currentPercent}% of registered students`;
-                    } else {
-                        document.getElementById('curSitInPercent').textContent = '0% of registered students';
-                    }
                 })
                 .catch(err => {
                     console.error('Error fetching statistics: ', err);
@@ -309,7 +299,6 @@
                     document.getElementById('totalRegStuds').textContent = '0';
                     document.getElementById('curSitIn').textContent = '0';
                     document.getElementById('totalSitIn').textContent = '0';
-                    document.getElementById('curSitInPercent').textContent = '0% of registered students';
                 });
         }
 

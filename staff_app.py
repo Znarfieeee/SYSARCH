@@ -123,6 +123,7 @@ def create_announcement():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
+    
     idno = session['user']['idno']
     title = request.form.get('title')
     content = request.form.get('content')
@@ -132,11 +133,8 @@ def create_announcement():
                          content=content)
     
     if success:
-        flash('Announcement created successfully', 'success')
-    else:
-        flash('Failed to create announcement', 'error')
-        
-    return redirect(url_for('staff_app.staff_dashboard'))
+        return jsonify({'message': 'Announcement created successfully'}), 200
+    return jsonify({'message': 'Failed to create announcement'}), 400
 
 @staff_app.route('/announcement/<int:id>', methods=['DELETE'])
 def delete_announcement(id):
@@ -144,11 +142,8 @@ def delete_announcement(id):
     success = postprocess(sql, (id,))
     
     if success:
-        flash('Announcement deleted successfully!', 'success')
-    else:
-        flash('Failed to delete announcement', 'error')
-    
-    return redirect(url_for('staff_app.staff_dashboard'))
+        return jsonify({'message': 'Announcement deleted successfully'}), 200
+    return jsonify({'message': 'Failed to delete announcement'}), 400
 
 @staff_app.route('/announcement/<int:id>/edit', methods=['POST'])
 def edit_announcement(id):
@@ -163,8 +158,7 @@ def edit_announcement(id):
         
         if success:
             return jsonify({'message': 'Announcement updated successfully'}), 200
-        else:
-            return jsonify({'message': 'Failed to update announcement'}), 400
+        return jsonify({'message': 'Failed to update announcement'}), 400
             
     except Exception as e:
         return jsonify({'message': f'Error: {str(e)}'}), 500
@@ -451,11 +445,24 @@ def end_sitin_route(sitin_id):
     try:
         if not session.get('logged_in'):
             return jsonify({'error': 'Not authenticated'}), 401
-            
+        
+        # Get the sit-in details
+        sql = "SELECT id, idno FROM active_sitin WHERE id = ? AND status = 'active'"
+        sitin = getallprocess(sql, (sitin_id,))
+        
+        if not sitin:
+            return jsonify({'error': 'No active sit-in found'}), 404
+        
+        sitin_id = sitin[0]['id']
+        student_idno = sitin[0]['idno']
+        
+        # End the sit-in
         success = end_sitin(sitin_id)
         
         if success:
-            return jsonify({'message': 'Sit-in ended successfully'}), 200
+            update_sessions(student_idno)
+            
+            return jsonify({'message': 'Sit-in ended successfully and session deducted'}), 200
         return jsonify({'error': 'Failed to end sit-in'}), 400
             
     except Exception as e:
@@ -537,16 +544,28 @@ def check_out(reservation_id):
     
     try:
         # Get the active sit-in for this reservation
-        sql = "SELECT id FROM active_sitin WHERE reservation_id = ? AND status = 'active'"
+        sql = "SELECT id, idno FROM active_sitin WHERE reservation_id = ? AND status = 'active'"
         sitin = getallprocess(sql, (reservation_id,))
         
         if not sitin:
             return jsonify({'error': 'No active sit-in found'}), 404
-            
-        success = end_sitin(sitin[0]['id'])
+        
+        sitin_id = sitin[0]['id']
+        student_idno = sitin[0]['idno']
+        
+        # End the sit-in
+        success = end_sitin(sitin_id)
         
         if success:
-            return jsonify({'message': 'Check-out successful'}), 200
+            # Deduct one session from the student's remaining sessions
+            update_sessions_sql = """
+                UPDATE users
+                SET no_session = no_session - 1
+                WHERE idno = ? AND no_session > 0
+            """
+            postprocess(update_sessions_sql, (student_idno,))
+            
+            return jsonify({'message': 'Check-out successful and session deducted'}), 200
         return jsonify({'error': 'Failed to check out'}), 400
             
     except Exception as e:
@@ -568,8 +587,6 @@ def add_sitin():
         if not student:
             return jsonify({'error': 'Student not registered in the system'}), 404
         
-        # Format date and time properly
-        date = data.get('date', '')
         expected_end_time = data.get('expected_end_time', '')
                 
         # Extract the data from the request
