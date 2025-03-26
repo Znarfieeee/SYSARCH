@@ -71,7 +71,9 @@
                             <div id="header" class="flex justify-between">
                                 <h2 class="font-semibold text-xl announcement-title">{{ announcement.title }}</h2>
                             </div>
-                            <p class="text-sm text-gray-400 mb-4 announcement-date">{{ announcement.created_at }}</p>
+                            <p class="text-sm text-gray-400 mb-4 announcement-date">
+                                {{ announcement.created_at | datetimeformat("%B %d, %Y %I:%M %p") }}
+                            </p>
                             <p class="text-sm line-clamp-1 announcement-content">{{ announcement.content }}</p>
                         </div>
                     {% endfor %}
