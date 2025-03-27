@@ -34,6 +34,10 @@
                 <input type="radio" name="radio">
                 <span class="name">Pending Reservations</span>
             </a>
+            <a href="/staff/students/total" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio">
+                <span class="name">Total Sit-in</span>
+            </a>
         </div>
         <button onclick="showAddSitinModal()" 
                 class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
@@ -48,7 +52,7 @@
     
 
     <!-- Current Sit-in Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[95%] mx-auto rise-up">
+    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
         <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
@@ -58,7 +62,6 @@
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Course & Year</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Expected End Time</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -107,8 +110,8 @@
                     <label class="user-label bg-gray-200">Purpose</label>
                 </div>
                 <div class="input-group">
-                    <input required="" type="time" name="expected_end_time" class="input w-full">
-                    <label class="user-label bg-gray-200">Expected End Time</label>
+                    <input required="" type="time" name="end_time" class="input w-full">
+                    <label class="user-label bg-gray-200">End Time</label>
                 </div>
                 <div class="input-group">
                     <select name="labno" class="input w-full" required="">
@@ -121,10 +124,6 @@
                         <option value="Mac Laboratory">Mac Laboratory</option>
                     </select>
                     <label class="user-label bg-gray-200">Lab Number</label>
-                </div>
-                <div class="input-group">
-                    <input required="" type="text" autocomplete="off" name="pc_number" class="input w-full">
-                    <label class="user-label bg-gray-200">PC Number</label>
                 </div>
                 <div class="input-group">
                     <textarea name="notes" class="input w-full" rows="2"></textarea>
@@ -231,12 +230,8 @@ async function loadCurrentSitIns() {
 
         // Render data
         data.forEach(student => {
-            // Parse lab_pc_number
-            let [labNumber, pcNumber] = (student.lab_pc_number || '').split('-');
-            if (!pcNumber) {
-                pcNumber = labNumber;
-                labNumber = 'N/A';
-            }
+
+
             
             const row = document.createElement('tr');
             row.className = 'sitin-row hover:bg-gray-50';
@@ -244,9 +239,8 @@ async function loadCurrentSitIns() {
                 <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno || 'N/A'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname ? student.firstname.toUpperCase() : ''} ${student.lastname ? student.lastname.toUpperCase() : ''}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${student.course ? student.course.toUpperCase() : 'N/A'} - ${student.yr_lvl || 'N/A'}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${labNumber} (PC ${pcNumber})</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${student.labno}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${new Date(student.start_time).toLocaleString('en-US', {  hour: '2-digit', minute: '2-digit', hour12: false })}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.expected_end_time}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${student.purpose}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -296,12 +290,7 @@ async function endSitIn(sitInId) {
 
         if (response.ok) {
             alert('Sit-in session ended successfully');
-            // Reload the current sit-ins instead of logging out
-            loadCurrentSitIns();
-            // Also update the statistics
-            if (typeof updateStatistics === 'function') {
-                updateStatistics();
-            }
+            window.location.href = '/staff/students/total';
         } else {
             throw new Error(result.error || 'Failed to end sit-in');
         }
@@ -346,7 +335,7 @@ document.getElementById('addSitinForm').addEventListener('submit', async (e) => 
         }
         
         const labno = formData.get('labno');
-        const pcNumber = formData.get('pc_number');
+
 
         // Format datetime properly for SQLite
         const formatDateTime = (date, time) => {
@@ -355,8 +344,8 @@ document.getElementById('addSitinForm').addEventListener('submit', async (e) => 
         
         const data = {
             idno: idno,
-            lab_pc_number: `${labno}-${pcNumber}`,
-            expected_end_time: formData.get('expected_end_time'),
+            labno: labno,
+            end_time: formData.get('end_time'),
             notes: formData.get('notes') || null,
             purpose: formData.get('purpose'),
             status: 'active'

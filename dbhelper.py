@@ -118,7 +118,7 @@ def get_reservation_details(reservation_id):
     sql = """
         SELECT r.*, u.no_session, 
                (SELECT COUNT(*) FROM reservations 
-                WHERE idno = r.idno AND status = 'completed') as used_sessions
+                WHERE idno = r.idno AND status = 'done') as used_sessions
         FROM reservations r
         JOIN users u ON r.idno = u.idno
         WHERE r.id = ?
@@ -176,7 +176,7 @@ def get_reservation_history():
         LEFT JOIN history h ON r.id = h.reservation_id
         LEFT JOIN staffverlog sv ON r.id = sv.reservation_id
         LEFT JOIN users s ON sv.staff_id = s.idno
-        WHERE r.status IN ('approved', 'completed')
+        WHERE r.status IN ('approved', 'done')
         ORDER BY h.updated_at DESC
     """
     return getallprocess(sql)
@@ -187,7 +187,7 @@ def get_dashboard_statistics():
         SELECT 
             (SELECT COUNT(*) FROM users WHERE role = 'student') as total_registered_students,
             (SELECT COUNT(*) FROM active_sitin WHERE status = 'active') as currently_sit_in,
-            (SELECT COUNT(*) FROM active_sitin WHERE status = 'completed') as completed_sit_ins
+            (SELECT COUNT(*) FROM active_sitin WHERE status = 'done') as completed_sit_ins
         FROM (SELECT 1) dummy
     """
     return getstat(sql)
@@ -196,7 +196,7 @@ def get_reservation_statistics():
     sql = """
         SELECT purpose, COUNT(*) as count
         FROM reservations
-        WHERE status IN ('approved', 'completed')
+        WHERE status IN ('approved', 'done')
         GROUP BY purpose
         ORDER BY count DESC
     """
@@ -209,7 +209,7 @@ def check_student_sessions(idno):
             COUNT(r.id) as used_sessions
         FROM users u
         LEFT JOIN reservations r ON u.idno = r.idno
-        WHERE u.idno = ? AND r.status = 'completed'
+        WHERE u.idno = ? AND r.status = 'done'
         GROUP BY u.idno, u.no_session
     """
     return getallprocess(sql, (idno,))
@@ -280,12 +280,12 @@ def get_detailed_history():
         LEFT JOIN history h ON r.id = h.reservation_id
         LEFT JOIN staffverlog sv ON r.id = sv.reservation_id
         LEFT JOIN users s ON sv.staff_id = s.idno
-        WHERE r.status = 'completed'
+        WHERE r.status = 'done'
         ORDER BY r.date DESC, r.time_start DESC
     """
     return getallprocess(sql)
 
-def start_sitin(idno, expected_end_time, notes, reservation_id, pc_number, purpose):
+def start_sitin(expected_end_time, notes, reservation_id, pc_number, purpose):
     conn = get_db_connection()
     cursor = conn.cursor()
     success = False
@@ -343,7 +343,7 @@ def start_sitin(idno, expected_end_time, notes, reservation_id, pc_number, purpo
         
         # Add entry to attendancelog
         cursor.execute("""
-            INSERT INTO attendancelog (reserve_id, idno, check_in_time)
+            INSERT INTO attendancelog (reserve_id, idno, start_time)
             VALUES (?, ?, datetime('now', 'localtime'))
         """, (reservation_id, reservation['idno']))
         
@@ -365,6 +365,14 @@ def start_sitin(idno, expected_end_time, notes, reservation_id, pc_number, purpo
     
     return success
 
+def check_student_sitin(idno):
+    sql = """
+            SELECT id 
+            FROM active_sitin 
+            WHERE idno = ? AND status = 'active'
+        """
+    return getallprocess(sql, (idno,))
+
 def end_sitin(sitin_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -385,8 +393,8 @@ def end_sitin(sitin_id):
         # End sit-in
         cursor.execute("""
             UPDATE active_sitin 
-            SET status = 'completed',
-                end_time = datetime('now', 'localtime')
+            SET status = 'done',
+            end_time = end_time
             WHERE id = ?
         """, (sitin_id,))
         
@@ -433,9 +441,8 @@ def get_active_sitins():
             SELECT 
             s.id,
             s.idno,
-            s.lab_pc_number,
+            s.labno,
             s.start_time,
-            s.expected_end_time,
             s.notes,
             s.status,
             s.purpose,
@@ -496,7 +503,7 @@ def get_sitin_history():
         LEFT JOIN history h ON r.id = h.reservation_id
         LEFT JOIN staffverlog sv ON r.id = sv.reservation_id
         LEFT JOIN users s ON sv.staff_id = s.idno
-        WHERE r.status = 'completed'
+        WHERE r.status = 'done'
         ORDER BY h.updated_at DESC
     """
     return getallprocess(sql)
@@ -558,6 +565,24 @@ def get_direct_active_sitins():
         WHERE s.status = 'active'
         ORDER BY s.start_time DESC
     """
+    return getallprocess(sql)
+
+def get_total_sitins():
+    sql = """
+            SELECT 
+            a.idno,
+            u.firstname,
+            u.lastname,
+            strftime('%H:%M %p', a.start_time) as start_time,
+            strftime('%H:%M %p', a.end_time) as end_time,
+            strftime('%Y-%m-%d', a.start_time) as date,
+            a.purpose,
+            a.labno
+            FROM active_sitin a
+            JOIN users u ON a.idno = u.idno
+            WHERE a.status = 'done'
+            ORDER BY a.id DESC
+            """
     return getallprocess(sql)
 
 def update_sessions(idno):

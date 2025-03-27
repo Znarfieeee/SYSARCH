@@ -4,27 +4,27 @@
         <!-- Statistics Data -->
         <div id="container-1" class="col-span-6 row-span-6 grid gap-4 grid-rows-20 rounded-md">
             <div id="box1" class="row-span-5 grid grid-cols-4 gap-4 rise-up">
-                <div id="registered-student" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
+                <div id="registered-student" class="flex flex-col justify-between bg-white shadow-md align- p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50 cursor-pointer" onclick="window.location.href='/staff/students'">
                     <p class="text-gray-600 font-medium">Registered Students</p>
-                    <span id="totalRegStuds" class="flex justify-center text-7xl p-4 text-blue-600 ">
+                    <span id="totalRegStuds" class="flex justify-center text-6xl text-blue-600 ">
                         {{ total_registered_students }}
                     </span>
                 </div>
-                <div id="current-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50 cursor-pointer" onclick="window.location.href='/staff/students/current'">
+                <div id="current-sitin" class="flex flex-col justify-between bg-white shadow-md align- p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50 cursor-pointer" onclick="window.location.href='/staff/students/current'">
                     <p class="text-gray-600 font-medium">Currently Sit-in</p>
-                    <span id="curSitIn" class="flex justify-center text-7xl p-4 text-green-600 ">
+                    <span id="curSitIn" class="flex justify-center text-6xl text-green-600 ">
                         {{ currently_sit_in }}
                     </span>
                 </div>
-                <div id="total-sitin" class="bg-white shadow-md p-4 rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50">
+                <div id="reservation-count" class="flex flex-col justify-between bg-white shadow-md p-4 align- rounded-lg cursor-pointer hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50" onclick="window.location.href='/staff/students/pending'">
+                    <p class="text-gray-600 font-medium">Pending Reservations</p>
+                    <span id="reservationCount" class="flex justify-center text-6xl text-red-600"></span>
+                </div>
+                <div id="total-sitin" class="flex flex-col justify-between bg-white shadow-md p-4 align- rounded-lg hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50 cursor-pointer" onclick="window.location.href='/staff/students/total'">
                     <p class="text-gray-600 font-medium">Total Sit-in</p>
-                    <span id="totalSitIn" class="flex justify-center text-7xl p-4 text-purple-600 ">
+                    <span id="totalSitIn" class="flex justify-center text-6xl text-purple-600 ">
                         {{ total_sit_in }}
                     </span>
-                </div>
-                <div id="reservation-count" class="bg-white shadow-md p-4 rounded-lg cursor-pointer hover:-translate-y-1.5 transition duration-300 ease-in-out delay-50" onclick="window.location.href='/staff/students/pending'">
-                    <p class="text-gray-600 font-medium">Pending Reservations</p>
-                    <span id="reservationCount" class="flex justify-center text-7xl p-4 text-red-600"></span>
                 </div>
             </div>
             <div id="box2" class="flex flex-row row-span-15 p-4 py-2 bg-white shadow-md text-xs rounded-lg rise-up">
@@ -34,7 +34,7 @@
             </div>
         </div>
         <!-- Announcement -->
-        <div id="container-2" class="col-span-4 row-span-6 w-full overflow-y-auto justify-center bg-white p-6 rounded-lg shadow-md overflow-hidden rise-up">
+        <div id="container-2" class="col-span-4 row-span-6 w-full justify-center bg-white p-6 rounded-lg shadow-md overflow-hidden rise-up">
             <div id="header" class="flex justify-between">
                 <h1 class="font-semibold text-xl py-auto p-2">Announcement</h1>
                 <button id="toggleFormBtn" class="w-35 h-10 p-2 text-sm rounded-2xl cursor-pointer hover:bg-gray-500/50 hover:text-gray-50 hover:shadow-md transition ease-in-out duration-300">+ Announcement</button>
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             </form>
-            <div id="announcements-container" class="relative overflow-y-auto pb-6">
+            <div id="announcements-container" class="relative pb-6">
                 {% for announcement in announcements %}
                     <div class="bg-white shadow-md p-4 rounded-lg mb-4 border-l-4 border-gray-400">
                         <div id="header" class="flex justify-between ">

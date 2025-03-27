@@ -455,5 +455,5 @@ def get_history():
         return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run(debug=True, host='172.19.131.161', port=5000)
+    app.run(debug=True)
+    # app.run(debug=True, host='172.19.131.161', port=5000)

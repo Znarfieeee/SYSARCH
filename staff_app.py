@@ -117,6 +117,14 @@ def staff_students_pending():
     return render_template("staff/studlist-pr.html", 
                          pagetitle='Pending Reservations')
 
+@staff_app.route('/staff/students/total')
+def staff_students_total():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/studlist-ts.html", 
+                         pagetitle='Total Reservations')
+
 # Functions
 @staff_app.route('/announcement', methods=['POST'])
 def create_announcement():
@@ -162,6 +170,27 @@ def edit_announcement(id):
             
     except Exception as e:
         return jsonify({'message': f'Error: {str(e)}'}), 500
+
+@staff_app.route('/api/book', methods=['POST'])
+def book_res():
+    idno = request.form.get('idno')
+    date = request.form.get('date')
+    time_start = request.form.get('time-start')
+    time_end = request.form.get('time-end')
+    labno = request.form.get('labno')
+    purpose = request.form.get('purpose')
+    status = "pending"
+
+    success = addprocess('reservations', idno=idno, date=date, 
+                         time_start=time_start, time_end=time_end, 
+                         labno=labno, purpose=purpose, status=status)
+    
+    if success:
+        flash("Reservation successful.", "success")
+    else:
+        flash("Reservation failed.", "error")
+
+    return redirect(url_for('staff_app.staff_students_pending'))
 
 @staff_app.route('/api/statistics', methods=['GET'])
 def get_statistics():
@@ -281,6 +310,7 @@ def add_student():
             'firstname': request.form.get('firstname'),
             'middlename': request.form.get('middlename'),
             'lastname': request.form.get('lastname'),
+            'username': idno,
             'course': course,
             'yr_lvl': request.form.get('yr_lvl'),
             'email': request.form.get('email'),
@@ -409,27 +439,23 @@ def start_sitin_route():
             
         data = request.json
         idno = data.get('idno')
-        expected_end_time = data.get('expected_end_time')
+        end_time = data.get('expected_end_time')
         notes = data.get('notes')
         reservation_id = data.get('reservation_id')
-        lab_pc_number = data.get('lab_pc_number')
+        labno = data.get('labno')
         purpose = data.get('purpose')
         
         # Validate required fields
-        if not all([lab_pc_number, purpose, idno, expected_end_time]):
+        if not all([labno, purpose, idno, end_time]):
             return jsonify({'error': 'Missing required data'}), 400
-        
-        # Ensure proper formatting of time
-        if not expected_end_time:
-            return jsonify({'error': 'Expected end time is required'}), 400
         
         # Start the sit-in
         success = start_sitin(
             idno=idno,
-            expected_end_time=expected_end_time,
+            end_time=end_time,
             notes=notes,
             reservation_id=reservation_id,
-            pc_number=lab_pc_number,
+            pc_number=labno,
             purpose=purpose
         )
         
@@ -580,20 +606,17 @@ def add_sitin():
         data = request.json
         idno = data.get('idno')
         
-        
         # First, check if the student exists
         student = check_student_exist(idno)
         
         if not student:
             return jsonify({'error': 'Student not registered in the system'}), 404
-        
-        expected_end_time = data.get('expected_end_time', '')
                 
         # Extract the data from the request
         sitin_data = {
             'idno': idno,
-            'lab_pc_number': data.get('lab_pc_number'),
-            'expected_end_time': expected_end_time,
+            'labno': data.get('labno'),
+            'end_time': data.get('end_time'),
             'notes': data.get('notes'),
             'status': 'active',
             'purpose': data.get('purpose'),
@@ -616,8 +639,12 @@ def add_sitin():
         finally:
             conn.close()
 
-        # Add the sit-in record to the database
-        success = addprocess('active_sitin', **sitin_data)
+        # Add the sit-in record to the database\
+        active = check_student_sitin(idno)
+        if active:
+            return jsonify({'error': 'Student is already in a sit-in'}), 400
+        else:
+            success = addprocess('active_sitin', **sitin_data)
 
         if success:
             return jsonify({'message': 'Sit-in added successfully'}), 200
@@ -639,6 +666,14 @@ def get_reservation_count():
 def get_reservation_students():
     try:
         students = get_pending_reservations()
+        return jsonify([dict(student) for student in students] if students else [])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@staff_app.route('/api/students/total_sitins', methods=['GET'])
+def get_students_total_sitins():
+    try:
+        students = get_total_sitins()
         return jsonify([dict(student) for student in students] if students else [])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
