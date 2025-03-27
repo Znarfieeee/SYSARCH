@@ -97,17 +97,22 @@
         #sidebar {
             z-index: 999;
         }
-        #announcements-container::-webkit-scrollbar, #studentTableBody::-webkit-scrollbar{
+        #announcements-container::-webkit-scrollbar, #studentTableBody::-webkit-scrollbar, #total_sitin::-webkit-scrollbar {
             width: 5px;
         }
 
-        #announcements-container::-webkit-scrollbar-thumb, #studentTableBody::-webkit-scrollbar-thumb {
+        #announcements-container::-webkit-scrollbar-thumb, #studentTableBody::-webkit-scrollbar-thumb, #total_sitin::-webkit-scrollbar {
             background-color: rgba(0, 0, 0, 0.3); /*transparent */
             border-radius: 10px;
             
         }
-        #announcements-container::-webkit-scrollbar-track, #studentTableBody::-webkit-scrollbar-track {
+        #announcements-container::-webkit-scrollbar-track, #studentTableBody::-webkit-scrollbar-track, #total_sitin::-webkit-scrollbar {
             background: transparent; /* Invisible track */
+        }
+
+        #announcements-container {
+            overflow-y: auto;
+            height: 100%;
         }
 
         /* dashboard css */
@@ -622,7 +627,7 @@
         box-sizing: border-box;
         box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
         padding: 0.25rem;
-        width: 400px;
+        width: 500px;
         font-size: 14px;
         }
 
@@ -652,6 +657,25 @@
         font-weight: 600;
         transition: all .15s ease-in-out;
         transform: scale(1.05);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+        
+        .animate-bounce200 {
+            animation: bounce 1s infinite;
+            animation-delay: 0.2s;
+        }
+        
+        .animate-bounce400 {
+            animation: bounce 1s infinite;
+            animation-delay: 0.4s;
         }
 
     </style>
