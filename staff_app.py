@@ -174,7 +174,7 @@ def edit_announcement(id):
 @staff_app.route('/api/book', methods=['POST'])
 def book_res():
     idno = request.form.get('idno')
-    date = request.form.get('date')
+    date = request.form.get('resdate')
     time_start = request.form.get('time-start')
     time_end = request.form.get('time-end')
     labno = request.form.get('labno')
@@ -520,23 +520,6 @@ def get_student_sitins_route(idno):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@staff_app.route('/api/sitin/active')
-def get_active_sitins_route():
-    try:
-        if not session.get('logged_in'):
-            return jsonify({'error': 'Not authenticated'}), 401
-            
-        sitins = get_active_sitins()
-        
-        # Add additional debugging information
-        if sitins:
-            return jsonify([dict(row) for row in sitins])
-        return jsonify([])
-        
-    except Exception as e:
-        # Log the error for debugging
-        print(f"Error in get_active_sitins_route: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 @staff_app.route('/api/check-in/<int:reservation_id>', methods=['POST'])
 def check_in(reservation_id):
@@ -678,3 +661,34 @@ def get_students_total_sitins():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@staff_app.route('/reset_session', methods=['GET'])
+def reset_sessions():
+    try:
+        if not session.get('logged_in'):
+            flash('Not authenticated', 'error')
+            return redirect(url_for('login'))
+        
+        if (not session.get('user', {}).get('role') == 'admin'):
+            flash('Only admin can reset sessions', 'error')
+            return redirect(url_for('staff_app.staff_students_total'))
+        
+        password = request.form.get('password')
+        if not password:
+            flash('Password is required', 'error')
+            
+        admin_idno = session.get('user', {}).get('idno')
+        sql = "SELECT * FROM users WHERE idno = ?"
+        admin = getallprocess(sql, (admin_idno,))
+        
+        if not admin or admin[0]['password'] != password:
+            flash("Invalid password", "error")
+        else:
+            success = reset_sessions()
+
+            if success:
+                flash('Student sessions reset successfully', 'success')
+            
+        return jsonify({'error': 'Failed to reset student sessions'}), 400
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

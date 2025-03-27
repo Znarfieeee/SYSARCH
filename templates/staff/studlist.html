@@ -52,8 +52,8 @@
     </div>
 
     <!-- Student Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
-        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
+        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -69,16 +69,16 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for student in students %}
                     <tr class="student-row hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.idno }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.idno }}</td>
                         {% if student.middlename.lower() == 'none' %}   
-                            <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.course.upper() }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.yr_lvl }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center" onclick="viewReservations('{{ student.idno }}', '{{ student.firstname }} {{ student.lastname }}')">{{ student.remaining_sessions }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.course.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.yr_lvl }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.remaining_sessions }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="flex gap-2 justify-center">
                                 <button onclick="editStudent('{{ student.idno }}')"
@@ -411,25 +411,6 @@ document.getElementById('addStudentForm').addEventListener('submit', async (e) =
         console.error('Error:', error);
         alert(error.message);
     }
-});
-
-// Reservations Modal Functions
-let currentView = 'reservations';
-let currentStudentId = null;
-let currentStudentName = null;
-
-// Add these styles to the views
-document.addEventListener('DOMContentLoaded', function() {
-    const reservationsView = document.getElementById('reservationsView');
-    const sitInView = document.getElementById('sitInView');
-    
-    // Add transition styles
-    reservationsView.style.transition = 'opacity 0.3s ease-in-out';
-    sitInView.style.transition = 'opacity 0.3s ease-in-out';
-    
-    // Set initial opacity
-    reservationsView.style.opacity = '1';
-    sitInView.style.opacity = '0';
 });
 </script>
 {% endblock %}

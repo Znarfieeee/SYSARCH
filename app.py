@@ -220,42 +220,15 @@ def home():
     user = session.get('user')
     return render_template("student/dashboard.html", user=user, pagetitle=pagetitle, announcements=announcements)
     
-
 @app.route('/history')
 def history():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
     pagetitle = 'Sit-in History'
-    user = session.get('user')
+
     
-    # Fetch completed sit-in history with all related information
-    sql = """
-        SELECT 
-            r.date, r.time_start, r.time_end, r.labno, r.purpose,
-            a.start_time, a.end_time,
-            acs.lab_pc_number,
-            sv.action as verification_status,
-            sv.timestamp as verified_at,
-            u.firstname AS staff_firstname, 
-            u.lastname AS staff_lastname
-        FROM reservations r
-        INNER JOIN attendancelog a ON r.id = a.reserve_id
-        LEFT JOIN active_sitin acs ON r.id = acs.reservation_id
-        LEFT JOIN staffverlog sv ON r.id = sv.reservation_id 
-            AND sv.action = 'approved'
-        LEFT JOIN users u ON sv.staff_id = u.idno
-        WHERE r.idno = ? 
-            AND a.start_time IS NOT NULL 
-            AND a.end_time IS NOT NULL
-        ORDER BY r.date DESC, r.time_start DESC
-    """
-    history = getallprocess(sql, (user['idno'],))
-    
-    return render_template('student/history.html', 
-                         pagetitle=pagetitle, 
-                         history=history, 
-                         user=user)
+    return render_template('student/history.html', pagetitle=pagetitle)
 
 @app.route('/reservation')
 def reservation():
@@ -328,6 +301,24 @@ def sitin():
                          pagetitle=pagetitle, 
                          user=user,
                          reservations=reservations)
+
+@app.route('/api/sitin/active')
+def get_active_sitins_route():
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        sitins = get_active_sitins()
+        
+        # Add additional debugging information
+        if sitins:
+            return jsonify([dict(row) for row in sitins])
+        return jsonify([])
+        
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in get_active_sitins_route: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/check-in/<int:reservation_id>', methods=['POST'])
 def check_in(reservation_id):
@@ -409,51 +400,62 @@ def edit_reservation(reservation_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/history')
-def get_history():
-    if not session.get('logged_in'):
-        return jsonify({'error': 'Not authenticated'}), 401
-    
+@app.route('/api/user-sitins')
+def get_user_sitins():
     try:
+        # Ensure the user is logged in
+        # if not session.get('logged_in'):
+        #     return jsonify({'error': 'Not authenticated'}), 401
+
+        # Get the user object from the session
         user = session.get('user')
-        
+        if not user or 'idno' not in user:
+            return jsonify({'error': 'User information is missing'}), 400
+
+        idno = user['idno']
+
+        # SQL query to fetch sit-in history for a specific user
         sql = """
             SELECT 
-                r.date, r.time_start, r.time_end, r.labno, r.purpose,
-                a.check_in_time as start_time, a.check_out_time as end_time,
-                acs.lab_pc_number
-            FROM reservations r
-            INNER JOIN attendancelog a ON r.id = a.reserve_id
-            LEFT JOIN active_sitin acs ON r.id = acs.reservation_id
-            WHERE r.idno = ? 
-                AND a.check_in_time IS NOT NULL 
-                AND a.check_out_time IS NOT NULL
-            ORDER BY r.date DESC, r.time_start DESC
+                a.idno,
+                u.firstname,
+                u.lastname,
+                strftime('%H:%M %p', a.start_time) AS start_time,
+                strftime('%H:%M %p', a.end_time) AS end_time,
+                strftime('%Y-%m-%d', a.start_time) AS date,
+                a.purpose,
+                a.labno
+            FROM active_sitin a
+            JOIN users u ON a.idno = u.idno
+            WHERE a.status = 'done' AND a.idno = ?
+            ORDER BY a.id DESC;
         """
         
-        history = getallprocess(sql, (user['idno'],))
+        # Fetch data from the database
+        sitins = getallprocess(sql, (idno,))
         
         # Convert the results to a list of dictionaries
-        if history:
+        if sitins:
             result = []
-            for row in history:
+            for row in sitins:
                 result.append({
-                    'date': row['date'],
-                    'time_start': row['time_start'],
-                    'time_end': row['time_end'],
-                    'labno': row['labno'],
-                    'purpose': row['purpose'],
+                    'idno': row['idno'],
+                    'firstname': row['firstname'],
+                    'lastname': row['lastname'],
                     'start_time': row['start_time'],
                     'end_time': row['end_time'],
-                    'lab_pc_number': row['lab_pc_number']
+                    'date': row['date'],
+                    'purpose': row['purpose'],
+                    'labno': row['labno']
                 })
-            return jsonify(result)
-        return jsonify([])
+            return jsonify(result), 200
         
+        # Return an empty list if no sit-ins are found
+        return jsonify([]), 200
+    
     except Exception as e:
-        print(f"Error in get_history: {str(e)}")  # For debugging
-        return jsonify({'error': 'Internal server error'}), 500
-
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
     # app.run(debug=True, host='172.19.131.161', port=5000)

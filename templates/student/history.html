@@ -1,43 +1,20 @@
 {% extends 'home.html'%}
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden rise-up">
-        <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Sit-In History</h1>
-            <div class="relative w-64">
-                <input 
-                    type="text" 
-                    id="searchHistory" 
-                    placeholder="Search history..." 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeyup="filterHistory()"
-                >
-                <span class="absolute right-3 top-2.5 text-gray-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </span>
-            </div>
-        </div>
-        
-        <div class="overflow-x-auto">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden rise-up w-[80%] mx-auto">
+        <div class="max-h-[80vh] overflow-y-auto" id="tableContainer">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Date</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Time</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Lab / PC</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Laboratory</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Purpose</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Check In</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Check Out</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Session Started</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Session Ended</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="historyTableBody">
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                            Loading history...
-                        </td>
-                    </tr>
+                    <!-- Data will be added dynamically -->
                 </tbody>
             </table>
         </div>
@@ -45,23 +22,60 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadHistory();
-});
+document.addEventListener('DOMContentLoaded', loadHistory);
 
 async function loadHistory() {
+    const tableBody = document.getElementById('historyTableBody');
+
+    tableBody.innerHTML = `
+        <tr id="loadingRow" class="animate-pulse">
+            <td colspan="7" class="px-6 py-4">
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                    </div>
+                    <div class="text-center text-gray-500">Loading data...</div>
+                </div>
+            </td>
+        </tr>`;
+
     try {
-        const response = await fetch('/api/history');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch('/api/user-sitins');
         const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
+
+        // Clear loading state
+        tableBody.innerHTML = '';
+
+        if (data.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        No sit-in sessions
+                    </td>
+                </tr>`;
+            return;
         }
-        
-        displayHistory(data);
+
+        data.forEach( item => {
+            const date = new Date(item.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+
+            const row = document.createElement('tr');
+            row.className = 'history-row hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-center">${date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${item.labno}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${item.purpose}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${item.start_time}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${item.end_time}</td>
+            `
+            tableBody.appendChild(row);
+        });
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('historyTableBody').innerHTML = `
@@ -74,69 +88,30 @@ async function loadHistory() {
     }
 }
 
-function displayHistory(history) {
-    const tableBody = document.getElementById('historyTableBody');
-    
-    if (!history || history.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                    No completed sit-in sessions found
-                </td>
-            </tr>
-        `;
-        return;
-    }
+// function filterHistory() {
+//     const searchInput = document.getElementById('searchHistory');
+//     const filter = searchInput.value.toLowerCase();
+//     const rows = document.getElementsByClassName('history-row');
 
-    tableBody.innerHTML = history.map(record => `
-        <tr class="history-row hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-center">${record.date || 'N/A'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">${record.time_start || ''} - ${record.time_end || ''}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-                Lab ${record.labno || 'N/A'}
-                ${record.lab_pc_number ? 
-                    `<span class="text-sm text-gray-500">(PC ${record.lab_pc_number})</span>` 
-                    : ''}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">${record.purpose || 'N/A'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    ${record.start_time || 'N/A'}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    ${record.end_time || 'N/A'}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-}
+//     for (let row of rows) {
+//         const date = row.children[0].textContent.toLowerCase();
+//         const time = row.children[1].textContent.toLowerCase();
+//         const lab = row.children[2].textContent.toLowerCase();
+//         const purpose = row.children[3].textContent.toLowerCase();
+//         const checkIn = row.children[4].textContent.toLowerCase();
+//         const checkOut = row.children[5].textContent.toLowerCase();
 
-function filterHistory() {
-    const searchInput = document.getElementById('searchHistory');
-    const filter = searchInput.value.toLowerCase();
-    const rows = document.getElementsByClassName('history-row');
-
-    for (let row of rows) {
-        const date = row.children[0].textContent.toLowerCase();
-        const time = row.children[1].textContent.toLowerCase();
-        const lab = row.children[2].textContent.toLowerCase();
-        const purpose = row.children[3].textContent.toLowerCase();
-        const checkIn = row.children[4].textContent.toLowerCase();
-        const checkOut = row.children[5].textContent.toLowerCase();
-
-        if (date.includes(filter) || 
-            time.includes(filter) || 
-            lab.includes(filter) || 
-            purpose.includes(filter) || 
-            checkIn.includes(filter) || 
-            checkOut.includes(filter)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    }
-}
+//         if (date.includes(filter) || 
+//             time.includes(filter) || 
+//             lab.includes(filter) || 
+//             purpose.includes(filter) || 
+//             checkIn.includes(filter) || 
+//             checkOut.includes(filter)) {
+//             row.style.display = '';
+//         } else {
+//             row.style.display = 'none';
+//         }
+//     }
+// }
 </script>
 {% endblock %}

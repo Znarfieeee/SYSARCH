@@ -542,7 +542,7 @@ def get_pending_reservations():
         FROM reservations r
         JOIN users u ON r.idno = u.idno
         WHERE r.status = 'pending'
-        ORDER BY r.date ASC, r.time_start ASC
+        ORDER BY r.date DESC, r.time_start DESC
     """
     return getallprocess(sql)
 
@@ -592,3 +592,15 @@ def update_sessions(idno):
         WHERE idno = ? and no_session > 0
     """
     return postprocess(sql, (idno,))
+
+def reset_sessions():
+    sql = """
+        UPDATE users
+        SET no_session = CASE
+            WHEN course = 'BSIT', 'BSCS', 'BSCPE' THEN 30
+            ELSE 15
+        END
+        WHERE role = 'student'
+        
+        """
+    return postprocess(sql)

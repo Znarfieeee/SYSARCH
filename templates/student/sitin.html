@@ -1,9 +1,11 @@
 {% extends 'home.html' %}
 {% block content %}
-<div class="container mx-auto px-4 py-8 rise-up">
+<div class="container flex flex-col mx-auto w-[80%] py-8 rise-up gap-6">
     <!-- Active Sit-in Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-2xl font-bold mb-6">Current Active Sit-in</h2>
+    <div class="bg-white rounded-lg shadow-md p-6 h-[30%]">
+        <div class="flex justify-between items-center content-center mb-4">
+            <h2 class="text-2xl font-bold">Current Active Sit-in</h2>
+        </div>
         <div id="activeSitinSection">
             <!-- Active sit-in content will be loaded here -->
             <div class="animate-pulse">
@@ -19,15 +21,23 @@
 
     <!-- Approved Reservations Section -->
     <div class="bg-white rounded-lg shadow overflow-hidden w-full mx-auto rise-up p-6">
-        <h2 class="text-2xl font-bold mb-6">Approved Reservations</h2>
+        <div id="header" class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Approved Reservations</h2>
+            <div class="cursor-pointer">
+                <a href="{{ url_for('reservation') }}" 
+                   class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Make a Reservation
+                </a>
+            </div>
+        </div>
         
-        <div id="reservationsSection" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+        <div id="reservationsSection" class="overflow-x-auto overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="bg-gray-50 sticky top-0 z-10">
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                     </tr>
                 </thead>
@@ -36,12 +46,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="text-center py-6">
-            <a href="{{ url_for('reservation') }}" 
-               class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Make a Reservation
-            </a>
-        </div>
+        
     </div>
 </div>
 
@@ -90,38 +95,37 @@ async function loadActiveSitIn() {
         const data = await response.json();
         
         if (data && data.length > 0) {
-            const sitin = data[0]; // Get the first active sit-in
-            const [labNumber, pcNumber] = (sitin.lab_pc_number || '').split('-');
+            const sitin = data[0];
             
             activeSitinSection.innerHTML = `
                 <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600">Lab & PC</p>
-                            <p class="font-semibold">Lab ${labNumber || 'N/A'} (PC ${pcNumber || 'N/A'})</p>
+                            <p class="text-sm text-gray-600">Date</p>
+                            <p class="font-semibold">${new Date(sitin.start_time).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Start Time</p>
-                            <p class="font-semibold">${formatDateTime(sitin.start_time)}</p>
+                            <p class="font-semibold">${new Date(sitin.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-600">Expected End Time</p>
-                            <p class="font-semibold">${formatDateTime(sitin.expected_end_time)}</p>
+                            <p class="text-sm text-gray-600">Lab</p>
+                            <p class="font-semibold">Lab ${sitin.labno}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Purpose</p>
                             <p class="font-semibold">${sitin.purpose}</p>
                         </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button onclick="endSitIn(${sitin.id})"
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                            End Session
-                        </button>
+                        <div>
+                            <button onclick="endSitIn(${sitin.id})"
+                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                End Session
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -136,20 +140,6 @@ async function loadActiveSitIn() {
             <p class="text-center text-red-500">Error loading active sit-in data.</p>
         `;
     }
-}
-
-function formatDateTime(dateTimeStr) {
-    if (!dateTimeStr) return 'N/A';
-    const parts = dateTimeStr.split(' ');
-    if (parts.length < 2) return dateTimeStr;
-    
-    const date = new Date(parts[0]);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-    return `${formattedDate} ${parts[1]}`;
 }
 
 async function startSitIn(reservationId) {

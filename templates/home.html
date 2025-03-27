@@ -99,53 +99,37 @@
         }
 
         /* dashboard css */
-        #lab-info::-webkit-scrollbar {
-            width: 5px;  /* Thin scrollbar */
-        }
-
-        #lab-info::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent */
-            border-radius: 10px;
-        }
-
-        #lab-info::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.5); /*transparent */
-        }
-
-        #lab-info::-webkit-scrollbar-track {
-            background: transparent; /* Invisible track */
-        }
-
-        #schedule-table::-webkit-scrollbar{
+        #tableContainer::-webkit-scrollbar {
             width: 5px;
         }
 
-        #schedule-table::-webkit-scrollbar-thumb {
+        #tableContainer::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0.3); /*transparent */
             border-radius: 10px;
         }
 
-        #schedule-table::-webkit-scrollbar-thumb:hover {
+        #tableContainer::-webkit-scrollbar-thumb:hover {
             background-color: rgba(0, 0, 0, 0.5); /*transparent */
         }
 
-        #schedule-table::-webkit-scrollbar-track {
+        #tableContainer::-webkit-scrollbar-track{
             background: transparent; /* Invisible track */
         }
 
-        #announcements-container::-webkit-scrollbar{
+        #schedule-table::-webkit-scrollbar, #lab-info::-webkit-scrollbar {
             width: 5px;
-            
         }
 
-        #announcements-container::-webkit-scrollbar-thumb {
+        #schedule-table::-webkit-scrollbar-thumb, #lab-info::-webkit-scrollbar-thumb{
             background-color: rgba(0, 0, 0, 0.3); /*transparent */
             border-radius: 10px;
         }
-        #announcements-container::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.); /*transparent */
+
+        #schedule-table::-webkit-scrollbar-thumb:hover, #lab-info::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.5); /*transparent */
         }
-        #announcements-container::-webkit-scrollbar-track {
+
+        #schedule-table::-webkit-scrollbar-track, #lab-info::-webkit-scrollbar-track {
             background: transparent; /* Invisible track */
         }
 
@@ -271,23 +255,23 @@
     </header>
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
         <div class="flex-1">
-            <a href="{{ url_for('home') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+            <a href="{{ url_for('home') }}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
                 <img src="/static/img/dashboard.png" class="size-5 mx-4">
                 <span>Dashboard</span>
             </a>
-            <a href="{{ url_for('history')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in  ">
+            <a href="{{ url_for('history')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in  ">
                 <img src="/static/img/history.png" class="size-5 mx-4">
                 <span>History</span>
             </a>
-            <a href="{{ url_for('sitin') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in">
+            <a href="{{ url_for('sitin') }}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                 <img src="/static/img/pc.png" class="size-5 mx-4">
                 <span>Sit-in</span>
             </a>
-            <a href="{{ url_for('reservation')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+            <a href="{{ url_for('reservation')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in ">
                 <img src="/static/img/booking.png" class="size-5 mx-4">
                 <span>Reservation</span>
             </a>
-            <button onclick="logout()" class="flex items-center cursor-pointer block p-5 w-full text-black hover:bg-gray-200 transition ease-in">
+            <button onclick="logout()" class="flex items-center cursor-pointer p-5 w-full text-black hover:bg-gray-200 transition ease-in">
                 <i class="fas fa-sign-out-alt mx-4 size-5"></i>
                 <span>Logout</span>
             </button>
