@@ -97,16 +97,16 @@
         #sidebar {
             z-index: 999;
         }
-        #announcements-container::-webkit-scrollbar, #studentTableBody::-webkit-scrollbar, #total_sitin::-webkit-scrollbar {
+        #announcements-container::-webkit-scrollbar, #tableContainer::-webkit-scrollbar {
             width: 5px;
         }
 
-        #announcements-container::-webkit-scrollbar-thumb, #studentTableBody::-webkit-scrollbar-thumb, #total_sitin::-webkit-scrollbar {
+        #announcements-container::-webkit-scrollbar-thumb, #tableContainer::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0.3); /*transparent */
             border-radius: 10px;
             
         }
-        #announcements-container::-webkit-scrollbar-track, #studentTableBody::-webkit-scrollbar-track, #total_sitin::-webkit-scrollbar {
+        #announcements-container::-webkit-scrollbar-track, #tableContainer::-webkit-scrollbar-track{
             background: transparent; /* Invisible track */
         }
 
@@ -694,23 +694,23 @@
     </header>
     <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
         <div class="flex-1">
-            <a href="{{ url_for('staff_app.staff_dashboard') }}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+            <a href="{{ url_for('staff_app.staff_dashboard') }}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
                 <img src="/static/img/dashboard.png" class="size-5 mx-4">
                 <span>Dashboard</span>
             </a>
-            <a href="{{ url_for('staff_app.staff_students')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in  ">
+            <a href="{{ url_for('staff_app.staff_students')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in
                 <img src="/static/img/sticky-note.png" class="size-5 mx-4">
                 <span>Students</span>
             </a>
-            <a href="{{ url_for('staff_app.staff_reports')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+            <a href="{{ url_for('staff_app.staff_reports')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in ">
                 <img src="/static/img/seo-report.png" class="size-5 mx-4">
                 <span>Reports</span>
             </a>
-            <a href="{{ url_for('staff_app.staff_feedbacks')}}" class="flex items-center block text-black p-5 hover:bg-gray-200 transition ease-in ">
+            <a href="{{ url_for('staff_app.staff_feedbacks')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in
                 <img src="/static/img/feedback.png" class="size-5 mx-4">
                 <span>Feedbacks</span>
             </a>
-            <button onclick="logout()" class="flex items-center cursor-pointer block p-5 w-full text-black hover:bg-gray-200 transition ease-in">
+            <button onclick="logout()" class="flex items-center cursor-pointer p-5 w-full text-black hover:bg-gray-200 transition ease-in">
                 <i class="fas fa-sign-out-alt mx-4 size-5"></i>
                 <span>Logout</span>
             </button>

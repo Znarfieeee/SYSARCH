@@ -52,8 +52,8 @@
     </div>
 
     <!-- Pending Reservations Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
-        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
+        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -73,6 +73,7 @@
         </div>
     </div>
 
+    <!-- Modal for Adding Reservation -->
     <div id="modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
         <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[30%] transform scale-20 opacity-0 transition-all duration-300">
             <form action="/api/book" method="post" name="reservation-form" id="reservation-form"> 
@@ -85,7 +86,7 @@
                         <label class="user-label bg-gray-200">Student ID</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="date" name="date" autocomplete="off" class="input w-full">
+                        <input required="" type="date" name="resdate" autocomplete="off" class="input w-full">
                         <label class="user-label bg-gray-200">Date</label>
                     </div>
                     <div class="input-group">
@@ -207,7 +208,7 @@ async function loadPendingReservations() {
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.idno}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.firstname.toUpperCase()} ${reservation.lastname.toUpperCase()}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.date}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.time_start} - ${reservation.time_end}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.purpose}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${reservation.labno}</td>
