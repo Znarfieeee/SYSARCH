@@ -203,31 +203,32 @@
 
         cancelBtn.addEventListener('click', hideForm);
 
-        function deleteAnnouncement(id) {
-            fetch(`/announcement/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            })
-            .then(response => {
-                
-                    if (response.redirected) {
-                        if(confirm("Are you sure you want to delete this announcement? ")){
-                            alert('Announcement deleted successfully!');
-                            window.location.href = response.url;
-                        }
-                    } else if (response.ok){
-                        alert('Announcement deleted successfully!');
-                        location.reload(); 
-                    }
-                    else {
-                        alert('An error occurred while deleting this announcement.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+        async function deleteAnnouncement(id) {
+            const confirmed = await confirmAction('Are you sure you want to delete this announcement?');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/announcement/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                 });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification(data.message || "Announcement deleted successfully", "success");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    showNotification(data.error || "Failed to delete announcement", "error");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification("An unexpected error occurred while deleting the announcement", "error");
+            }
         }
 
         document.querySelectorAll('.editBtn').forEach(button => {
@@ -265,17 +266,16 @@
                     body: formData
                 });
 
+                const result = await response.json();
                 if (response.ok) {
-                    const result = await response.json();
-                    alert(result.message || 'Announcement saved successfully');
-                    window.location.reload();
+                    showNotification(result.message || 'Announcement saved successfully', "success");
+                    setTimeout(() => window.location.reload(), 5000);
                 } else {
-                    const error = await response.json();
-                    alert(error.message || 'Failed to save announcement');
+                    showNotification(result.error || 'Failed to save announcement', "error");
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while saving the announcement');
+                showNotification('An error occurred while saving announcement', "error");
             }
         }
 
@@ -407,12 +407,15 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                if (data.message) {
+                showNotification(data.message, data.status);
+                if (data.status === "success") {
                     showReservationStudents();
                 }
             })
-            .catch(err => console.error('Error updating reservation status:', err));
+            .catch(err => {
+                console.error('Error updating reservation status:', err);
+                showNotification("An error occurred while updating status", "error");
+            });
         }
 
         function closeModal() {

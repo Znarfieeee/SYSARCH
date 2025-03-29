@@ -76,7 +76,7 @@
     <!-- Modal for Adding Reservation -->
     <div id="modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
         <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[30%] transform scale-20 opacity-0 transition-all duration-300">
-            <form action="/api/book" method="post" name="reservation-form" id="reservation-form"> 
+            <form action="/api/book" method="POST" name="reservation-form" id="reservation-form"> 
                 <input type="hidden" id="selectedDate" name="date">
                 <h1 class="font-bold text-2xl text-center">Reservation</h1>
                 <h2 id="thisday" class="text-lg text-center mb-8"></h2>
@@ -240,9 +240,8 @@ async function loadPendingReservations() {
 
 async function updateReservationStatus(reservationId, status) {
     try {
-        if (!confirm(`Are you sure you want to ${status} this reservation?`)) {
-            return;
-        }
+        const confirmed = await confirmAction(`Are you sure you want to ${status} this reservation?`);
+        if (!confirmed) return;
 
         const response = await fetch(`/api/reservation/${reservationId}/status`, {
             method: 'POST',
@@ -252,17 +251,16 @@ async function updateReservationStatus(reservationId, status) {
             body: JSON.stringify({ status })
         });
 
-        const result = await response.json();
-
+        const data = await response.json();
         if (response.ok) {
-            alert(result.message);
+            showNotification(data.message, data.status);
             loadPendingReservations();
         } else {
-            throw new Error(result.error || 'Failed to update reservation');
+            showNotification(data.error || "Failed to update reservation", "error");
         }
     } catch (error) {
         console.error('Error:', error);
-        alert(error.message);
+        showNotification("An unexpected error occurred", "error");
     }
 }
 
@@ -275,12 +273,63 @@ function showAddReservationModal() {
 }    
 
 function closeModal() {
-        modalContent.classList.remove('scale-100', 'opacity-100');
-       modalContent.classList.add('scale-20', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-20', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.toggle('hidden');
+        document.getElementById('reservation-form').reset();
+    }, 300);
+}
+
+document.getElementById('reservation-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/api/book', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification(data.message || "Reservation added successfully", "success");
+            setTimeout(() => {
+                closeModal();
+                loadPendingReservations();
+            }, 1000);
+        } else {
+            showNotification(data.error || "Failed to add reservation", "error");
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification("An unexpected error occurred", "error");
+    }
+});
+
+function showNotification(message, type = "success") {
+    // Remove any existing notifications
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    // Add to document
+    document.body.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.5s ease-in-out forwards';
         setTimeout(() => {
-            modal.classList.toggle('hidden');
-            document.getElementById('reservation-form').reset();
-        }, 300);
-    } 
+            notification.remove();
+        }, 500);
+    }, 3000);
+}
 </script>
 {% endblock %}

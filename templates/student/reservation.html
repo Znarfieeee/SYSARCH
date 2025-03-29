@@ -78,36 +78,59 @@
 </div>
 
 <!-- Edit Reservation Modal -->
-<div id="editReservationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+<div id="editReservationModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
+    <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-xl w-[25%] transform scale-75 opacity-0 transition-all duration-300">
         <div class="mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Reservation</h3>
-            <div class="mt-2">
-                <form id="editReservationForm">
+            <h3 class="font-bold text-2xl text-center">Edit Reservation</h3>
+            <div class="mt-6">
+                <form id="editReservationForm" class="flex flex-col gap-4 mx-auto">
                     <input type="hidden" id="reservationId" name="reservationId">
-                    <div class="mb-4">
-                        <label for="editDate" class="block text-sm font-medium text-gray-700">Date</label>
-                        <input type="date" id="editDate" name="date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                    <div class="input-group">
+                        <input required="" type="date" name="date" id="editDate" autocomplete="off" class="input w-full">
+                        <label for="editDate" class="user-label bg-gray-200">Date</label>
                     </div>
-                    <div class="mb-4">
-                        <label for="editTimeStart" class="block text-sm font-medium text-gray-700">Start Time</label>
-                        <input type="time" id="editTimeStart" name="time_start" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                    <div class="input-group">
+                        <input required="" type="time" name="time_start" id="editTimeStart" autocomplete="off" class="input w-full">
+                        <label for="editTimeStart" class="user-label bg-gray-200">Start Time</label>
                     </div>
-                    <div class="mb-4">
-                        <label for="editTimeEnd" class="block text-sm font-medium text-gray-700">End Time</label>
-                        <input type="time" id="editTimeEnd" name="time_end" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                    <div class="input-group">
+                        <input required="" type="time" name="time_end" id="editTimeEnd" autocomplete="off" class="input w-full">
+                        <label for="editTimeEnd" class="user-label bg-gray-200">End Time</label>
                     </div>
-                    <div class="mb-4">
-                        <label for="editLabNo" class="block text-sm font-medium text-gray-700">Lab Number</label>
-                        <input type="text" id="editLabNo" name="labno" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                    <div class="input-group">
+                        <select required id="editLabNo" name="labno" class="input w-full">
+                            <option value="" selected disabled></option>
+                            <option value="524">524</option>
+                            <option value="526">526</option>
+                            <option value="528">528</option>
+                            <option value="530">530</option>
+                            <option value="542">542</option>
+                            <option value="Mac Laboratory">Mac Laboratory</option>
+                        </select>
+                        <label class="user-label bg-gray-200">Laboratory</label>                    
                     </div>
-                    <div class="mb-4">
-                        <label for="editPurpose" class="block text-sm font-medium text-gray-700">Purpose</label>
-                        <input type="text" id="editPurpose" name="purpose" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                    <div class="input-group">
+                        <select id="editPurpose" name="purpose" class="input w-full" required>
+                            <option value="" disabled selected></option>
+                            <option value="Java programming">Java Programming</option>
+                            <option value="C programming">C Programming</option>
+                            <option value="C# programming">C# Programming</option>
+                            <option value="Php programming">Php Programming</option>
+                            <option value="Python programming">Python Programming</option>
+                            <option value="Javascript programming">Javascript Programming</option>
+                            <option value="ASP.Net programming">ASP.Net Programming</option>
+                        </select>
+                        <label class="user-label bg-gray-200">Purpose</label>                    
                     </div>
-                    <div class="flex justify-end">
-                        <button type="button" onclick="closeEditModal()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">Cancel</button>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
+                    <div class="flex justify-between mt-2">
+                        <button type="button" onclick="closeEditModal()" 
+                                class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                            Save
+                        </button>
                     </div>
                 </form>
             </div>
@@ -170,7 +193,7 @@
         generateCalendar(currentDate);
     });
 
-    // Close Modal
+    // Close Add reservation modal
     function closeModal() {
         modalContent.classList.remove('scale-100', 'opacity-100');
         modalContent.classList.add('scale-20', 'opacity-0');
@@ -196,22 +219,21 @@
                     statusClass = 'status-denied';
                 }
                 const reservationCard = `
-
-                        <div id="reservation-card" class="p-4 hover:-translate-y-1.5 duration-300 hover:shadow-md border-l-4 border-gray-400 rounded-xl cursor-pointer">
-                            <div class="flex  justify-between">
-                                <span class="font-bold">${reservation.date}</span>
-                                <span class="text-sm ${statusClass}">${reservation.status}</span>    
-                            </div>    
-                            <div class="text-sm text-gray-700 mt-2"> 
-                                <span>${reservation.purpose}</span>
-                            </div>
-                            <div class="flex justify-between mt-2 text-sm text-gray-600">
-                                <span>🕒 ${reservation.time_start}</span>
-                                <span>🕒 ${reservation.time_end}</span>
-                            </div>
-                            <div class="mt-2 text-sm font-semibold">Lab: ${reservation.labno}</div>
-                        </div> 
-
+                    <div onclick="openEditModal('${reservation.id}', '${reservation.date}', '${reservation.time_start}', '${reservation.time_end}', '${reservation.labno}', '${reservation.purpose}', '${reservation.status}')" id="reservation-card" 
+                        class="p-4 hover:-translate-y-1.5 duration-300 hover:shadow-md border-l-4 border-gray-400 rounded-xl cursor-pointer">
+                        <div class="flex justify-between">
+                            <span class="font-bold">${reservation.date}</span>
+                            <span class="text-sm ${statusClass}">${reservation.status}</span>    
+                        </div>    
+                        <div class="text-sm text-gray-700 mt-2"> 
+                            <span>${reservation.purpose}</span>
+                        </div>
+                        <div class="flex justify-between mt-2 text-sm text-gray-600">
+                            <span>🕒 ${reservation.time_start}</span>
+                            <span>🕒 ${reservation.time_end}</span>
+                        </div>
+                        <div class="mt-2 text-sm font-semibold">Lab: ${reservation.labno}</div>
+                    </div>
                 `;
                 scheduleTable.innerHTML += reservationCard;
             })
@@ -221,18 +243,54 @@
 
     generateCalendar(currentDate);
 
-    function openEditModal(reservation) {
-        document.getElementById('reservationId').value = reservation.id;
-        document.getElementById('editDate').value = reservation.date;
-        document.getElementById('editTimeStart').value = reservation.time_start;
-        document.getElementById('editTimeEnd').value = reservation.time_end;
-        document.getElementById('editLabNo').value = reservation.labno;
-        document.getElementById('editPurpose').value = reservation.purpose;
-        document.getElementById('editReservationModal').classList.remove('hidden');
+    async function openEditModal(id, date, timeStart, timeEnd, labNo, purpose, status) {
+        if (status !== 'pending') {
+            alert('Only pending reservations can be edited.');
+            return;
+        }
+        else{
+            try {
+                // Populate the modal fields with the provided data
+                document.getElementById('reservationId').value = id;
+                document.querySelector('#editDate').value = new Date(date).toISOString().split('T')[0]; // Format as YYYY-MM-DD
+                document.getElementById('editTimeStart').value = timeStart;
+                document.getElementById('editTimeEnd').value = timeEnd;
+
+                // Set the default selected option for "Laboratory"
+                const labNoSelect = document.getElementById('editLabNo');
+                labNoSelect.value = labNo;
+
+                
+
+                // Set the default selected option for "Purpose"
+                const purposeSelect = document.getElementById('editPurpose');
+                purposeSelect.value = purpose;
+
+                // Show the modal with animation
+                const modal = document.getElementById('editReservationModal');
+                const modalContent = modal.querySelector('#modalContent');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-75', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            } catch (error) {
+                console.error('Error loading reservation data:', error);
+                alert('Failed to load reservation data. Please try again.');
+            }
+        }
     }
 
     function closeEditModal() {
-        document.getElementById('editReservationModal').classList.add('hidden');
+        const modal = document.getElementById('editReservationModal');
+        const modalContent = modal.querySelector('#modalContent');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-75', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.getElementById('editReservationForm').reset();
+        }, 300);
     }
 
     document.getElementById('editReservationForm').addEventListener('submit', async function(event) {

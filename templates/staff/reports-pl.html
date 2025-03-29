@@ -3,25 +3,26 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header and Search Section -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
-        <div class="w-full md:w-64 opacity-0">
-            <div class="relative">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search students..." 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeyup="filtertotalsitin()">
-                <span class="absolute right-3 top-2.5 text-gray-400 cursor-pointer">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </span>
+        <div class="flex gap-2">
+            <div class="input-group">
+                <select name="level" id="levelFilter" class="input w-full" required onchange="filterTable()">
+                    <option value="" selected></option>
+                    <option value="1">1 year</option>
+                    <option value="2">2 year</option>
+                    <option value="3">3 year</option>
+                    <option value="4">4 year</option>
+                </select>
+                <label class="user-label bg-gray-200">Level</label>
+            </div>
+            <div class="input-group">
+                <input required="" type="date" name="date" id="dateFilter" autocomplete="off" class="input w-full" onchange="filterTable()">
+                <label class="user-label bg-gray-200">Date</label>
             </div>
         </div>
         
         <div class="radio-inputs flex flex-wrap justify-center gap-2">
             <a href="/staff/reports" class="radio">
-                <input type="radio" name="radio" checked="">
+                <input type="radio" name="radio">
                 <span class="name">All Students</span>
             </a>
             <a href="/staff/reports/purpose" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
@@ -29,7 +30,7 @@
                 <span class="name">Per Purpose</span>
             </a>
             <a href="/staff/reports/level" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+                <input type="radio" name="radio" checked="">
                 <span class="name">Per Level</span>
             </a>
         </div>
@@ -49,17 +50,16 @@
     <!-- Student Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
         <div id="tableContainer" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table id="studentTable" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
                         <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
                         <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
                         <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -75,13 +75,25 @@
                         <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.course.upper() }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.yr_lvl }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.purpose }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.start_time }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.end_time }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.date }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Modal for file type selection -->
+<div id="fileTypeModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+        <h2 class="text-lg font-semibold mb-4">Select File Type</h2>
+        <div class="flex flex-col gap-4">
+            <button onclick="generateReport('csv')" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">CSV</button>
+            <button onclick="generateReport('excel')" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Excel</button>
+            <button onclick="generateReport('pdf')" class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg">PDF</button>
+        </div>
+        <button onclick="closeFileTypeModal()" class="mt-4 text-gray-500 hover:text-gray-700">Cancel</button>
     </div>
 </div>
 
@@ -128,12 +140,12 @@ async function loadTotalSitins(data) {
             const row = document.createElement('tr');
             row.className = 'totalsitin-row hover:bg-gray-50';
             row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.start_time} - ${student.end_time}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">${student.purpose}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${student.labno}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${student.idno}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${student.start_time} - ${student.end_time}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${student.purpose}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${student.labno}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -146,6 +158,25 @@ async function loadTotalSitins(data) {
             </tr>`;
         console.error('Error:', error);
     }
+}
+
+function filterTable() {
+    const levelFilter = document.getElementById('levelFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    const rows = document.querySelectorAll('#studentTable tbody tr');
+
+    rows.forEach(row => {
+        const level = row.querySelector('td:nth-child(5)').textContent.trim();
+        const date = row.querySelector('td:nth-child(7)').textContent.trim();
+        const matchesLevel = !levelFilter || level === levelFilter;
+        const matchesDate = !dateFilter || date === dateFilter;
+
+        if (matchesLevel && matchesDate) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 function showFileTypeModal() {
