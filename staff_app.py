@@ -66,7 +66,36 @@ def staff_students():
 def staff_reports():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template("staff/reports.html", pagetitle='Reports')
+
+    students = get_total_sitins()
+    
+    if students:
+        students_list = []
+        for student in students:
+            student_dict = dict(student)
+            student_dict['sessions'] = student_dict.get('sessions', 0)
+            student_dict['remaining_sessions'] = student_dict.get('no_session', 0) - student_dict['sessions']
+            students_list.append(student_dict)
+    else:
+        students_list = []
+    
+    return render_template('staff/reports.html', pagetitle='Reports', students=students_list)
+
+@staff_app.route('/staff/reports/purpose')
+def staff_reports_purpose():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/reports-pp.html", 
+                         pagetitle='Reports per Purpose')
+
+@staff_app.route('/staff/reports/level')
+def staff_reports_level():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/reports-pl.html", 
+                         pagetitle='Reports per Level')
 
 @staff_app.route('/staff/feedbacks')
 def staff_feedbacks():
@@ -199,9 +228,9 @@ def get_statistics():
             stats_dict = dict(stats[0])
             # Ensure values are not None and non-negative
             stats_dict = {
-                'total_registered_students': max(0, stats_dict.get('total_registered_students', 0) -1),
+                'total_registered_students': max(0, stats_dict.get('total_registered_students', 0)),
                 'currently_sit_in': max(0, stats_dict.get('currently_sit_in', 0)),
-                'total_sit_in': max(0, stats_dict.get('currently_sit_in', 0) + stats_dict.get('completed_sit_ins', 0) -1)
+                'total_sit_in': max(0, stats_dict.get('completed_sit_ins', 0))
             }
             return jsonify(stats_dict)
         return jsonify({
