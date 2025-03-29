@@ -133,7 +133,7 @@ def update_reservation_status(reservation_id, status, staff_id):
         # Update reservation status
         cursor.execute("""
             UPDATE reservations 
-            SET status = ?, updated_at = datetime('now', 'localtime')
+            SET status = ?
             WHERE id = ?
         """, (status, reservation_id))
 
@@ -285,7 +285,7 @@ def get_detailed_history():
     """
     return getallprocess(sql)
 
-def start_sitin(expected_end_time, notes, reservation_id, pc_number, purpose):
+def start_sitin(end_time, notes, reservation_id, purpose):
     conn = get_db_connection()
     cursor = conn.cursor()
     success = False
@@ -319,17 +319,16 @@ def start_sitin(expected_end_time, notes, reservation_id, pc_number, purpose):
                 idno, 
                 lab_pc_number, 
                 start_time,
-                expected_end_time,
+                end_time,
                 status,
                 notes,
                 purpose
             )
-            VALUES (?, ?, ?, datetime('now', 'localtime'), ?, 'active', ?, ?)
+            VALUES (?, ?, datetime('now', 'localtime'), ?, 'active', ?, ?)
         """, (
             reservation_id, 
             reservation['idno'], 
-            pc_number,
-            expected_end_time,
+            end_time,
             notes,
             purpose
         ))
@@ -542,7 +541,7 @@ def get_pending_reservations():
         FROM reservations r
         JOIN users u ON r.idno = u.idno
         WHERE r.status = 'pending'
-        ORDER BY r.date DESC, r.time_start DESC
+        ORDER BY r.date DESC
     """
     return getallprocess(sql)
 
