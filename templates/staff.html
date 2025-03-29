@@ -55,6 +55,49 @@
         background-color: rgba(220, 53, 69, 0.8);
         }
 
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            max-width: 24rem;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification.success {
+            background-color: #10B981;
+        }
+
+        .notification.error {
+            background-color: #EF4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        } 
+
         /* From Uiverse.io by JulanDeAlb */ 
         .hamburger {
             cursor: pointer;
@@ -788,6 +831,59 @@
         });
     }, 5000);
 
+    // function showNotification(message, category) {
+    //     // Create a new flash message element
+    //     const flashMessage = document.createElement('div');
+    //     flashMessage.classList.add('flash', category);
+    //     flashMessage.innerHTML = `
+    //         <span>${message}</span>
+    //     `;
+
+    //     // Append to the flash-messages container
+    //     const flashContainer = document.querySelector('.flash-messages');
+    //     if (!flashContainer) {
+    //         console.error("Flash messages container not found!");
+    //         return;
+    //     }
+    //     flashContainer.appendChild(flashMessage);
+
+    //     // Automatically remove the message after 5 seconds
+    //     setTimeout(() => {
+    //         flashMessage.remove();
+    //     }, 5000);
+    // }
+
+    function showNotification(message, type = "success") {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        // Add to document
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.5s ease-in-out forwards';
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 3000);
+    }
+
+    function confirmAction(message) {
+        return new Promise((resolve) => {
+            const confirmed = window.confirm(message);
+            resolve(confirmed);
+        });
+    }
+
     function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('-translate-x-full');
@@ -855,6 +951,8 @@
         observer.observe(reservationsView);
         observer.observe(sitInView);
     });
+
+
 
     window.addEventListener('load', function() {
         const loader = document.getElementById('loader');

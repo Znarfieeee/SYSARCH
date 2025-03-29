@@ -128,8 +128,7 @@ def staff_students_total():
 @staff_app.route('/announcement', methods=['POST'])
 def create_announcement():
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
     
     idno = session['user']['idno']
     title = request.form.get('title')
@@ -140,11 +139,9 @@ def create_announcement():
                          content=content)
     
     if success:
-        flash("Announcement created successfully.", "success")
-        return redirect(url_for('staff_app.staff_dashboard'))
+        return jsonify({'message': 'Announcement created successfully.', 'status': 'success'}), 200
     
-    flash("Failed to create announcement.", "error")
-    return redirect(url_for('staff_app.staff_dashboard'))
+    return jsonify({'message': 'Failed to create announcement.', 'status': 'error'}), 400
 
 @staff_app.route('/announcement/<int:id>', methods=['DELETE'])
 def delete_announcement(id):
@@ -152,11 +149,9 @@ def delete_announcement(id):
     success = postprocess(sql, (id,))
     
     if success:
-        flash("Announcement deleted successfully.", "success")
-        return url_for('staff_app.staff_dashboard')
+        return jsonify({'message': 'Announcement deleted successfully.', 'status': 'success'}), 200
     
-    flash("Failed to delete announcement.", "error")
-    return url_for('staff_app.staff_dashboard')
+    return jsonify({'message': 'Failed to delete announcement.', 'status': 'error'}), 400
 
 @staff_app.route('/announcement/<int:id>/edit', methods=['POST'])
 def edit_announcement(id):
@@ -170,15 +165,12 @@ def edit_announcement(id):
                               content=content)
         
         if success:
-            flash("Announcement updated successfully.", "success")
-            return redirect(url_for('staff_app.staff_dashboard'))
+            return jsonify({'message': 'Announcement updated successfully', 'status': 'success'}), 200
         
-        flash("Failed to update announcement.", "error")
-        return redirect(url_for('staff_app.staff_dashboard'))
+        return jsonify({'message': 'Failed to update announcement', 'status': 'error'}), 400
             
     except Exception as e:
-        flash("Error updating announcement: " + str(e), "error")
-        return redirect(url_for('staff_app.staff_dashboard'))
+        return jsonify({'message': f"Error updating announcement: {str(e)}", 'status': 'error'}), 500
 
 @staff_app.route('/api/book', methods=['POST'])
 def book_res():
@@ -195,11 +187,9 @@ def book_res():
                          labno=labno, purpose=purpose, status=status)
     
     if success:
-        flash("Reservation successful.", "success")
-    else:
-        flash("Reservation failed.", "error")
-
-    return redirect(url_for('staff_app.staff_students_pending'))
+        return jsonify({'message': 'Reservation successful.', 'status': 'success'}), 200
+    
+    return jsonify({'message': 'Reservation failed.', 'status': 'error'}), 400
 
 @staff_app.route('/api/statistics', methods=['GET'])
 def get_statistics():
@@ -400,35 +390,26 @@ def update_reservation_status_route(reservation_id):
         staff_id = session.get('user', {}).get('idno')
         
         if not staff_id:
-            flash("Account type is not authenticated", "error")
-            return redirect(url_for('staff_app.staff_students_pending'))
+            return jsonify({'message': 'Account type is not authenticated', 'status': 'error'}), 401
             
-        # Get reservation details and check sessions
         reservation = get_reservation_details(reservation_id)
         if not reservation:
-            flash("Reservation not found", "error")
-            return redirect(url_for('staff_app.staff_students_pending'))
+            return jsonify({'message': 'Reservation not found', 'status': 'error'}), 404
             
-        # Check remaining sessions if approving
         if status == 'approved':
             sessions = check_student_sessions(reservation[0]['idno'])
             if sessions and sessions[0]['used_sessions'] >= sessions[0]['no_session']:
-                flash("Student has no remaining sessions", "error")
-                return redirect(url_for('staff_app.staff_students_pending'))
+                return jsonify({'message': 'Student has no remaining sessions', 'status': 'error'}), 400
         
-        # Update the reservation status
         success = update_reservation_status(reservation_id, status, staff_id)
         
         if success:
-            flash("Reservation status updated successfully", "success")
-            return redirect(url_for('staff_app.staff_students_pending'))
+            return jsonify({'message': 'Reservation status updated successfully', 'status': 'success'}), 200
         
-        flash("Failed to update reservation status", "error")
-        return redirect(url_for('staff_app.staff_students_pending'))
+        return jsonify({'message': 'Failed to update reservation status', 'status': 'error'}), 400
             
     except Exception as e:
-        flash(f"Error updating reservation status: {str(e)}", "error")
-        return redirect(url_for('staff_app.staff_students_pending'))
+        return jsonify({'message': f'Error updating reservation status: {str(e)}', 'status': 'error'}), 500
 
 @staff_app.route('/api/history')
 def get_history_route():
@@ -459,7 +440,7 @@ def get_statistics_chart_route():
 def start_sitin_route():
     try:
         if not session.get('logged_in'):
-            return jsonify({'error': 'Not authenticated'}), 401
+            return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
             
         data = request.json
         idno = data.get('idno')
@@ -469,11 +450,9 @@ def start_sitin_route():
         labno = data.get('labno')
         purpose = data.get('purpose')
         
-        # Validate required fields
         if not all([labno, purpose, idno, end_time]):
-            flash("All fields are required", "error")
+            return jsonify({'message': 'All fields are required', 'status': 'error'}), 400
         
-        # Start the sit-in
         success = start_sitin(
             idno=idno,
             end_time=end_time,
@@ -484,45 +463,38 @@ def start_sitin_route():
         )
         
         if success:
-            flash("Sit-in started successfully", "success")
-            return redirect(url_for('staff_app.staff_students_current'))
+            return jsonify({'message': 'Sit-in started successfully', 'status': 'success'}), 200
         
-        flash("Failed to start sit-in", "error")
-        return redirect(url_for('staff_app.staff_students_current'))
+        return jsonify({'message': 'Failed to start sit-in', 'status': 'error'}), 400
             
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'message': f'Error starting sit-in: {str(e)}', 'status': 'error'}), 500
 
 @staff_app.route('/api/sitin/<int:sitin_id>/end', methods=['POST'])
 def end_sitin_route(sitin_id):
     try:
         if not session.get('logged_in'):
-            return jsonify({'error': 'Not authenticated'}), 401
+            return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
         
-        # Get the sit-in details
         sql = "SELECT id, idno FROM active_sitin WHERE id = ? AND status = 'active'"
         sitin = getallprocess(sql, (sitin_id,))
         
         if not sitin:
-            return jsonify({'error': 'No active sit-in found'}), 404
+            return jsonify({'message': 'No active sit-in found', 'status': 'error'}), 404
         
         sitin_id = sitin[0]['id']
         student_idno = sitin[0]['idno']
         
-        # End the sit-in
         success = end_sitin(sitin_id)
         
         if success:
             update_sessions(student_idno)
-            
-            flash("Sit-in ended successfully", "success")
-            return redirect(url_for('staff_app.staff_students_current'))
+            return jsonify({'message': 'Sit-in ended successfully', 'status': 'success'}), 200
         
-        flash("Failed to end sit-in", "error")
-        return redirect(url_for('staff_app.staff_students_current'))
+        return jsonify({'message': 'Failed to end sit-in', 'status': 'error'}), 400
             
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'message': f'Error ending sit-in: {str(e)}', 'status': 'error'}), 500
 
 @staff_app.route('/api/student/<int:idno>/sitin')
 def get_student_sitins_route(idno):
@@ -698,30 +670,27 @@ def get_students_total_sitins():
 def reset_sessions():
     try:
         if not session.get('logged_in'):
-            flash('Not authenticated', 'error')
-            return redirect(url_for('login'))
+            return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
         
-        if (not session.get('user', {}).get('role') == 'admin'):
-            flash('Only admin can reset sessions', 'error')
-            return redirect(url_for('staff_app.staff_students_total'))
+        if not session.get('user', {}).get('role') == 'admin':
+            return jsonify({'message': 'Only admin can reset sessions', 'status': 'error'}), 403
         
         password = request.form.get('password')
         if not password:
-            flash('Password is required', 'error')
+            return jsonify({'message': 'Password is required', 'status': 'error'}), 400
             
         admin_idno = session.get('user', {}).get('idno')
         sql = "SELECT * FROM users WHERE idno = ?"
         admin = getallprocess(sql, (admin_idno,))
         
         if not admin or admin[0]['password'] != password:
-            flash("Invalid password", "error")
-        else:
-            success = reset_sessions()
-
-            if success:
-                flash('Student sessions reset successfully', 'success')
-            
-        return jsonify({'error': 'Failed to reset student sessions'}), 400
+            return jsonify({'message': 'Invalid password', 'status': 'error'}), 403
+        
+        success = reset_sessions()
+        if success:
+            return jsonify({'message': 'Student sessions reset successfully', 'status': 'success'}), 200
+        
+        return jsonify({'message': 'Failed to reset student sessions', 'status': 'error'}), 400
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
