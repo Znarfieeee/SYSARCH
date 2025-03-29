@@ -1,0 +1,170 @@
+{% extends 'staff.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header and Search Section -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+        <div class="w-full md:w-64 opacity-0">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search students..." 
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onkeyup="filtertotalsitin()">
+                <span class="absolute right-3 top-2.5 text-gray-400 cursor-pointer">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+        
+        <div class="radio-inputs flex flex-wrap justify-center gap-2">
+            <a href="/staff/reports" class="radio">
+                <input type="radio" name="radio" checked="">
+                <span class="name">All Students</span>
+            </a>
+            <a href="/staff/reports/purpose" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio">
+                <span class="name">Per Purpose</span>
+            </a>
+            <a href="/staff/reports/level" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio">
+                <span class="name">Per Level</span>
+            </a>
+        </div>
+
+        <button onclick="showFileTypeModal()" 
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+                        transition duration-300 ease-in-out flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Generate Report
+        </button>
+
+    </div>
+
+    <!-- Student Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
+        <div id="tableContainer" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for student in students %}
+                    <tr class="student-row hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.idno }}</td>
+                        {% if student.middlename.lower() == 'none' %}   
+                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
+                        {% else %}
+                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
+                        {% endif %}
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.course.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.yr_lvl }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.purpose }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.start_time }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.end_time }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadTotalSitins(data) {
+    const tableBody = document.getElementById('totalsitinTableBody');
+    // Show loading state
+    tableBody.innerHTML = `
+        <tr id="loadingRow" class="animate-pulse">
+            <td colspan="7" class="px-6 py-4">
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                        <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                    </div>
+                    <div class="text-center text-gray-500">Loading data...</div>
+                </div>
+            </td>
+        </tr>`;
+
+    try {
+        // Clear loading state
+        tableBody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 text-center">
+                        <p class="text-2xl text-gray-500 text-center p-4">No Sit-ins</p>
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        // Render data
+        data.forEach(student => {
+            const date = new Date(student.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const row = document.createElement('tr');
+            row.className = 'totalsitin-row hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.start_time} - ${student.end_time}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">${student.purpose}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">Lab ${student.labno}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-4 text-center text-red-500">
+                    Error loading data. Please try again.
+                </td>
+            </tr>`;
+        console.error('Error:', error);
+    }
+}
+
+function showFileTypeModal() {
+    document.getElementById('fileTypeModal').classList.remove('hidden');
+}
+
+function closeFileTypeModal() {
+    document.getElementById('fileTypeModal').classList.add('hidden');
+}
+
+function generateReport(fileType) {
+    const table = document.querySelector('table');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const data = rows.map(row => Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim()));
+
+    // Send data to the server or process it for file generation
+    console.log('Generating report as', fileType, 'with data:', data);
+
+    closeFileTypeModal();
+}
+</script>
+{% endblock %}

@@ -588,6 +588,50 @@ def get_total_sitins():
             """
     return getallprocess(sql)
 
+def get_total_sitins_purpose():
+    sql = """
+            SELECT 
+            a.idno,
+            u.firstname,
+            u.lastname,
+            u.middlename,
+            u.course,
+            u.yr_lvl,
+            u.email,
+            strftime('%H:%M %p', a.start_time) as start_time,
+            strftime('%H:%M %p', a.end_time) as end_time,
+            strftime('%Y-%m-%d', a.start_time) as date,
+            a.purpose,
+            a.labno
+            FROM active_sitin a
+            JOIN users u ON a.idno = u.idno
+            WHERE a.status = 'done'
+            ORDER BY a.purpose ASC, date ASC
+            """
+    return getallprocess(sql)
+
+def get_total_sitins_level():
+    sql = """
+            SELECT 
+            a.idno,
+            u.firstname,
+            u.lastname,
+            u.middlename,
+            u.course,
+            u.yr_lvl,
+            u.email,
+            strftime('%H:%M %p', a.start_time) as start_time,
+            strftime('%H:%M %p', a.end_time) as end_time,
+            strftime('%Y-%m-%d', a.start_time) as date,
+            a.purpose,
+            a.labno
+            FROM active_sitin a
+            JOIN users u ON a.idno = u.idno
+            WHERE a.status = 'done'
+            ORDER BY u.yr_lvl ASC, date ASC
+            """
+    return getallprocess(sql)
+
 def update_sessions(idno):
     sql = """
         UPDATE users

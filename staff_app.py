@@ -1,8 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 from dbhelper import *
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from io import BytesIO
+import csv
+import xlsxwriter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
 staff_app = Blueprint('staff_app', __name__)
 
@@ -73,29 +80,57 @@ def staff_reports():
         students_list = []
         for student in students:
             student_dict = dict(student)
-            student_dict['sessions'] = student_dict.get('sessions', 0)
-            student_dict['remaining_sessions'] = student_dict.get('no_session', 0) - student_dict['sessions']
             students_list.append(student_dict)
     else:
         students_list = []
     
-    return render_template('staff/reports.html', pagetitle='Reports', students=students_list)
+    return render_template('staff/reports.html', 
+                           pagetitle='Reports', 
+                           students=students_list)
 
 @staff_app.route('/staff/reports/purpose')
 def staff_reports_purpose():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
+    students = get_total_sitins_purpose()
+    
+    if students:
+        students_list = []
+        for student in students:
+            student_dict = dict(student)
+            # Ensure all fields are included for filtering
+            student_dict['purpose'] = student_dict.get('purpose', '')
+            student_dict['date'] = student_dict.get('date', '')
+            students_list.append(student_dict)
+    else:
+        students_list = []
+    
     return render_template("staff/reports-pp.html", 
-                         pagetitle='Reports per Purpose')
+                           pagetitle='Reports per Purpose',
+                           students=students_list)
 
 @staff_app.route('/staff/reports/level')
 def staff_reports_level():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
+    students = get_total_sitins_level()
+    
+    if students:
+        students_list = []
+        for student in students:
+            student_dict = dict(student)
+            # Ensure all fields are included for filtering
+            student_dict['yr_lvl'] = student_dict.get('yr_lvl', '')
+            student_dict['date'] = student_dict.get('date', '')
+            students_list.append(student_dict)
+    else:
+        students_list = []
+    
     return render_template("staff/reports-pl.html", 
-                         pagetitle='Reports per Level')
+                           pagetitle='Reports per Level',
+                           students=students_list)
 
 @staff_app.route('/staff/feedbacks')
 def staff_feedbacks():
@@ -551,63 +586,6 @@ def get_student_sitins_route(idno):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-# @staff_app.route('/api/check-in/<int:reservation_id>', methods=['POST'])
-# def check_in(reservation_id):
-#     if not session.get('logged_in'):
-#         return jsonify({'error': 'Not authenticated'}), 401
-    
-#     try:
-#         # Get the reservation details
-#         reservation = get_reservation_details(reservation_id)
-#         if not reservation:
-#             flash("Reservation not found", "error")
-#             return redirect(url_for('staff_app.staff_students_pending'))
-            
-#         success = start_sitin(reservation_id)
-        
-#         if success:
-#             flash("")
-            
-#         return jsonify({'error': 'Failed to check in'}), 400
-            
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-# @staff_app.route('/api/check-out/<int:reservation_id>', methods=['POST'])
-# def check_out(reservation_id):
-#     if not session.get('logged_in'):
-#         return jsonify({'error': 'Not authenticated'}), 401
-    
-#     try:
-#         # Get the active sit-in for this reservation
-#         sql = "SELECT id, idno FROM active_sitin WHERE reservation_id = ? AND status = 'active'"
-#         sitin = getallprocess(sql, (reservation_id,))
-        
-#         if not sitin:
-#             return jsonify({'error': 'No active sit-in found'}), 404
-        
-#         sitin_id = sitin[0]['id']
-#         student_idno = sitin[0]['idno']
-        
-#         # End the sit-in
-#         success = end_sitin(sitin_id)
-        
-#         if success:
-#             # Deduct one session from the student's remaining sessions
-#             update_sessions_sql = """
-#                 UPDATE users
-#                 SET no_session = no_session - 1
-#                 WHERE idno = ? AND no_session > 0
-#             """
-#             postprocess(update_sessions_sql, (student_idno,))
-            
-#             return jsonify({'message': 'Check-out successful and session deducted'}), 200
-#         return jsonify({'error': 'Failed to check out'}), 400
-            
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 @staff_app.route('/api/sitin/add', methods=['POST'])
 def add_sitin():
     try:
@@ -723,3 +701,86 @@ def reset_sessions():
         
     except Exception as e:
         return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
+
+@staff_app.route('/staff/generate-report', methods=['POST'])
+def generate_report():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated'}), 401
+
+    data = request.json
+    file_type = data.get('fileType')
+    headers = data.get('headers')
+    rows = data.get('data')
+
+    if not all([file_type, headers, rows]):
+        return jsonify({'message': 'Missing required data'}), 400
+
+    buffer = BytesIO()
+
+    try:
+        if file_type == 'csv':
+            # Generate CSV
+            writer = csv.writer(buffer)
+            writer.writerow(headers)
+            writer.writerows(rows)
+            mimetype = 'text/csv'
+            filename = 'report.csv'
+
+        elif file_type == 'excel':
+            # Generate Excel
+            workbook = xlsxwriter.Workbook(buffer)
+            worksheet = workbook.add_worksheet()
+            
+            # Add headers
+            for col, header in enumerate(headers):
+                worksheet.write(0, col, header)
+            
+            # Add data
+            for row_idx, row in enumerate(rows, start=1):
+                for col_idx, cell in enumerate(row):
+                    worksheet.write(row_idx, col_idx, cell)
+                    
+            workbook.close()
+            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            filename = 'report.xlsx'
+
+        elif file_type == 'pdf':
+            # Generate PDF
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            elements = []
+            
+            # Create table with headers and data
+            table_data = [headers] + rows
+            table = Table(table_data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            elements.append(table)
+            doc.build(elements)
+            
+            mimetype = 'application/pdf'
+            filename = 'report.pdf'
+        
+        else:
+            return jsonify({'message': 'Invalid file type'}), 400
+
+        buffer.seek(0)
+        return send_file(
+            buffer,
+            mimetype=mimetype,
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        return jsonify({'message': f'Error generating report: {str(e)}'}), 500
