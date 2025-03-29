@@ -142,6 +142,65 @@ def register():
 
     return render_template("register.html")
 
+# Student Navigation
+@app.route('/home')
+def home():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Dashboard'
+    
+    sql = "select id, title, content, created_at from announcement order by created_at desc"
+    success = getallprocess(sql)
+    
+    if success:
+        announcements = [dict(row) for row in success]
+    else:
+        announcements = []
+    
+    user = session.get('user')
+    return render_template("student/dashboard.html", user=user, pagetitle=pagetitle, announcements=announcements)
+    
+@app.route('/history')
+def history():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Sit-in History'
+
+    
+    return render_template('student/history.html', pagetitle=pagetitle)
+
+@app.route('/sitin')
+def sitin():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Sit-in'
+    user = session.get('user')
+    
+    # Get approved reservations for the current user
+    sql = """
+        SELECT r.*, a.start_time, a.end_time
+        FROM reservations r
+        LEFT JOIN attendancelog a ON r.id = a.reserve_id
+        WHERE r.idno = ? AND r.status = 'approved'
+        AND r.date >= date('now')
+        ORDER BY r.date ASC, r.time_start ASC
+    """
+    reservations = getallprocess(sql, (user['idno'],))
+    
+    return render_template('student/sitin.html', 
+                         pagetitle=pagetitle, 
+                         user=user,
+                         reservations=reservations)
+
+@app.route('/reservation')
+def reservation():
+    pagetitle = 'Reservation'
+    
+    return render_template('student/reservation.html', pagetitle=pagetitle)
+
 # Functionalities for Student
 @app.route('/edit', methods=['POST'])
 def editStudent():
@@ -201,51 +260,18 @@ def editStudent():
 
     return redirect(url_for('home'))
 
-# Student Navigation
-@app.route('/home')
-def home():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
-    pagetitle = 'Dashboard'
-    
-    sql = "select id, title, content, created_at from announcement order by created_at desc"
-    success = getallprocess(sql)
-    
-    if success:
-        announcements = [dict(row) for row in success]
-    else:
-        announcements = []
-    
-    user = session.get('user')
-    return render_template("student/dashboard.html", user=user, pagetitle=pagetitle, announcements=announcements)
-    
-@app.route('/history')
-def history():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
-    pagetitle = 'Sit-in History'
-
-    
-    return render_template('student/history.html', pagetitle=pagetitle)
-
-@app.route('/reservation')
-def reservation():
-    pagetitle = 'Reservation'
-    
-    return render_template('student/reservation.html', pagetitle=pagetitle)
 
 @app.route('/get_reservations')
 def get_reservations():
     idno = session['user']['idno']
-    sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY date DESC"
+    sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY created_at DESC"
     reservations = getallprocess(sql, (idno,))
     
     data  = []
     for res in reservations:
         data.append({
             "id": res['id'],
+            # "date": datetime.strptime(res['date'], '%Y %b %d').strftime('%Y-%m-%d') if res['date'] else '',
             "date": res['date'],
             "time_start": res['time_start'],
             "time_end": res['time_end'],
@@ -277,30 +303,6 @@ def book():
         flash("Reservation failed.", "error")
 
     return redirect(url_for('reservation'))
-
-@app.route('/sitin')
-def sitin():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
-    pagetitle = 'Sit-in'
-    user = session.get('user')
-    
-    # Get approved reservations for the current user
-    sql = """
-        SELECT r.*, a.start_time, a.end_time
-        FROM reservations r
-        LEFT JOIN attendancelog a ON r.id = a.reserve_id
-        WHERE r.idno = ? AND r.status = 'approved'
-        AND r.date >= date('now')
-        ORDER BY r.date ASC, r.time_start ASC
-    """
-    reservations = getallprocess(sql, (user['idno'],))
-    
-    return render_template('student/sitin.html', 
-                         pagetitle=pagetitle, 
-                         user=user,
-                         reservations=reservations)
 
 @app.route('/api/sitin/active')
 def get_active_sitins_route():
@@ -366,8 +368,19 @@ def get_active_sitins_route():
 def edit_reservation(reservation_id):
     if not session.get('logged_in'):
         return jsonify({'error': 'Not authenticated'}), 401
-
+    
     try:
+        # First check if the reservation exists and get its status
+        sql = "SELECT status FROM reservations WHERE id = ?"
+        reservation = getallprocess(sql, (reservation_id,))
+        
+        if not reservation:
+            return jsonify({'error': 'Reservation not found'}), 404
+            
+        # Check if the status is pending
+        if reservation[0]['status'] != 'pending':
+            return jsonify({'error': 'Only pending reservations can be edited'}), 403
+
         # Retrieve form data
         date = request.form.get('date')
         time_start = request.form.get('time_start')
@@ -377,23 +390,21 @@ def edit_reservation(reservation_id):
 
         # Prepare data for update
         update_data = {
-            'id': reservation_id,  # Use 'id' as the key for the reservation ID
-            'date': date,
+            'id': reservation_id,
+            'date': datetime.strptime(date, '%Y-%m-%d').strftime('%Y %b %d'),
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'time_start': time_start,
             'time_end': time_end,
             'labno': labno,
             'purpose': purpose
         }
 
-        # Call updateprocess function
+        # Update the reservation
         success = updateprocess('reservations', **update_data)
 
         if success:
-            flash("Reservation updated successfully.", "success")
-            return redirect(url_for('reservation'))
-        
-        flash("Failed to update reservation.", "error")
-        return redirect(url_for('reservation'))
+            return jsonify({'message': 'Reservation updated successfully'}), 200
+        return jsonify({'error': 'Failed to update reservation'}), 400
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -402,8 +413,8 @@ def edit_reservation(reservation_id):
 def get_user_sitins():
     try:
         # Ensure the user is logged in
-        # if not session.get('logged_in'):
-        #     return jsonify({'error': 'Not authenticated'}), 401
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
 
         # Get the user object from the session
         user = session.get('user')
