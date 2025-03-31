@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8">
     <!-- Header and Search Section -->
-    <div class="flex flex-col md:flex-row z-999 justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
         <div class="flex gap-2">
             <div class="input-group">
                 <select name="level" id="purposeFilter" class="input w-full" required onchange="filterTable()">
@@ -38,67 +38,64 @@
             </a>
         </div>
 
-        <div class="relative">
-            <button id="generateReportBtn" 
-                    class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center gap-2">
+        <div id="generateReport" class="relative">
+            <button 
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+                        transition duration-300 ease-in-out flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                           d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Generate Report
             </button>
+            <div id="fileTypeDropdown" class="absolute hidden flex-col mt-2 gap-3 bg-white text-black px-4 py-5 rounded-md shadow-lg w-[180px]">
+                <legend class="text-md font-semibold mb-3 select-none">Choose format</legend>
+                <button onclick="generateReport('csv')" 
+                        class="text-sm h-5 flex items-center px-3 gap-3 rounded-lg hover:bg-zinc-100">
+                    <div class="w-5 fill-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512">
+                            <path d="M30.713,0.501L71.717,460.42l184.006,51.078l184.515-51.15L481.287,0.501H30.713z M395.754,109.646 ..."></path>
+                        </svg>
+                    </div>
+                    CSV
+                </button>
+                <button onclick="generateReport('excel')" 
+                        class="text-sm h-5 flex items-center px-3 gap-3 rounded-lg hover:bg-zinc-100">
+                    <div class="w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 ..."></path>
+                        </svg>
+                    </div>
+                    Excel
+                </button>
+                <button onclick="generateReport('pdf')" 
+                        class="font-medium h-5 flex items-center px-3 gap-3 rounded-lg hover:bg-zinc-100">
+                    <div class="w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512">
+                            <path d="M1.008,0.5C0.438,0.583,0.48,1.27,0.521,1.958c0,169.668,0,339.31,0,508.974c169.364,1.135 ..."></path>
+                        </svg>
+                    </div>
+                    PDF
+                </button>
+            </div>
         </div>
-
-        <!-- Add download button after the table -->
-        
-
         <style>
             #generateReport {
                 position: relative;
-                isolation: isolate;
-                transform: translateZ(0);
             }
-            
             #fileTypeDropdown {
-                position: absolute;
-                top: 100%;
+                display: none;
+                z-index: 50; /* Ensure it appears above other elements */
+                position: absolute; /* Ensure it is positioned relative to the button */
+                top: 100%; /* Position below the button */
                 left: 0;
-                z-index: 9999;
-                transform: translateZ(9999px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
-                            0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
-            
             #generateReport:hover #fileTypeDropdown {
                 display: flex;
-            } 
-            
-            /* Add download button styles */
-            #downloadButtonContainer {
-                margin-top: 1rem;
-                display: flex;
-                justify-content: center;
             }
-
-            #dropdown-portal {
-                position: fixed;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            }
-
-            #downloadButtonContainer {
-                animation: fadeIn 0.3s ease-in-out;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            /* Ensure parent containers do not clip the dropdown */
+            .container, .flex, .relative {
+                overflow: visible !important;
             }
         </style>
 
@@ -110,29 +107,29 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for student in students %}
                     <tr class="student-row hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.idno }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.idno }}</td>
                         {% if student.middlename.lower() == 'none' %}   
-                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.course.upper() }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.yr_lvl }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.purpose }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.course.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.yr_lvl }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.purpose }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.date }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -140,148 +137,7 @@
         </div>
     </div>
 </div>
-<div id="dropdown-portal" class="hidden fixed bg-white rounded-lg shadow-xl p-4 min-w-[200px] z-[9999]">
-    <div class="text-gray-700 font-semibold mb-3">Choose format</div>
-    <div class="flex flex-col gap-2">
-        <button onclick="handleFileTypeSelect('csv')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
-            CSV
-        </button>
-        <button onclick="handleFileTypeSelect('excel')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
-            Excel
-        </button>
-        <button onclick="handleFileTypeSelect('pdf')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
-            PDF
-        </button>
-        <div id="downloadButtonContainer" class="hidden pt-3 mt-3 border-t border-gray-200">
-            <button onclick="downloadReport()" 
-                    class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Download Report
-            </button>
-        </div>
-    </div>
-</div>
 <script>
-let selectedFileType = null;
-const generateReportBtn = document.getElementById('generateReportBtn');
-const dropdownPortal = document.getElementById('dropdown-portal');
-const downloadContainer = document.getElementById('downloadButtonContainer');
-let isDropdownOpen = false;
-
-// Position and show dropdown
-function showDropdown(e) {
-    const button = e.target.closest('button');
-    const rect = button.getBoundingClientRect();
-    
-    dropdownPortal.style.top = `${rect.bottom + 5}px`;
-    dropdownPortal.style.left = `${rect.left}px`;
-    dropdownPortal.classList.remove('hidden');
-    isDropdownOpen = true;
-}
-
-// Handle file type selection
-function handleFileTypeSelect(fileType) {
-    selectedFileType = fileType;
-    // Show the download button
-    downloadContainer.classList.remove('hidden');
-    
-    // Highlight the selected option
-    const buttons = dropdownPortal.querySelectorAll('button:not([onclick*="downloadReport"])');
-    buttons.forEach(btn => {
-        if (btn.textContent.trim().toLowerCase() === fileType.toLowerCase()) {
-            btn.classList.add('bg-blue-50', 'text-blue-600');
-        } else {
-            btn.classList.remove('bg-blue-50', 'text-blue-600');
-        }
-    });
-}
-
-// Toggle dropdown on button click
-generateReportBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isDropdownOpen) {
-        dropdownPortal.classList.add('hidden');
-        isDropdownOpen = false;
-    } else {
-        showDropdown(e);
-    }
-});
-
-// Close dropdown when clicking outside
-document.addEventListener('click', (e) => {
-    if (isDropdownOpen && !dropdownPortal.contains(e.target) && e.target !== generateReportBtn) {
-        dropdownPortal.classList.add('hidden');
-        isDropdownOpen = false;
-    }
-});
-
-// Update dropdown position on scroll
-document.addEventListener('scroll', () => {
-    if (isDropdownOpen) {
-        const rect = generateReportBtn.getBoundingClientRect();
-        dropdownPortal.style.top = `${rect.bottom + 5}px`;
-        dropdownPortal.style.left = `${rect.left}px`;
-    }
-}, true);
-
-function downloadReport() {
-    if (!selectedFileType) return;
-
-    // Get table data
-    const table = document.querySelector('table');
-    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr')).map(row => 
-        Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim())
-    );
-
-    // Filter out hidden rows
-    const visibleRows = rows.filter(row => {
-        const tr = table.querySelector(`tbody tr:has(td:contains("${row[0]}"))`);
-        return tr && tr.style.display !== 'none';
-    });
-
-    // Send data to server
-    fetch('/staff/generate-report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            fileType: selectedFileType,
-            headers: headers,
-            data: visibleRows
-        })
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Network response was not ok');
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `report.${selectedFileType}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to generate report');
-    });
-}
-
 async function loadTotalSitins(data) {
     const tableBody = document.getElementById('totalsitinTableBody');
     // Show loading state
