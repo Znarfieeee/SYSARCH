@@ -49,59 +49,6 @@
                 Generate Report
             </button>
         </div>
-
-        <!-- Add download button after the table -->
-        
-
-        <style>
-            #generateReport {
-                position: relative;
-                isolation: isolate;
-                transform: translateZ(0);
-            }
-            
-            #fileTypeDropdown {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                z-index: 9999;
-                transform: translateZ(9999px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
-                            0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            }
-            
-            #generateReport:hover #fileTypeDropdown {
-                display: flex;
-            } 
-            
-            /* Add download button styles */
-            #downloadButtonContainer {
-                margin-top: 1rem;
-                display: flex;
-                justify-content: center;
-            }
-
-            #dropdown-portal {
-                position: fixed;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            }
-
-            #downloadButtonContainer {
-                animation: fadeIn 0.3s ease-in-out;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        </style>
-
     </div>
 
     <!-- Student Table -->
@@ -140,6 +87,8 @@
         </div>
     </div>
 </div>
+
+<!-- Dropdown -->
 <div id="dropdown-portal" class="hidden fixed bg-white rounded-lg shadow-xl p-4 min-w-[200px] z-[9999]">
     <div class="text-gray-700 font-semibold mb-3">Choose format</div>
     <div class="flex flex-col gap-2">
@@ -157,13 +106,13 @@
         </button>
         <div id="downloadButtonContainer" class="hidden pt-3 mt-3 border-t border-gray-200">
             <button onclick="downloadReport()" 
-                    class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg 
+                           transition duration-300 ease-in-out flex items-center justify-center gap-px cursor-pointer">
+                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Download Report
+                <p class="text-sm">Download Report</p>
             </button>
         </div>
     </div>
@@ -186,12 +135,33 @@ function showDropdown(e) {
     isDropdownOpen = true;
 }
 
+// Function to close the dropdown and reset selectedFileType
+function closeDropdown() {
+    dropdownPortal.classList.add('hidden');
+    isDropdownOpen = false;
+
+    // Reset selectedFileType and hide the download button
+    selectedFileType = null;
+    downloadContainer.classList.add('hidden');
+
+    // Remove any highlighted file type buttons
+    const buttons = dropdownPortal.querySelectorAll('button:not([onclick*="downloadReport"])');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-blue-50', 'text-blue-600');
+    });
+}
+
 // Handle file type selection
 function handleFileTypeSelect(fileType) {
     selectedFileType = fileType;
-    // Show the download button
-    downloadContainer.classList.remove('hidden');
-    
+
+    // Show the download button only if a file type is selected
+    if (selectedFileType) {
+        downloadContainer.classList.remove('hidden');
+    } else {
+        downloadContainer.classList.add('hidden');
+    }
+
     // Highlight the selected option
     const buttons = dropdownPortal.querySelectorAll('button:not([onclick*="downloadReport"])');
     buttons.forEach(btn => {
@@ -207,8 +177,7 @@ function handleFileTypeSelect(fileType) {
 generateReportBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (isDropdownOpen) {
-        dropdownPortal.classList.add('hidden');
-        isDropdownOpen = false;
+        closeDropdown()
     } else {
         showDropdown(e);
     }
@@ -217,19 +186,9 @@ generateReportBtn.addEventListener('click', (e) => {
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
     if (isDropdownOpen && !dropdownPortal.contains(e.target) && e.target !== generateReportBtn) {
-        dropdownPortal.classList.add('hidden');
-        isDropdownOpen = false;
+        closeDropdown()
     }
 });
-
-// Update dropdown position on scroll
-document.addEventListener('scroll', () => {
-    if (isDropdownOpen) {
-        const rect = generateReportBtn.getBoundingClientRect();
-        dropdownPortal.style.top = `${rect.bottom + 5}px`;
-        dropdownPortal.style.left = `${rect.left}px`;
-    }
-}, true);
 
 function downloadReport() {
     if (!selectedFileType) return;
@@ -237,15 +196,12 @@ function downloadReport() {
     // Get table data
     const table = document.querySelector('table');
     const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr')).map(row => 
+    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none').map(row => 
         Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim())
     );
 
-    // Filter out hidden rows
-    const visibleRows = rows.filter(row => {
-        const tr = table.querySelector(`tbody tr:has(td:contains("${row[0]}"))`);
-        return tr && tr.style.display !== 'none';
-    });
+    const purposeFilter = document.getElementById('purposeFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
 
     // Send data to server
     fetch('/staff/generate-report', {
@@ -256,7 +212,10 @@ function downloadReport() {
         body: JSON.stringify({
             fileType: selectedFileType,
             headers: headers,
-            data: visibleRows
+            data: rows,
+            purpose: purposeFilter,
+            date: dateFilter,
+            page: 'pp',
         })
     })
     .then(response => {
@@ -270,7 +229,11 @@ function downloadReport() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `report.${selectedFileType}`;
+        if (selectedFileType === 'excel') {
+            a.download = "report.xlsx";
+        } else {
+            a.download = `report.${selectedFileType}`;
+        }
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -278,7 +241,7 @@ function downloadReport() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to generate report');
+        alert('An error occurred while generating the report. Please try again.');
     });
 }
 
@@ -355,6 +318,8 @@ function filterTable() {
         const matchesPurpose = !purposeFilter || purpose === purposeFilter;
         const matchesDate = !dateFilter || date === dateFilter;
 
+        console.log(`Row Purpose: ${purpose}, Row Date: ${date}, Matches Purpose: ${matchesPurpose}, Matches Date: ${matchesDate}`);
+
         if (matchesPurpose && matchesDate) {
             row.style.display = '';
         } else {
@@ -362,27 +327,5 @@ function filterTable() {
         }
     });
 }
-
-function showFileTypeModal() {
-    const modal = document.getElementById('fileTypeModal');
-    modal.classList.toggle('hidden')
-    modal.classList.toggle('opacity-0')
-}
-
-function closeFileTypeModal() {
-    document.getElementById('fileTypeModal').classList.add('hidden');
-}
-
-function generateReport(fileType) {
-    const table = document.querySelector('table');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    const data = rows.map(row => Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim()));
-
-    // Send data to the server or process it for file generation
-    console.log('Generating report as', fileType, 'with data:', data);
-
-    closeFileTypeModal();
-}
-
 </script>
 {% endblock %}

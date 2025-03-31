@@ -720,6 +720,52 @@
             animation: bounce 1s infinite;
             animation-delay: 0.4s;
         }
+        #generateReport {
+            position: relative;
+            isolation: isolate;
+            transform: translateZ(0);
+        }
+        
+        #fileTypeDropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 9999;
+            transform: translateZ(9999px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        #generateReport:hover #fileTypeDropdown {
+            display: flex;
+        } 
+        
+        /* Add download button styles */
+        /* #downloadButtonContainer {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        #dropdown-portal {
+            position: fixed;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        #downloadButtonContainer {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        } */
     </style>
 </head>
 <body class="overflow-hidden bg-gray-200">

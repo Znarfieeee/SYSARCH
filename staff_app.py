@@ -3,16 +3,17 @@ from dbhelper import *
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import io
 from io import BytesIO
 import csv
 import xlsxwriter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 staff_app = Blueprint('staff_app', __name__)
-
 
 # Routes for Admin
 @staff_app.route('/staff/dashboard')
@@ -339,12 +340,10 @@ def update_student(idno):
         success = updateprocess('users', **update_data)
         
         if success:
-            flash("Student updated successfully.", "success")
-            return redirect(url_for('staff_app.staff_students'))
+            return jsonify({'message': 'Student update succesfully', 'status': 'success'}), 302
+
         
-        flash("Failed to update student.", "error")
-        return redirect(url_for('staff_app.staff_students'))
-    
+        return jsonify({'message': 'Failed to update student!', 'status': 'error'}), 302
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -355,12 +354,9 @@ def delete_student(idno):
         success = postprocess(sql, (idno,))
         
         if success:
-            flash("Student deleted successfully.", "success")
-            return redirect(url_for('staff_app.staff_students'))
-        
-        flash("Failed to delete student.", "error")
-        return redirect(url_for('staff_app.staff_students'))
-    
+            return jsonify({'message': 'Student delete succesfully', 'status': 'success'}), 302
+
+        return jsonify({'message': 'Failed to delete student!', 'status': 'error'}), 302
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -392,12 +388,9 @@ def add_student():
         success = addprocess('users', **data)
         
         if success:
-            flash("Student added successfully.", "success")
-            return redirect(url_for('staff_app.staff_students'))
+            return jsonify({'message': 'Student added succesfully', 'status': 'success'}), 302
         
-        flash("Failed to add student.", "error")
-        return redirect(url_for('staff_app.staff_students'))
-    
+        return jsonify({'message': 'Failed to add student', 'status': 'error'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -706,48 +699,113 @@ def reset_sessions():
 def generate_report():
     if not session.get('logged_in'):
         return jsonify({'message': 'Not authenticated'}), 401
-
-    data = request.json
-    file_type = data.get('fileType')
-    headers = data.get('headers')
-    rows = data.get('data')
-
-    if not all([file_type, headers, rows]):
-        return jsonify({'message': 'Missing required data'}), 400
-
-    buffer = BytesIO()
-
+    
     try:
+        data = request.json
+        file_type = data.get('fileType')
+        headers = data.get('headers')
+        rows = data.get('data')
+        purpose = data.get('purpose')
+        level = data.get('level')
+        date = data.get('date')
+        page = data.get('page')
+        
+        if date:
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d").strftime("%B %d, %Y")
+            except ValueError:
+                return jsonify({'message': 'Invalid date format'}), 400
+        else:
+            date = "all dates"
+        
+        if page == 'pl':
+            if level:
+                report_title = f"Report for level {level} on {date}"
+            else:  
+                report_title = f"Report for all levels on {date}"
+        elif page == 'pp':
+            if purpose: 
+                report_title = f"Report for {purpose} on {date}"
+            else:
+                report_title = f"Report for all purposes on {date}"
+
         if file_type == 'csv':
-            # Generate CSV
-            writer = csv.writer(buffer)
-            writer.writerow(headers)
-            writer.writerows(rows)
-            mimetype = 'text/csv'
-            filename = 'report.csv'
+            try:
+                text_buffer = io.StringIO()
+                writer = csv.writer(text_buffer)
+                writer.writerow([report_title])
+                writer.writerow([])
+                writer.writerow(headers)
+                writer.writerows(rows)
+
+                # Convert the StringIO content to bytes
+                buffer = BytesIO(text_buffer.getvalue().encode('utf-8'))
+
+                mimetype = 'text/csv'
+                filename = 'report.csv'
+
+                buffer.seek(0)
+            except Exception as e:
+                print(f"Error generating CSV: {str(e)}")
+                return jsonify({'message': f'Error generating CSV: {str(e)}'}), 500
 
         elif file_type == 'excel':
             # Generate Excel
             workbook = xlsxwriter.Workbook(buffer)
             worksheet = workbook.add_worksheet()
-            
-            # Add headers
+
+            # Define header format with grey background
+            header_format = workbook.add_format({
+                'bold': True,
+                'bg_color': '#808080',  # Light grey background
+                'font_color': '#FFFFFF',  # White text color
+                'border': 1,
+                'align': 'center',
+                'valign': 'vcenter'
+            })
+
+            # Define title format
+            title_format = workbook.add_format({
+                'bold': True,
+                'font_size': 16,
+                'bg_color': '#525252',
+                'font_color': '#FFFFFF',
+                'align': 'center',
+                'valign': 'vcenter'
+            })
+
+            # Write the report title and merge cells across all columns
+            worksheet.merge_range(0, 0, 0, len(headers) - 1, report_title, title_format)
+
+            # Add headers with styling
             for col, header in enumerate(headers):
-                worksheet.write(0, col, header)
-            
+                worksheet.write(1, col, header, header_format)  # Start headers from the second row
+
             # Add data
-            for row_idx, row in enumerate(rows, start=1):
+            for row_idx, row in enumerate(rows, start=2):  # Start data from the third row
                 for col_idx, cell in enumerate(row):
                     worksheet.write(row_idx, col_idx, cell)
-                    
+
+            # Adjust column widths to fit the data
+            for col_idx, header in enumerate(headers):
+                max_width = len(header)  # Start with the header width
+                for row in rows:
+                    if len(str(row[col_idx])) > max_width:
+                        max_width = len(str(row[col_idx]))
+                worksheet.set_column(col_idx, col_idx, max_width + 2)  # Add padding for readability
+
             workbook.close()
             mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             filename = 'report.xlsx'
 
         elif file_type == 'pdf':
             # Generate PDF
-            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
             elements = []
+            
+            title_style = getSampleStyleSheet()['Title']
+            title = Paragraph(report_title, title_style)
+            elements.append(title)
             
             # Create table with headers and data
             table_data = [headers] + rows
@@ -759,7 +817,7 @@ def generate_report():
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 14),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
                 ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
                 ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 1), (-1, -1), 12),
