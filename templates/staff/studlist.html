@@ -104,13 +104,13 @@
 
     <!-- Edit Student Modal -->
     <div id="editModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
-        <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300 overflow-hidden">
-            <form id="editForm" class="space-y-4" enctype="multipart/form-data">
+        <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] max-h-[90vh] transform scale-75 opacity-0 transition-all duration-300 overflow-y-auto">
+            <form id="editForm" class="space-y-6" enctype="multipart/form-data">
                 <h2 class="text-2xl font-bold text-center mb-4">Edit Student Information</h2>
-                <div class="self-center flex flex-col items-center gap-2">
-                    <div class="relative size-24 overflow-hidden">
+                <div class="self-center flex flex-col items-center gap-4">
+                    <div class="relative w-24 h-24 overflow-hidden">
                         <img id="userPhotoPreview" src="/static/user_img/default/def-user.png" 
-                             class="size-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400">
+                             class="w-24 h-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400">
                     </div>
                     <button type="button" 
                             id="deletePhotoBtn" 
@@ -279,8 +279,7 @@ async function editStudent(idno) {
             modalContent.classList.add('scale-100', 'opacity-100');
         }, 50);
     } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to load student data');
+        showNotification(error.message || 'Failed to load student data')
     }
 }
 
@@ -333,7 +332,6 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
             showNotification(data.error || "Failed to update student", "error");
         }
     } catch (error) {
-        console.error('Error:', error);
         showNotification("An unexpected error occurred", "error");
     }
 });

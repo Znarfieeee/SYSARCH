@@ -295,8 +295,7 @@ def get_statisticchart():
         reservation_stats_dict = [dict(row) for row in success]
         return jsonify(reservation_stats_dict)
     else:
-        flash("Failed to fetch reservation statistics.", "error")
-        return jsonify([]), 500
+        return jsonify({'message': 'Failed to fetch reservation statistics.', 'status': 'error'}), 500
 
 @staff_app.route('/api/student/<int:idno>')
 def get_student(idno):
@@ -304,8 +303,7 @@ def get_student(idno):
     student = getallprocess(sql, (idno,))
     if student:
         return jsonify(dict(student[0]))
-    flash("Student not found.", "error")
-    return jsonify([]), 404
+    return jsonify({'message': 'Student not found!', 'status': 'error'}), 404
 
 @staff_app.route('/api/student/<int:idno>/edit', methods=['POST'])
 def update_student(idno):
@@ -474,8 +472,7 @@ def get_history_route():
         history = get_reservation_history()
         return jsonify([dict(row) for row in history] if history else [])
     except Exception as e:
-        flash(f"Error fetching history: {str(e)}", "error")
-        return redirect(url_for('staff_app.staff_history'))
+        return jsonify({'message': 'Error fetching history: ' + str(e), 'status': 'error'}), 400
 
 @staff_app.route('/api/statistics')
 def get_statistics_route():
@@ -583,8 +580,7 @@ def get_student_sitins_route(idno):
 def add_sitin():
     try:
         if not session.get('logged_in'):
-            flash("Not authenticated", "error")
-            return redirect(url_for('login'))
+            return jsonify({'message': 'Not authenticated!', 'status': 'error'}), 400
 
         data = request.json
         idno = data.get('idno')
@@ -593,7 +589,7 @@ def add_sitin():
         student = check_student_exist(idno)
         
         if not student:
-            flash("Student not registered!", "error")
+            return jsonify({'message': 'Student not registered!', 'status': 'error'}), 400
                 
         # Extract the data from the request
         sitin_data = {
@@ -625,18 +621,15 @@ def add_sitin():
         # Add the sit-in record to the database\
         active = check_student_sitin(idno)
         if active:
-            flash("Student already has an active sit-in!", "error")
-            return redirect(url_for('staff_app.staff_students_current'))
+            return jsonify({'message': 'Student has an active sit in!', 'status': 'error'}), 400
         
         else:
             success = addprocess('active_sitin', **sitin_data)
 
         if success:
-            flash("Sit-in started successfully", "success")
-            return redirect(url_for('staff_app.staff_students_current'))
+            return jsonify({'message':'Sit in started successfully.', 'status': 'success'}), 200
         
-        flash("Failed to start sit-in", "error")
-        return redirect(url_for('staff_app.staff_students_current'))
+        return jsonify({'message': 'Failed to start sit in.', 'status': 'error'}), 400
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -644,8 +637,7 @@ def add_sitin():
 @staff_app.route('/api/reservation_count', methods=['GET'])
 def get_reservation_count():
     if not session.get('logged_in'):
-        flash("Not authenticated", "error")
-        return redirect(url_for('login'))
+        return jsonify({'message': 'Student has an active sit in!', 'status': 'error'}), 400
 
     count = get_pending_reservation_count()
     return jsonify({'count': count})
