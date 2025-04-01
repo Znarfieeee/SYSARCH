@@ -15,6 +15,15 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 staff_app = Blueprint('staff_app', __name__)
 
+def json_response(message, status='success', data=None, code=200):
+    response = {
+        'message': message,
+        'status': status
+    }
+    if data is not None:
+        response['data'] = data
+    return jsonify(response), code
+
 # Routes for Admin
 @staff_app.route('/staff/dashboard')
 def staff_dashboard():
@@ -193,7 +202,7 @@ def staff_students_total():
 @staff_app.route('/announcement', methods=['POST'])
 def create_announcement():
     if not session.get('logged_in'):
-        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+        return json_response('Not authenticated', 'error', code=401)
     
     idno = session['user']['idno']
     title = request.form.get('title')
@@ -204,9 +213,8 @@ def create_announcement():
                          content=content)
     
     if success:
-        return jsonify({'message': 'Announcement created successfully.', 'status': 'success'}), 200
-    
-    return jsonify({'message': 'Failed to create announcement.', 'status': 'error'}), 400
+        return json_response('Announcement created successfully')
+    return json_response('Failed to create announcement', 'error', code=400)
 
 @staff_app.route('/announcement/<int:id>', methods=['DELETE'])
 def delete_announcement(id):
@@ -338,10 +346,10 @@ def update_student(idno):
         success = updateprocess('users', **update_data)
         
         if success:
-            return jsonify({'message': 'Student update succesfully', 'status': 'success'}), 302
+            return jsonify({'message': 'Student update succesfully', 'status': 'success'}), 200
 
         
-        return jsonify({'message': 'Failed to update student!', 'status': 'error'}), 302
+        return jsonify({'message': 'Failed to update student!', 'status': 'error'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -350,11 +358,11 @@ def delete_student(idno):
     try:
         sql = "DELETE FROM users WHERE idno = ?"
         success = postprocess(sql, (idno,))
-        
-        if success:
-            return jsonify({'message': 'Student delete succesfully', 'status': 'success'}), 302
 
-        return jsonify({'message': 'Failed to delete student!', 'status': 'error'}), 302
+        if success:
+            return jsonify({'message': 'Student deleted successfully', 'status': 'success'}), 200
+
+        return jsonify({'message': 'Failed to delete student!', 'status': 'error'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -372,7 +380,6 @@ def add_student():
         data = {
             'idno': idno,
             'firstname': request.form.get('firstname'),
-            'middlename': request.form.get('middlename'),
             'lastname': request.form.get('lastname'),
             'username': idno,
             'course': course,
@@ -382,19 +389,21 @@ def add_student():
             'role': 'student',
             'no_session': no_session 
         }
-        
-        success = addprocess('users', **data)
-        
-        if success:
-            return jsonify({'message': 'Student added succesfully', 'status': 'success'}), 302
-        
-        return jsonify({'message': 'Failed to add student', 'status': 'error'}), 400
+       
+        success = addprocess('users', **data)      
+
+        if not success:
+            return jsonify({'message': 'Failed to add student', 'status': 'error'}), 400
+        return jsonify({'message': 'Student added succesfully', 'status': 'success'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @staff_app.route('/api/student/<int:idno>/reservations')
 def get_student_reservations(idno):
     try:
+        if not session.get('logged_in'):
+            return json_response('Not authenticated', 'error', code=401)
+            
         sql = """
             SELECT 
                 r.id,
@@ -432,11 +441,11 @@ def get_student_reservations(idno):
                     except:
                         pass
                 formatted_reservations.append(res_dict)
-            return jsonify(formatted_reservations)
-        return jsonify([])
-    
+            return json_response('Reservations retrieved successfully', data=formatted_reservations)
+        return json_response('No reservations found', data=[])
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return json_response(str(e), 'error', code=500)
 
 @staff_app.route('/api/reservation/<int:reservation_id>/status', methods=['POST'])
 def update_reservation_status_route(reservation_id):
@@ -834,3 +843,26 @@ def generate_report():
 
     except Exception as e:
         return jsonify({'message': f'Error generating report: {str(e)}'}), 500
+
+@staff_app.route('/reservation/<int:id>', methods=['DELETE'])
+def delete_reservation(id):
+    try:
+        sql = "DELETE FROM reservations WHERE id = ?"
+        success = postprocess(sql, (id,))
+
+        if not success:
+            return jsonify({
+                'message': 'Failed to delete reservation.', 
+                'status': 'error'
+            }), 400
+
+        return jsonify({
+            'message': 'Reservation cancelled successfully.', 
+            'status': 'success'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'message': f'Error deleting reservation: {str(e)}', 
+            'status': 'error'
+        }), 500

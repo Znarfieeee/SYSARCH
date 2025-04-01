@@ -80,8 +80,9 @@
 <!-- Edit Reservation Modal -->
 <div id="editReservationModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
     <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-xl w-[25%] transform scale-75 opacity-0 transition-all duration-300">
+        <span class="float-end size-5 text-bold cursor-pointer hover:text-gray-500" onclick="closeEditModal()">x</span>
         <div class="mt-3 text-center">
-            <h3 class="font-bold text-2xl text-center">Edit Reservation</h3>
+            <h3 class="font-bold text-2xl text-center">Reservation</h3>
             <div class="mt-6">
                 <form id="editReservationForm" class="flex flex-col gap-4 mx-auto">
                     <input type="hidden" id="reservationId" name="reservationId">
@@ -123,13 +124,19 @@
                         <label class="user-label bg-gray-200">Purpose</label>                    
                     </div>
                     <div class="flex justify-between mt-2">
-                        <button type="button" onclick="closeEditModal()" 
-                                class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        <button type="button" onclick="deleteReservation(document.getElementById('reservationId').value)"
+                                class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300 relative group">
                             Cancel
+                            <span class="absolute hidden group-hover:block bg-gray-500 text-white text-xs rounded py-1 px-2 bottom-full mb-1 left-1/2 transform -translate-x-1/2">
+                                Cancel Reservation?
+                            </span>
                         </button>
                         <button type="submit" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                                class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300 relative group">
                             Save
+                            <span class="absolute hidden group-hover:block bg-gray-500 text-white text-xs rounded py-1 px-2 bottom-full mb-1 left-1/2 transform -translate-x-1/2">
+                                Save Reservation
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -138,7 +145,46 @@
     </div>
 </div>
 
+<!-- Add this right after your existing modals, before the script tag -->
+<div id="notification" class="hidden fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full">
+    <div class="flex items-center">
+        <div class="notification-icon mr-3"></div>
+        <div class="notification-message"></div>
+    </div>
+</div>
+
 <script>
+    // Add these functions at the start of your script section
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        const notificationMessage = notification.querySelector('.notification-message');
+        const notificationIcon = notification.querySelector('.notification-icon');
+        
+        // Set message
+        notificationMessage.textContent = message;
+        
+        // Set styles based on type
+        if (type === 'success') {
+            notification.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg bg-green-100 text-green-700 border border-green-300';
+            notificationIcon.innerHTML = '✓';
+        } else if (type === 'error') {
+            notification.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg bg-red-100 text-red-700 border border-red-300';
+            notificationIcon.innerHTML = '✕';
+        }
+        
+        // Show notification
+        notification.classList.remove('hidden', 'translate-x-full');
+        notification.classList.add('translate-x-0');
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 300);
+        }, 3000);
+    }
+
     const monthYear = document.getElementById('current-month-year');
     const datesContainer = document.getElementById('dates');
     const prevBtn = document.getElementById('previous');
@@ -250,23 +296,18 @@
         }
         else{
             try {
-                // Populate the modal fields with the provided data
+                // Format the date from "YYYY Mon DD" to "YYYY-MM-DD"
+                const dateParts = date.split(' ');
+                const monthNum = new Date(Date.parse(dateParts[1] + " 1, 2000")).getMonth() + 1;
+                const formattedDate = `${dateParts[0]}-${monthNum.toString().padStart(2, '0')}-${dateParts[2].padStart(2, '0')}`;
+                
                 document.getElementById('reservationId').value = id;
-                document.querySelector('#editDate').value = new Date(date).toISOString().split('T')[0]; // Format as YYYY-MM-DD
+                document.querySelector('#editDate').value = formattedDate;
                 document.getElementById('editTimeStart').value = timeStart;
                 document.getElementById('editTimeEnd').value = timeEnd;
+                document.getElementById('editLabNo').value = labNo;
+                document.getElementById('editPurpose').value = purpose;
 
-                // Set the default selected option for "Laboratory"
-                const labNoSelect = document.getElementById('editLabNo');
-                labNoSelect.value = labNo;
-
-                
-
-                // Set the default selected option for "Purpose"
-                const purposeSelect = document.getElementById('editPurpose');
-                purposeSelect.value = purpose;
-
-                // Show the modal with animation
                 const modal = document.getElementById('editReservationModal');
                 const modalContent = modal.querySelector('#modalContent');
                 modal.classList.remove('hidden');
@@ -293,6 +334,41 @@
         }, 300);
     }
 
+    async function deleteReservation(id) {
+        if (!id) {
+            showNotification('Invalid reservation ID', 'error');
+            return;
+        }
+
+        const confirmDelete = confirm('Are you sure you want to cancel this reservation?');
+        
+        if (confirmDelete) {
+            try {
+                const response = await fetch(`/reservation/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to cancel reservation');
+                }
+
+                const result = await response.json();
+                showNotification(result.message || 'Reservation cancelled successfully', 'success');
+                closeEditModal();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+            catch (error) {
+                console.error('Error:', error);
+                showNotification(error.message || 'An error occurred while cancelling the reservation', 'error');
+            }
+        }
+    }
+
     document.getElementById('editReservationForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         const formData = new FormData(this);
@@ -307,8 +383,8 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Reservation updated successfully');
-                window.location.reload();
+                showNotification(result.message, 'success')
+                setTimeout(() => {window.location.reload();}, 2000)
             } else {
                 throw new Error(result.error || 'Failed to update reservation');
             }

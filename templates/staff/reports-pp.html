@@ -241,7 +241,7 @@ function downloadReport() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while generating the report. Please try again.');
+        showNotification(error.message || 'An error occured while generating the report. Please try again.')
     });
 }
 

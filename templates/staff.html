@@ -218,7 +218,7 @@
         .user-label, .user-label2 {
         position: absolute;
         left: 15px;
-        color: #b9b9b9;
+        color: #8c8b8b;
         pointer-events: none;
         transform: translateY(10px);
         transition: 150ms cubic-bezier(0.4,0,0.2,1);
@@ -236,7 +236,7 @@
         }
 
         /* Style for optional middlename field */
-        .input:focus, .input2[value]:not([value=""]){
+        .input2:focus, .input2[value]:not([value=""]){
         outline: none;
         border: 1.5px solid #303030;
         }
@@ -898,7 +898,7 @@
     //     }, 5000);
     // }
 
-    function showNotification(message, type = "success") {
+    function showNotification(message, status) {
         // Remove any existing notifications
         const existingNotification = document.querySelector('.notification');
         if (existingNotification) {
@@ -907,7 +907,7 @@
 
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+        notification.className = `notification ${status}`;
         notification.textContent = message;
 
         // Add to document
@@ -919,7 +919,7 @@
             setTimeout(() => {
                 notification.remove();
             }, 500);
-        }, 3000);
+        }, 5000);
     }
 
     function confirmAction(message) {

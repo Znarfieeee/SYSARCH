@@ -145,15 +145,11 @@
                 <div class="space-y-4">
                     <div class="input-group">
                         <input required="" type="text" name="idno" autocomplete="off" class="input w-full">
-                        <label class="user-label bg-gray-200">Id Number</label>
+                        <label class="user-label bg-gray-200">ID Number</label>
                     </div>
                     <div class="input-group">
                         <input required="" type="text" name="firstname" autocomplete="off" class="input w-full">
                         <label class="user-label bg-gray-200">First Name</label>
-                    </div>
-                    <div class="input-group2">
-                        <input type="text" name="middlname" autocomplete="off" class="input2 w-full">
-                        <label class="user-label2 bg-gray-200">Middle Name</label>
                     </div>
                     <div class="input-group">
                         <input required="" type="text" name="lastname" autocomplete="off" class="input w-full">
@@ -242,6 +238,11 @@ async function editStudent(idno) {
     try {
         const response = await fetch(`/api/student/${idno}`);
         const student = await response.json();
+
+        if (!student || !student.idno){
+            showNotification("Failed to retrieve student data. Please try again.", "error")
+            return
+        }
         
         // Reset photo deletion state
         shouldDeletePhoto = false;
@@ -327,7 +328,8 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
         const data = await response.json();
         if (response.ok) {
             showNotification(data.message, "success");
-            setTimeout(() => window.location.reload(), 1000);
+            updateStudentRow(data.student); // Dynamically update the student row
+            closeEditModal();
         } else {
             showNotification(data.error || "Failed to update student", "error");
         }
@@ -335,6 +337,21 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
         showNotification("An unexpected error occurred", "error");
     }
 });
+
+// Function to dynamically update a student row in the table
+function updateStudentRow(student) {
+    const rows = document.querySelectorAll('.student-row');
+    for (let row of rows) {
+        if (row.children[0].textContent === student.idno) {
+            row.children[1].textContent = `${student.firstname.toUpperCase()} ${student.middlename ? student.middlename.toUpperCase() : ''} ${student.lastname.toUpperCase()}`;
+            row.children[2].textContent = student.course.toUpperCase();
+            row.children[3].textContent = student.yr_lvl;
+            row.children[4].textContent = student.email;
+            row.children[5].textContent = student.remaining_sessions;
+            break;
+        }
+    }
+}
 
 async function deleteStudent(idno) {
     const confirmed = await confirmAction('Are you sure you want to delete this student?');
@@ -347,13 +364,24 @@ async function deleteStudent(idno) {
             const data = await response.json();
             if (response.ok) {
                 showNotification(data.message, "success");
-                setTimeout(() => window.location.reload(), 1000);
+                removeStudentRow(idno); // Dynamically remove the student row
             } else {
                 showNotification(data.error || "Failed to delete student", "error");
             }
         } catch (error) {
             console.error('Error:', error);
             showNotification("An unexpected error occurred", "error");
+        }
+    }
+}
+
+// Function to dynamically remove a student row from the table
+function removeStudentRow(idno) {
+    const rows = document.querySelectorAll('.student-row');
+    for (let row of rows) {
+        if (row.children[0].textContent === idno) {
+            row.remove();
+            break;
         }
     }
 }
@@ -393,17 +421,53 @@ document.getElementById('addStudentForm').addEventListener('submit', async (e) =
         });
 
         const result = await response.json();
+        console.log(response.status)
+        console.log(result)
 
         if (response.ok) {
-            showNotification(result.message, "success");
-            setTimeout(() => window.location.reload(), 1000);
+            showNotification(result.message || "Student added successfully!", "success");
+            addStudentToTable(result.student); // Dynamically add the new student
+            closeAddStudentModal();
         } else {
-            throw new Error(result.error || 'Failed to add student');
+            showNotification(result.error || "Failed to add student.", "error");
         }
     } catch (error) {
         console.error('Error:', error);
         showNotification(error.message, "error");
     }
 });
+
+// Function to dynamically add a student row to the table
+function addStudentToTable(student) {
+    if (!student || !student.idno) {
+        showNotification("Failed to add student to the table. Missing data.", "error");
+        return;
+    }
+    console.log(student)
+    console.log(student.idno)
+
+    const tableBody = document.querySelector('tbody');
+    const row = document.createElement('tr');
+    row.className = 'student-row hover:bg-gray-50';
+    row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname.toUpperCase()} ${student.middlename ? student.middlename.toUpperCase() : ''} ${student.lastname.toUpperCase()}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.course.toUpperCase()}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.yr_lvl}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.email}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">${student.remaining_sessions}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+            <div class="flex gap-2 justify-center">
+                <button onclick="editStudent('${student.idno}')" class="text-blue-600 hover:text-blue-900 cursor-pointer">
+                    <!-- Edit Icon -->
+                </button>
+                <button onclick="deleteStudent('${student.idno}')" class="text-red-600 hover:text-red-900 cursor-pointer">
+                    <!-- Delete Icon -->
+                </button>
+            </div>
+        </td>
+    `;
+    tableBody.appendChild(row);
+}
 </script>
 {% endblock %}
