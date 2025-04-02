@@ -57,29 +57,29 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for student in students %}
                     <tr class="student-row hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.idno }}</td>
-                        {% if student.middlename.lower() == 'none' %}   
-                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.idno }}</td>
+                        {% if student.middlename and student.middlename != 'None' %}   
+                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.course.upper() }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.yr_lvl }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.remaining_sessions }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.course.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.yr_lvl }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.remaining_sessions }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
                             <div class="flex gap-2 justify-center">
                                 <button onclick="editStudent('{{ student.idno }}')"
                                         class="text-blue-600 hover:text-blue-900 cursor-pointer">
@@ -343,7 +343,9 @@ function updateStudentRow(student) {
     const rows = document.querySelectorAll('.student-row');
     for (let row of rows) {
         if (row.children[0].textContent === student.idno) {
-            row.children[1].textContent = `${student.firstname.toUpperCase()} ${student.middlename ? student.middlename.toUpperCase() : ''} ${student.lastname.toUpperCase()}`;
+            row.children[1].textContent = student.middlename && student.middlename !== 'None' 
+                ? `${student.firstname.toUpperCase()} ${student.middlename.toUpperCase()} ${student.lastname.toUpperCase()}`
+                : `${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}`;
             row.children[2].textContent = student.course.toUpperCase();
             row.children[3].textContent = student.yr_lvl;
             row.children[4].textContent = student.email;
@@ -409,7 +411,7 @@ function closeAddStudentModal() {
     }, 300);
 }
 
-// Add Student Form Handler
+// Update the Add Student Form Handler
 document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -421,48 +423,65 @@ document.getElementById('addStudentForm').addEventListener('submit', async (e) =
         });
 
         const result = await response.json();
-        console.log(response.status)
-        console.log(result)
 
         if (response.ok) {
             showNotification(result.message || "Student added successfully!", "success");
-            addStudentToTable(result.student); // Dynamically add the new student
-            closeAddStudentModal();
+            if (result.student) {
+                addStudentToTable(result.student);
+                closeAddStudentModal();
+            } else {
+                showNotification("Student added but refresh needed", "warning");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
         } else {
             showNotification(result.error || "Failed to add student.", "error");
         }
     } catch (error) {
         console.error('Error:', error);
-        showNotification(error.message, "error");
+        showNotification(error.message || "An error occurred", "error");
     }
 });
 
-// Function to dynamically add a student row to the table
+// Update the addStudentToTable function
 function addStudentToTable(student) {
     if (!student || !student.idno) {
         showNotification("Failed to add student to the table. Missing data.", "error");
         return;
     }
-    console.log(student)
-    console.log(student.idno)
 
     const tableBody = document.querySelector('tbody');
     const row = document.createElement('tr');
     row.className = 'student-row hover:bg-gray-50';
+    
+    // Add SVG icons for the actions
+    const editIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+    </svg>`;
+    
+    const deleteIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+    </svg>`;
+
     row.innerHTML = `
         <td class="px-6 py-4 whitespace-nowrap text-center">${student.idno}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">${student.firstname.toUpperCase()} ${student.middlename ? student.middlename.toUpperCase() : ''} ${student.lastname.toUpperCase()}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">${student.course.toUpperCase()}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">${student.yr_lvl}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">${student.email}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-center">${student.remaining_sessions}</td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
+            ${student.middlename && student.middlename !== 'None' 
+                ? `${student.firstname.toUpperCase()} ${student.middlename.toUpperCase()} ${student.lastname.toUpperCase()}`
+                : `${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}`}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-start">${student.course.toUpperCase()}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-start">${student.yr_lvl}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-start">${student.email}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-start">${student.remaining_sessions}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-start">
             <div class="flex gap-2 justify-center">
                 <button onclick="editStudent('${student.idno}')" class="text-blue-600 hover:text-blue-900 cursor-pointer">
-                    <!-- Edit Icon -->
+                    ${editIcon}
                 </button>
                 <button onclick="deleteStudent('${student.idno}')" class="text-red-600 hover:text-red-900 cursor-pointer">
-                    <!-- Delete Icon -->
+                    ${deleteIcon}
                 </button>
             </div>
         </td>

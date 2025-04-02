@@ -394,7 +394,19 @@ def add_student():
 
         if not success:
             return jsonify({'message': 'Failed to add student', 'status': 'error'}), 400
-        return jsonify({'message': 'Student added succesfully', 'status': 'success'}), 200
+
+        # Return the student data along with the success message
+        student_data = {
+            **data,
+            'remaining_sessions': no_session,  # Add remaining sessions for display
+            'sessions': 0  # Initial sessions count
+        }
+        return jsonify({
+            'message': 'Student added successfully', 
+            'status': 'success',
+            'student': student_data
+        }), 200
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
