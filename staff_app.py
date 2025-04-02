@@ -372,27 +372,80 @@ def add_student():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@staff_app.route('/api/student/<int:idno>', methods=['PATCH'])
-def update_student():
+@staff_app.route('/api/student/<int:idno>/edit', methods=['POST'])
+def update_student(idno):
     try:
-        data = request.json
-
-        firstname = data.get('firstname')
-        middlename = data.get('middle')
-        lastname = data.get('lastname')
-        course = data.get('course')
-        level = data.get('yr_lvl')
-        email = data.get('email')
-
-        success = updateprocess('users', firstname=firstname, middlename=middlename,
-                                lastname=lastname, course=course, level=level, email=email)
+        # Get form data
+        data = {
+            'firstname': request.form.get('firstname'),
+            'middlename': request.form.get('middlename'),
+            'lastname': request.form.get('lastname'),
+            'course': request.form.get('course'),
+            'yr_lvl': request.form.get('yr_lvl'),
+            'email': request.form.get('email')
+        }
         
-        if not success:
-            return jsonify({'message': 'Failed to update student!', 'status':'error'}), 400
+        # Create SQL query
+        sql = """
+            UPDATE users 
+            SET firstname = ?, 
+                middlename = ?, 
+                lastname = ?, 
+                course = ?, 
+                yr_lvl = ?, 
+                email = ? 
+            WHERE idno = ?
+        """
         
-        return jsonify({'message': 'Update student successful!', 'status': 'success'}), 200
+        # Execute update query
+        params = (
+            data['firstname'],
+            data['middlename'],
+            data['lastname'],
+            data['course'],
+            data['yr_lvl'],
+            data['email'],
+            idno
+        )
+        
+        success = postprocess(sql, params)
+        
+        if success:
+            # Fetch updated student data
+            sql = """
+                SELECT u.*, 
+                       COALESCE(r.session_count, 0) as sessions,
+                       u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
+                FROM users u
+                LEFT JOIN (
+                    SELECT idno, COUNT(*) as session_count
+                    FROM reservations
+                    WHERE status = 'completed'
+                    GROUP BY idno
+                ) r ON u.idno = r.idno
+                WHERE u.idno = ?
+            """
+            updated_student = getallprocess(sql, (idno,))
+            
+            if updated_student:
+                student_data = dict(updated_student[0])
+                return jsonify({
+                    'message': 'Student updated successfully',
+                    'status': 'success',
+                    'student': student_data
+                }), 200
+                
+        return jsonify({
+            'message': 'Failed to update student',
+            'status': 'error'
+        }), 400
+    
     except Exception as e:
-        return jsonify({'message': str(e)}), 500
+        print(f"Error updating student: {str(e)}")  # Add this for debugging
+        return jsonify({
+            'message': str(e),
+            'status': 'error'
+        }), 500
 
 @staff_app.route('/api/student/<int:idno>/reservations')
 def get_student_reservations(idno):

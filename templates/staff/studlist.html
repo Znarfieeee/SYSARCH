@@ -104,36 +104,57 @@
 
     <!-- Edit Student Modal -->
     <div id="editModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
-        <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] max-h-[90vh] transform scale-75 opacity-0 transition-all duration-300 overflow-y-auto">
-            <form id="editForm" class="space-y-6" enctype="multipart/form-data">
+        <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[400px] max-h-[90vh] transform scale-75 opacity-0 transition-all duration-300 overflow-y-auto">
+            <form id="editForm" class="space-y-6">
                 <h2 class="text-2xl font-bold text-center mb-4">Edit Student Information</h2>
-                <div class="self-center flex flex-col items-center gap-4">
-                    <div class="relative size-24">
-                        <img id="userPhotoPreview" onclick="showPhotoPreview()"
-                             alt="Profile Picture"
-                             src="/static/user_img/default/def-user.png"
-                             class="w-24 h-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400 hover:bg-black/10 cursor-pointer">
-                    </div>
-                    <button type="button" 
-                            id="deletePhotoBtn" 
-                            onclick="confirmDeletePhoto()"
-                            class="hidden px-3 py-1 text-red-500 hover:text-red-700 text-sm font-medium 
-                                   border border-red-500 rounded-md hover:bg-red-50 transition-colors">
-                        Delete Photo
-                    </button>
-                </div>
                 <input type="hidden" id="studentId" name="idno">
                 <div class="space-y-4">
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="firstname" name="firstname" placeholder="First name" required>
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="middlename" name="middlename" placeholder="Middle name">
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="lastname" name="lastname" placeholder="Last name" required>
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="course" name="course" placeholder="Course" required>
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2 bg-transparent" type="text" id="yearLevel" name="yr_lvl" placeholder="Year Level" required>
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2 bg-transparent" type="email" id="email" name="email" placeholder="Email Address" required>
+                    <div class="input-group">
+                        <input required="" type="text" id="firstName" name="firstname" autocomplete="off" class="input w-full">
+                        <label class="user-label bg-gray-200">First Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="middleName" name="middlename" autocomplete="off" class="input w-full">
+                        <label class="user-label bg-gray-200">Middle Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" id="lastName" name="lastname" autocomplete="off" class="input w-full">
+                        <label class="user-label bg-gray-200">Last Name</label>
+                    </div>
+                    <div class="input-group">
+                        <select name="course" id="course" class="input w-full" required="">
+                            <option value="" disabled></option>
+                            <option value="bsit">Bachelor of Science in Information Technology</option>
+                            <option value="bscs">Bachelor of Science in Computer Studies</option>
+                            <option value="bscpe">Bachelor of Science in Computer Engineering</option>
+                            <option value="bsce">Bachelor of Science in Civil Engineering</option>
+                            <option value="bscj">Bachelor of Science in Criminal Justice</option>
+                            <option value="bsp">Bachelor of Science in Psychology</option>
+                            <option value="bap">Bachelor of arts in Psychology</option>
+                            <option value="bshm">Bachelor of Science in Hotel Management</option>
+                            <option value="bsba">Bachelor of Science in Business Administration</option>
+                            <option value="bsed">Bachelor of Science in Education</option>
+                        </select>
+                        <label class="user-label bg-gray-200">Course</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="text" id="yearLevel" name="yr_lvl" autocomplete="off" class="input w-full">
+                        <label class="user-label bg-gray-200">Year Level</label>
+                    </div>
+                    <div class="input-group">
+                        <input required="" type="email" id="email" name="email" autocomplete="off" class="input w-full">
+                        <label class="user-label bg-gray-200">Email Address</label>
+                    </div>
                 </div>
                 <div class="flex justify-between mt-6 text-sm">
-                    <button type="button" onclick="closeEditModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Save</button>
+                    <button type="button" onclick="closeEditModal()" 
+                            class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        Save
+                    </button>
                 </div>
             </form>
         </div>
@@ -262,16 +283,13 @@ function filterStudents() {
 async function editStudent(idno) {
     try {
         const response = await fetch(`/api/student/${idno}`);
-        const student = await response.json();
-
-
-        console.log(student)
-        // console.log(student.idno)
-
-        if (!student || !student.idno) {
-            showNotification("Failed to retrieve student data. Please try again.", "error")
-            return
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch student data');
         }
+        
+        const student = data[0]; // Access the first item in the array
         
         // Populate the form
         document.getElementById('studentId').value = student.idno;
@@ -281,20 +299,6 @@ async function editStudent(idno) {
         document.getElementById('course').value = student.course || '';
         document.getElementById('yearLevel').value = student.yr_lvl || '';
         document.getElementById('email').value = student.email || '';
-        
-        // Update photo preview
-        const photoPreview = document.getElementById('userPhotoPreview');
-        const deletePhotoBtn = document.getElementById('deletePhotoBtn');
-        
-        if (student.photo_url) {
-            photoPreview.src = student.photo_url;
-            originalPhotoSrc = student.photo_url;
-            deletePhotoBtn.classList[student.photo ? 'remove' : 'add']('hidden');
-        } else {
-            photoPreview.src = '/static/user_img/default/def-user.png';
-            originalPhotoSrc = '/static/user_img/default/def-user.png';
-            deletePhotoBtn.classList.add('hidden');
-        }
         
         // Show the modal with animation
         const modal = document.getElementById('editModal');
@@ -306,7 +310,7 @@ async function editStudent(idno) {
             modalContent.classList.add('scale-100', 'opacity-100');
         }, 50);
     } catch (error) {
-        showNotification(error.message || 'Failed to load student data', "error")
+        showNotification(error.message, "error");
     }
 }
 
@@ -318,16 +322,6 @@ function closeEditModal() {
     setTimeout(() => {
         document.getElementById('editModal').classList.add('hidden');
         document.getElementById('editForm').reset();
-        document.getElementById('userPhotoPreview').src = originalPhotoSrc;
-        shouldDeletePhoto = false;
-        
-        // Reset delete button visibility
-        const deletePhotoBtn = document.getElementById('deletePhotoBtn');
-        if (originalPhotoSrc !== '/static/user_img/default/def-user.png') {
-            deletePhotoBtn.classList.remove('hidden');
-        } else {
-            deletePhotoBtn.classList.add('hidden');
-        }
     }, 300);
 }
 
@@ -368,32 +362,38 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     const idno = formData.get('idno');
     
     try {
-        const response = await fetch(`/api/student/${idno}`, {
+        const response = await fetch(`/api/student/${idno}/edit`, {
             method: 'POST',
             body: formData
         });
 
         const data = await response.json();
+        
         if (response.ok) {
             showNotification(data.message, "success");
-            updateStudentRow(data.student);
-            closeEditModal();
+            if (data.student) {
+                updateStudentRow(data.student);
+                closeEditModal();
+            }
         } else {
-            showNotification(data.error || "Failed to update student", "error");
+            throw new Error(data.message || 'Failed to update student');
         }
     } catch (error) {
-        showNotification("An unexpected error occurred", "error");
+        showNotification(error.message, "error");
     }
 });
 
-// Function to dynamically update a student row in the table
+// Update the updateStudentRow function
 function updateStudentRow(student) {
     const rows = document.querySelectorAll('.student-row');
     for (let row of rows) {
         if (row.children[0].textContent === student.idno.toString()) {
-            row.children[1].textContent = student.middlename && student.middlename !== 'None' 
+            // Update name with proper formatting
+            const fullName = student.middlename && student.middlename !== 'None' 
                 ? `${student.firstname.toUpperCase()} ${student.middlename.toUpperCase()} ${student.lastname.toUpperCase()}`
                 : `${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}`;
+            
+            row.children[1].textContent = fullName;
             row.children[2].textContent = student.course.toUpperCase();
             row.children[3].textContent = student.yr_lvl;
             row.children[4].textContent = student.email;
