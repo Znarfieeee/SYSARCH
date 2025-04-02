@@ -50,7 +50,11 @@ def updateprocess(table, **kwargs) -> bool:
     sql = f"UPDATE {table} SET {update_str} WHERE {id_field} = ?"
     
     return postprocess(sql, (id_value,))
-    
+
+def deleteprocess(table, id) -> bool:
+    sql = f"DELETE FROM {table} WHERE id = ?"
+    postprocess(sql, (id,))
+
 def gethistory(sql: str, params=()) -> list:
     db = connect(database)
     db.row_factory = Row
