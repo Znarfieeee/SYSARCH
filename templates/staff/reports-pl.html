@@ -187,14 +187,22 @@ document.addEventListener('click', (e) => {
 });
 
 function downloadReport() {
-    if (!selectedFileType) return;
+    if (!selectedFileType) {
+        showNotification('Please select a file type', 'error');
+        return;
+    }
 
     // Get table data
     const table = document.querySelector('table');
     const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none').map(row => 
-        Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim())
-    );
+    const rows = Array.from(table.querySelectorAll('tbody tr'))
+        .filter(row => row.style.display !== 'none')
+        .map(row => Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim()));
+
+    if (rows.length === 0) {
+        showNotification('No data to export', 'error');
+        return;
+    }
 
     const levelFilter = document.getElementById('levelFilter').value;
     const dateFilter = document.getElementById('dateFilter').value;
@@ -215,29 +223,65 @@ function downloadReport() {
         })
     })
     .then(response => {
-        if (response.ok) {
-            return response.blob();
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Failed to generate report');
+            });
         }
-        throw new Error('Network response was not ok');
+        return response.blob();
     })
     .then(blob => {
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
+        a.style.display = 'none';
         a.href = url;
-        if (selectedFileType === 'excel') {
-            a.download = "report.xlsx";
-        } else {
-            a.download = `report.${selectedFileType}`;
+        
+        let filename = 'report';
+        switch (selectedFileType) {
+            case 'excel':
+                filename += '.xlsx';
+                break;
+            case 'pdf':
+                filename += '.pdf';
+                break;
+            case 'csv':
+                filename += '.csv';
+                break;
         }
+        a.download = filename;
+        
         document.body.appendChild(a);
         a.click();
+        
+        // Cleanup
         window.URL.revokeObjectURL(url);
         a.remove();
+        closeDropdown();
     })
     .catch(error => {
-        showNofication(error.message || 'Failed to load students.')
+        console.error('Error:', error);
+        showNotification(error.message || 'Failed to generate report', 'error');
     });
+}
+
+// Add this notification function if it doesn't exist
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white transform transition-all duration-300 translate-y-0`;
+    
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+
+    // Remove the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-y-[-100%]');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 async function loadTotalSitins(data) {

@@ -9,9 +9,9 @@ import csv
 import xlsxwriter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter, landscape, legal
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 staff_app = Blueprint('staff_app', __name__)
 
@@ -95,7 +95,7 @@ def staff_reports():
         students_list = []
     
     return render_template('staff/reports.html', 
-                           pagetitle='Reports', 
+                           pagetitle='Sit-in Reports', 
                            students=students_list)
 
 @staff_app.route('/staff/reports/purpose')
@@ -729,118 +729,180 @@ def generate_report():
             except ValueError:
                 return jsonify({'message': 'Invalid date format'}), 400
         else:
-            date = "all dates"
+            date = "ALL DATES"
         
         if page == 'pl':
             if level:
-                report_title = f"Report for level {level} on {date}"
+                report_title = f"REPORT FOR LEVEL {level} ON {date}"
             else:  
-                report_title = f"Report for all levels on {date}"
+                report_title = f"REPORT FOR ALL LEVELS {date}"
         elif page == 'pp':
             if purpose: 
-                report_title = f"Report for {purpose} on {date}"
+                report_title = f"REPORT FOR {purpose.upper()} ON {date}"
             else:
-                report_title = f"Report for all purposes on {date}"
+                report_title = f"REPORT FOR ALL PURPOSES ON {date}"
+        else:
+            report_title = f"RERORT FOR ALL STUDENTS"
+
+        # Create buffer here before any file type handling
+        buffer = BytesIO()
 
         if file_type == 'csv':
             try:
                 text_buffer = io.StringIO()
                 writer = csv.writer(text_buffer)
                 writer.writerow([report_title])
-                writer.writerow([])
+                writer.writerow([])  # Empty row for spacing
                 writer.writerow(headers)
                 writer.writerows(rows)
 
                 # Convert the StringIO content to bytes
                 buffer = BytesIO(text_buffer.getvalue().encode('utf-8'))
-
                 mimetype = 'text/csv'
                 filename = 'report.csv'
 
-                buffer.seek(0)
             except Exception as e:
-                print(f"Error generating CSV: {str(e)}")
                 return jsonify({'message': f'Error generating CSV: {str(e)}'}), 500
 
         elif file_type == 'excel':
-            # Generate Excel
-            workbook = xlsxwriter.Workbook(buffer)
-            worksheet = workbook.add_worksheet()
+            try:
+                workbook = xlsxwriter.Workbook(buffer)
+                worksheet = workbook.add_worksheet()
 
-            # Define header format with grey background
-            header_format = workbook.add_format({
-                'bold': True,
-                'bg_color': '#808080',  # Light grey background
-                'font_color': '#FFFFFF',  # White text color
-                'border': 1,
-                'align': 'center',
-                'valign': 'vcenter'
-            })
+                # Define formats
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'bg_color': '#D3D3D3',  # Light grey background like PDF
+                    'font_color': '#000000', # Black text like PDF
+                    'font_size': 14,         # Match PDF font size
+                    'font_name': 'Helvetica',
+                    'align': 'left',         # Left align like PDF
+                    'border_color': '#D3D3D3', # Light grey border like PDF
+                    'bottom': 1,             # Bottom border only like PDF
+                    'text_wrap': True,       # Enable text wrapping
+                })
 
-            # Define title format
-            title_format = workbook.add_format({
-                'bold': True,
-                'font_size': 16,
-                'bg_color': '#525252',
-                'font_color': '#FFFFFF',
-                'align': 'center',
-                'valign': 'vcenter'
-            })
+                title_format = workbook.add_format({
+                    'bold': True,
+                    'font_size': 18,         # Match PDF title size
+                    'font_name': 'Helvetica',
+                    'align': 'center',
+                    'valign': 'vcenter',
+                })
 
-            # Write the report title and merge cells across all columns
-            worksheet.merge_range(0, 0, 0, len(headers) - 1, report_title, title_format)
+                data_format = workbook.add_format({
+                    'font_size': 12,         # Match PDF body text size
+                    'font_name': 'Helvetica',
+                    'align': 'left',
+                    'border_color': '#D3D3D3',
+                    'bottom': 1,             # Bottom border only
+                    'text_wrap': True,       # Enable text wrapping
+                    'valign': 'vcenter',     # Vertically center wrapped text
+                })
 
-            # Add headers with styling
-            for col, header in enumerate(headers):
-                worksheet.write(1, col, header, header_format)  # Start headers from the second row
+                # Add extra space after title
+                worksheet.set_row(0, 30)  # Taller row for title
+                worksheet.set_row(1, 20)  # Empty row for spacing
 
-            # Add data
-            for row_idx, row in enumerate(rows, start=2):  # Start data from the third row
-                for col_idx, cell in enumerate(row):
-                    worksheet.write(row_idx, col_idx, cell)
+                # Write title
+                worksheet.merge_range(0, 0, 0, len(headers) - 1, report_title, title_format)
+                worksheet.write_blank(1, 0, None) 
 
-            # Adjust column widths to fit the data
-            for col_idx, header in enumerate(headers):
-                max_width = len(header)  # Start with the header width
-                for row in rows:
-                    if len(str(row[col_idx])) > max_width:
-                        max_width = len(str(row[col_idx]))
-                worksheet.set_column(col_idx, col_idx, max_width + 2)  # Add padding for readability
+                # Write headers
+                for col, header in enumerate(headers):
+                    worksheet.write(2, col, header, header_format)
 
-            workbook.close()
-            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            filename = 'report.xlsx'
+                # Write data with consistent formatting
+                for row_idx, row in enumerate(rows, start=3):
+                    worksheet.set_row(row_idx, 30)  # Match PDF row height
+                    for col_idx, cell in enumerate(row):
+                        worksheet.write(row_idx, col_idx, cell, data_format)
+
+                # Adjust column widths based on content with padding
+                for col_idx, header in enumerate(headers):
+                    max_width = len(header)
+                    for row in rows:
+                        cell_content = str(row[col_idx])
+                        # Calculate width based on full cell content
+                        content_width = len(cell_content)
+                        max_width = max(max_width, content_width)
+                    
+                    # Add left and right padding (3 characters each side)
+                    padded_width = max_width + 6
+                    
+                    # Set minimum width to ensure readability
+                    final_width = max(padded_width, 10)
+                    
+                    # Set column width with automatic text wrapping
+                    worksheet.set_column(col_idx, col_idx, final_width, None, {'text_wrap': True})
+
+                workbook.close()
+                mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                filename = 'report.xlsx'
+
+            except Exception as e:
+                return jsonify({'message': f'Error generating Excel: {str(e)}'}), 500
 
         elif file_type == 'pdf':
-            # Generate PDF
-            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
-            elements = []
-            
-            title_style = getSampleStyleSheet()['Title']
-            title = Paragraph(report_title, title_style)
-            elements.append(title)
-            
-            # Create table with headers and data
-            table_data = [headers] + rows
-            table = Table(table_data)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 14),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 12),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
-            elements.append(table)
-            doc.build(elements)
-            
-            mimetype = 'application/pdf'
-            filename = 'report.pdf'
+            try:
+                # Use landscape orientation and adjust page size
+                doc = SimpleDocTemplate(
+                    buffer,
+                    pagesize=landscape(legal),
+                    leftMargin=20,
+                    rightMargin=20,
+                    topMargin=20,
+                    bottomMargin=20
+                )
+                elements = []
+                
+                # Add title with smaller font
+                title_style = ParagraphStyle(
+                    'CustomTitle',
+                    parent=getSampleStyleSheet()['Title'],
+                    fontSize=18,
+                    spaceAfter=20,
+                    alignment=1  # Center alignment
+                )
+                title = Paragraph(report_title, title_style)
+                elements.append(title)
+                
+                # Create table with adjusted style
+                table_data = [headers] + rows
+                table_style = TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 14),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 20),  # Increased gap
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 12),
+                    ('LINEBELOW', (0, 0), (-1, -1), 1, colors.lightgrey),  # Bottom border only in light grey
+                    ('LEFTPADDING', (0, 0), (-1, -1), 5),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 5)
+                ])
+                
+                # Calculate column widths based on content
+                table = Table(table_data)
+                table.setStyle(table_style)
+                
+                # Create table without repeating headers
+                table = Table(table_data)
+                table.setStyle(table_style)
+                elements.append(table)
+                
+                # Build the PDF
+                doc.build(elements)
+                
+                mimetype = 'application/pdf'
+                filename = 'report.pdf'
+
+            except Exception as e:
+                print(f"Error generating PDF: {str(e)}")
+                return jsonify({'message': f'Error generating PDF: {str(e)}'}), 500
         
         else:
             return jsonify({'message': 'Invalid file type'}), 400
