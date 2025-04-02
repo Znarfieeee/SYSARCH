@@ -307,14 +307,27 @@ def get_statisticchart():
 
 @staff_app.route('/api/student/<int:idno>')
 def get_student(idno):
-    sql = "SELECT * FROM users WHERE idno = ?"
+    sql = """
+        SELECT u.*, 
+               COALESCE(r.session_count, 0) as sessions,
+               u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
+        FROM users u
+        LEFT JOIN (
+            SELECT idno, COUNT(*) as session_count
+            FROM reservations
+            WHERE status = 'completed'
+            GROUP BY idno
+        ) r ON u.idno = r.idno
+        WHERE u.idno = ?
+    """
     student = getallprocess(sql, (idno,))
     if student:
-        return jsonify(dict(student[0]))
-    return jsonify({'message': 'Student not found!', 'status': 'error'}), 404
+        student_data = dict(student[0])
 
-@staff_app.route('/api/student/<int:idno>/edit', methods=['POST'])
-def update_student(idno):
+        if not student_data.get('photo'):
+            student_data['photo_url'] = url_for('static', filename='user_img/default/def-user.png')
+        print(student_data)
+        return jsonify(student_data)
     try:
         # Handle photo deletion
         should_delete_photo = request.form.get('delete_photo') == 'true'
@@ -324,7 +337,7 @@ def update_student(idno):
         current_user = getallprocess(sql, (idno,))
         
         update_data = {
-            'id': idno,  # This will be used as idno in updateprocess
+            'id': idno,
             'firstname': request.form.get('firstname'),
             'middlename': request.form.get('middlename'),
             'lastname': request.form.get('lastname'),
@@ -336,9 +349,9 @@ def update_student(idno):
         if should_delete_photo and current_user:
             # Delete the physical file if it exists
             old_photo = current_user[0]['photo']
-            if old_photo and os.path.exists(old_photo):
+            if old_photo and os.path.exists(os.path.join('static', 'user_img', old_photo)):
                 try:
-                    os.remove(old_photo)
+                    os.remove(os.path.join('static', 'user_img', old_photo))
                 except:
                     pass  # Ignore file deletion errors
             update_data['photo'] = None
@@ -346,9 +359,33 @@ def update_student(idno):
         success = updateprocess('users', **update_data)
         
         if success:
-            return jsonify({'message': 'Student update succesfully', 'status': 'success'}), 200
+            # Get updated student data
+            sql = """
+                SELECT u.*, 
+                       COALESCE(r.session_count, 0) as sessions,
+                       u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
+                FROM users u
+                LEFT JOIN (
+                    SELECT idno, COUNT(*) as session_count
+                    FROM reservations
+                    WHERE status = 'completed'
+                    GROUP BY idno
+                ) r ON u.idno = r.idno
+                WHERE u.idno = ?
+            """
+            updated_student = getallprocess(sql, (idno,))
+            if updated_student:
+                student_data = dict(updated_student[0])
+                if student_data.get('photo'):
+                    student_data['photo_url'] = url_for('static', filename=f'user_img/{student_data["photo"]}')
+                else:
+                    student_data['photo_url'] = url_for('static', filename='user_img/default/def-user.png')
+                return jsonify({
+                    'message': 'Student updated successfully',
+                    'status': 'success',
+                    'student': student_data
+                }), 200
 
-        
         return jsonify({'message': 'Failed to update student!', 'status': 'error'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500

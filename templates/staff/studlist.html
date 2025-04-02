@@ -108,16 +108,33 @@
             <form id="editForm" class="space-y-6" enctype="multipart/form-data">
                 <h2 class="text-2xl font-bold text-center mb-4">Edit Student Information</h2>
                 <div class="self-center flex flex-col items-center gap-4">
-                    <div class="relative w-24 h-24 overflow-hidden">
-                        <img id="userPhotoPreview" src="/static/user_img/default/def-user.png" 
+                    <div class="relative size-24">
+                        <img id="userPhotoPreview"
+                             alt="Profile Picture"
+                             src="/static/user_img/default/def-user.png"
                              class="w-24 h-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400">
+                        <!-- Add an overlay with camera icon -->
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                             onclick="document.getElementById('photoInput').click()">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
                     </div>
+                    <!-- Hidden file input -->
+                    <input type="file" 
+                           id="photoInput" 
+                           name="photo" 
+                           accept="image/*"
+                           class="hidden"
+                           onchange="previewImage(event)">
                     <button type="button" 
                             id="deletePhotoBtn" 
                             onclick="confirmDeletePhoto()"
                             class="hidden px-3 py-1 text-red-500 hover:text-red-700 text-sm font-medium 
                                    border border-red-500 rounded-md hover:bg-red-50 transition-colors">
-                        Delete Profile Picture
+                        Delete Photo
                     </button>
                 </div>
                 <input type="hidden" id="studentId" name="idno">
@@ -193,9 +210,46 @@
             </form>
         </div>
     </div>
+
+    <!-- Photo Preview Modal -->
+    <div id="photoPreviewModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex justify-center items-center">
+        <div class="relative max-w-3xl max-h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden">
+            <button onclick="closePhotoPreview()" 
+                    class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <img id="photoPreviewImage" src="" alt="Profile Photo Preview" 
+                 class="max-w-full max-h-[90vh] object-contain">
+        </div>
+    </div>
+
 </div>
 
 <script>
+// Add these new functions at the beginning of your script section
+function showPhotoPreview() {
+    const photoPreview = document.getElementById('userPhotoPreview');
+    const previewModal = document.getElementById('photoPreviewModal');
+    const previewImage = document.getElementById('photoPreviewImage');
+    
+    previewImage.src = photoPreview.src;
+    previewModal.classList.remove('hidden');
+}
+
+function closePhotoPreview() {
+    const previewModal = document.getElementById('photoPreviewModal');
+    previewModal.classList.add('hidden');
+}
+
+// Close modal when clicking outside the image
+document.getElementById('photoPreviewModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePhotoPreview();
+    }
+});
+
 // Add event listener for real-time search
 document.getElementById('searchInput').addEventListener('input', filterStudents);
 function filterStudents() {
@@ -239,7 +293,7 @@ async function editStudent(idno) {
         const response = await fetch(`/api/student/${idno}`);
         const student = await response.json();
 
-        if (!student || !student.idno){
+        if (!student || !student.idno) {
             showNotification("Failed to retrieve student data. Please try again.", "error")
             return
         }
@@ -260,10 +314,10 @@ async function editStudent(idno) {
         const photoPreview = document.getElementById('userPhotoPreview');
         const deletePhotoBtn = document.getElementById('deletePhotoBtn');
         
-        if (student.photo) {
-            photoPreview.src = student.photo;
-            originalPhotoSrc = student.photo;
-            deletePhotoBtn.classList.remove('hidden');
+        if (student.photo_url) {
+            photoPreview.src = student.photo_url;
+            originalPhotoSrc = student.photo_url;
+            deletePhotoBtn.classList[student.photo ? 'remove' : 'add']('hidden');
         } else {
             photoPreview.src = '/static/user_img/default/def-user.png';
             originalPhotoSrc = '/static/user_img/default/def-user.png';
@@ -280,7 +334,7 @@ async function editStudent(idno) {
             modalContent.classList.add('scale-100', 'opacity-100');
         }, 50);
     } catch (error) {
-        showNotification(error.message || 'Failed to load student data')
+        showNotification(error.message || 'Failed to load student data', "error")
     }
 }
 
@@ -306,18 +360,51 @@ function closeEditModal() {
 }
 
 function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size should be less than 5MB', 'error');
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = function() {
-        const output = document.getElementById('userPhotoPreview');
-        output.src = reader.result;
-    }
-    reader.readAsDataURL(event.target.files[0]);
+        const photoPreview = document.getElementById('userPhotoPreview');
+        photoPreview.src = reader.result;
+        
+        // Show delete button when a new photo is selected
+        const deletePhotoBtn = document.getElementById('deletePhotoBtn');
+        deletePhotoBtn.classList.remove('hidden');
+        
+        // Reset delete photo flag since we're adding a new photo
+        shouldDeletePhoto = false;
+    };
+    reader.readAsDataURL(file);
 }
 
 document.getElementById('editForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const idno = formData.get('idno');
+    
+    // Get the file input
+    const photoInput = document.getElementById('photoInput');
+    if (photoInput.files.length > 0) {
+        formData.append('photo', photoInput.files[0]);
+    }
+    
+    // Add the delete_photo flag if needed
+    if (shouldDeletePhoto) {
+        formData.append('delete_photo', 'true');
+    }
     
     try {
         const response = await fetch(`/api/student/${idno}/edit`, {
@@ -328,7 +415,7 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
         const data = await response.json();
         if (response.ok) {
             showNotification(data.message, "success");
-            updateStudentRow(data.student); // Dynamically update the student row
+            updateStudentRow(data.student);
             closeEditModal();
         } else {
             showNotification(data.error || "Failed to update student", "error");
@@ -342,7 +429,7 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
 function updateStudentRow(student) {
     const rows = document.querySelectorAll('.student-row');
     for (let row of rows) {
-        if (row.children[0].textContent === student.idno) {
+        if (row.children[0].textContent === student.idno.toString()) {
             row.children[1].textContent = student.middlename && student.middlename !== 'None' 
                 ? `${student.firstname.toUpperCase()} ${student.middlename.toUpperCase()} ${student.lastname.toUpperCase()}`
                 : `${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}`;
