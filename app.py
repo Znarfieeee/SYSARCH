@@ -202,6 +202,27 @@ def reservation():
     return render_template('student/reservation.html', pagetitle=pagetitle)
 
 # Functionalities for Student
+def json_response(message, status='success', data=None, code=200):
+    response = {
+        'message': message,
+        'status': status
+    }
+    if data is not None:
+        response['data'] = data
+    return jsonify(response), code
+
+@app.route('/reservation/<int:id>', methods=['DELETE'])
+def delete_reservation(id):
+    try:
+        success = deleteprocess('reservations', id)
+        
+        if success:
+            return json_response('Reservation cancelled successfully')
+        return json_response('Failed to cancel reservation', 'error', code=400)
+
+    except Exception as e:
+        return json_response(str(e), 'error', code=500)
+
 @app.route('/edit', methods=['POST'])
 def editStudent():
     if not session.get('logged_in'):
@@ -388,10 +409,17 @@ def edit_reservation(reservation_id):
         labno = request.form.get('labno')
         purpose = request.form.get('purpose')
 
+        try:
+            # Convert the ISO date (YYYY-MM-DD) to the required format (YYYY Mon DD)
+            parsed_date = datetime.strptime(date, '%Y-%m-%d')
+            formatted_date = parsed_date.strftime('%Y %b %d')
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+
         # Prepare data for update
         update_data = {
             'id': reservation_id,
-            'date': datetime.strptime(date, '%Y-%m-%d').strftime('%Y %b %d'),
+            'date': formatted_date,
             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'time_start': time_start,
             'time_end': time_end,

@@ -286,6 +286,62 @@
         .rise-up {
             animation: riseUp 0.5s ease-out forwards;
         }
+
+        .notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            z-index: 9999;
+            animation: slideIn 0.5s ease-in-out forwards;
+        }
+
+        .notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            z-index: 9999;
+            animation: slideIn 0.5s ease-in-out forwards;
+        }
+
+        .notification.success {
+            background-color: rgba(40, 167, 69, 0.8);
+        }
+
+        .notification.error {
+            background-color: rgba(220, 53, 69, 0.8);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="overflow-hidden bg-gray-200">
@@ -383,9 +439,7 @@
   
 </body>
 <script>
-    function logout(){
-        document.location.href = "/logout";
-    }
+    function logout(){document.location.href = "/logout";}
 
     // Timeout for flash messages
     setTimeout(() => {
@@ -394,6 +448,37 @@
             flash.style.display = 'none';
         });
     }, 5000);
+
+    function showNotification(message, type = 'success') {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        // Add to document
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.5s ease-in-out forwards';
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 3000);
+    }
+
+    function confirmAction(message) {
+        return new Promise((resolve) => {
+            const confirmed = window.confirm(message);
+            resolve(confirmed);
+        });
+    }
 
     function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
