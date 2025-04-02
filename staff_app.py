@@ -49,7 +49,7 @@ def staff_students():
         return redirect(url_for('login'))
     
     sql = """
-        SELECT u.*, 
+        SELECT u.idno, u.firstname, u.middlename, u.lastname, u.course, u.yr_lvl, u.email, 
                COALESCE(r.session_count, 0) as sessions,
                u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
         FROM users u
@@ -66,18 +66,13 @@ def staff_students():
     students = getallprocess(sql)
     
     if students:
-        students_list = []
-        for student in students:
-            student_dict = dict(student)
-            student_dict['sessions'] = student_dict.get('sessions', 0)
-            student_dict['remaining_sessions'] = student_dict.get('no_session', 0) - student_dict['sessions']
-            students_list.append(student_dict)
+        students_list = [dict(student) for student in students]
     else:
         students_list = []
     
     return render_template("staff/studlist.html", 
-                         pagetitle='Students',
-                         students=students_list)
+                           pagetitle='Students',
+                           students=students_list)
 
 @staff_app.route('/staff/reports')
 def staff_reports():
@@ -305,90 +300,20 @@ def get_statisticchart():
     else:
         return jsonify({'message': 'Failed to fetch reservation statistics.', 'status': 'error'}), 500
 
-@staff_app.route('/api/student/<int:idno>')
+@staff_app.route('/api/student/<int:idno>', methods=['GET'])
 def get_student(idno):
-    sql = """
-        SELECT u.*, 
-               COALESCE(r.session_count, 0) as sessions,
-               u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
-        FROM users u
-        LEFT JOIN (
-            SELECT idno, COUNT(*) as session_count
-            FROM reservations
-            WHERE status = 'completed'
-            GROUP BY idno
-        ) r ON u.idno = r.idno
-        WHERE u.idno = ?
-    """
-    student = getallprocess(sql, (idno,))
-    if student:
-        student_data = dict(student[0])
-
-        if not student_data.get('photo'):
-            student_data['photo_url'] = url_for('static', filename='user_img/default/def-user.png')
-        print(student_data)
-        return jsonify(student_data)
     try:
-        # Handle photo deletion
-        should_delete_photo = request.form.get('delete_photo') == 'true'
-        
-        # Get current user data
-        sql = "SELECT photo FROM users WHERE idno = ?"
-        current_user = getallprocess(sql, (idno,))
-        
-        update_data = {
-            'id': idno,
-            'firstname': request.form.get('firstname'),
-            'middlename': request.form.get('middlename'),
-            'lastname': request.form.get('lastname'),
-            'course': request.form.get('course'),
-            'yr_lvl': request.form.get('yr_lvl'),
-            'email': request.form.get('email')
-        }
-        
-        if should_delete_photo and current_user:
-            # Delete the physical file if it exists
-            old_photo = current_user[0]['photo']
-            if old_photo and os.path.exists(os.path.join('static', 'user_img', old_photo)):
-                try:
-                    os.remove(os.path.join('static', 'user_img', old_photo))
-                except:
-                    pass  # Ignore file deletion errors
-            update_data['photo'] = None
-        
-        success = updateprocess('users', **update_data)
-        
-        if success:
-            # Get updated student data
-            sql = """
-                SELECT u.*, 
-                       COALESCE(r.session_count, 0) as sessions,
-                       u.no_session - COALESCE(r.session_count, 0) as remaining_sessions
-                FROM users u
-                LEFT JOIN (
-                    SELECT idno, COUNT(*) as session_count
-                    FROM reservations
-                    WHERE status = 'completed'
-                    GROUP BY idno
-                ) r ON u.idno = r.idno
-                WHERE u.idno = ?
-            """
-            updated_student = getallprocess(sql, (idno,))
-            if updated_student:
-                student_data = dict(updated_student[0])
-                if student_data.get('photo'):
-                    student_data['photo_url'] = url_for('static', filename=f'user_img/{student_data["photo"]}')
-                else:
-                    student_data['photo_url'] = url_for('static', filename='user_img/default/def-user.png')
-                return jsonify({
-                    'message': 'Student updated successfully',
-                    'status': 'success',
-                    'student': student_data
-                }), 200
+        sql = f"SELECT * FROM users WHERE IDNO = ?"
+        success = getallprocess(sql, (idno,))
 
-        return jsonify({'message': 'Failed to update student!', 'status': 'error'}), 400
+        if not success:
+            return jsonify({'message': 'Failed to fetch student data!', 'status': 'error'}), 400
+        
+        student = [dict(row) for row in success]
+        print(student)
+        return jsonify(student)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'message': str(e), 'status':'error'}), 500
 
 @staff_app.route('/api/student/<int:idno>', methods=['DELETE'])
 def delete_student(idno):
@@ -403,7 +328,7 @@ def delete_student(idno):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@staff_app.route('/api/student/add', methods=['POST'])
+@staff_app.route('/api/student', methods=['POST'])
 def add_student():
     try:
         idno = request.form.get('idno')
@@ -446,6 +371,28 @@ def add_student():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@staff_app.route('/api/student/<int:idno>', methods=['PATCH'])
+def update_student():
+    try:
+        data = request.json
+
+        firstname = data.get('firstname')
+        middlename = data.get('middle')
+        lastname = data.get('lastname')
+        course = data.get('course')
+        level = data.get('yr_lvl')
+        email = data.get('email')
+
+        success = updateprocess('users', firstname=firstname, middlename=middlename,
+                                lastname=lastname, course=course, level=level, email=email)
+        
+        if not success:
+            return jsonify({'message': 'Failed to update student!', 'status':'error'}), 400
+        
+        return jsonify({'message': 'Update student successful!', 'status': 'success'}), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 @staff_app.route('/api/student/<int:idno>/reservations')
 def get_student_reservations(idno):

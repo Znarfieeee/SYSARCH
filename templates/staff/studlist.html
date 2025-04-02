@@ -109,26 +109,11 @@
                 <h2 class="text-2xl font-bold text-center mb-4">Edit Student Information</h2>
                 <div class="self-center flex flex-col items-center gap-4">
                     <div class="relative size-24">
-                        <img id="userPhotoPreview"
+                        <img id="userPhotoPreview" onclick="showPhotoPreview()"
                              alt="Profile Picture"
                              src="/static/user_img/default/def-user.png"
-                             class="w-24 h-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400">
-                        <!-- Add an overlay with camera icon -->
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                             onclick="document.getElementById('photoInput').click()">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
+                             class="w-24 h-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-gray-400 hover:bg-black/10 cursor-pointer">
                     </div>
-                    <!-- Hidden file input -->
-                    <input type="file" 
-                           id="photoInput" 
-                           name="photo" 
-                           accept="image/*"
-                           class="hidden"
-                           onchange="previewImage(event)">
                     <button type="button" 
                             id="deletePhotoBtn" 
                             onclick="confirmDeletePhoto()"
@@ -139,9 +124,9 @@
                 </div>
                 <input type="hidden" id="studentId" name="idno">
                 <div class="space-y-4">
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="firstName" name="firstname" placeholder="First name" required>
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="middleName" name="middlename" placeholder="Middle name">
-                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="lastName" name="lastname" placeholder="Last name" required>
+                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="firstname" name="firstname" placeholder="First name" required>
+                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="middlename" name="middlename" placeholder="Middle name">
+                    <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="lastname" name="lastname" placeholder="Last name" required>
                     <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2 bg-transparent" type="text" id="course" name="course" placeholder="Course" required>
                     <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2 bg-transparent" type="text" id="yearLevel" name="yr_lvl" placeholder="Year Level" required>
                     <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2 bg-transparent" type="email" id="email" name="email" placeholder="Email Address" required>
@@ -274,32 +259,19 @@ function filterStudents() {
     }
 }
 
-let originalPhotoSrc = '/static/user_img/default/def-user.png';
-let shouldDeletePhoto = false;
-
-function confirmDeletePhoto() {
-    if (confirm('Are you sure you want to delete the profile picture?')) {
-        const photoPreview = document.getElementById('userPhotoPreview');
-        const deletePhotoBtn = document.getElementById('deletePhotoBtn');
-        
-        shouldDeletePhoto = true;
-        photoPreview.src = '/static/user_img/default/def-user.png';
-        deletePhotoBtn.classList.add('hidden');
-    }
-}
-
 async function editStudent(idno) {
     try {
         const response = await fetch(`/api/student/${idno}`);
         const student = await response.json();
 
+
+        console.log(student)
+        // console.log(student.idno)
+
         if (!student || !student.idno) {
             showNotification("Failed to retrieve student data. Please try again.", "error")
             return
         }
-        
-        // Reset photo deletion state
-        shouldDeletePhoto = false;
         
         // Populate the form
         document.getElementById('studentId').value = student.idno;
@@ -395,19 +367,8 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     const formData = new FormData(e.target);
     const idno = formData.get('idno');
     
-    // Get the file input
-    const photoInput = document.getElementById('photoInput');
-    if (photoInput.files.length > 0) {
-        formData.append('photo', photoInput.files[0]);
-    }
-    
-    // Add the delete_photo flag if needed
-    if (shouldDeletePhoto) {
-        formData.append('delete_photo', 'true');
-    }
-    
     try {
-        const response = await fetch(`/api/student/${idno}/edit`, {
+        const response = await fetch(`/api/student/${idno}`, {
             method: 'POST',
             body: formData
         });
@@ -504,7 +465,7 @@ document.getElementById('addStudentForm').addEventListener('submit', async (e) =
     const formData = new FormData(e.target);
     
     try {
-        const response = await fetch('/api/student/add', {
+        const response = await fetch('/api/student', {
             method: 'POST',
             body: formData
         });
