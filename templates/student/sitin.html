@@ -67,18 +67,16 @@
             <!-- Star Rating -->
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Rate your experience</label>
-                <div class="flex justify-start gap-2">
-                    <input type="radio" name="rating" id="star1" value="1" class="hidden peer/star1" required>
-                    <input type="radio" name="rating" id="star2" value="2" class="hidden peer/star2">
-                    <input type="radio" name="rating" id="star3" value="3" class="hidden peer/star3">
-                    <input type="radio" name="rating" id="star4" value="4" class="hidden peer/star4">
-                    <input type="radio" name="rating" id="star5" value="5" class="hidden peer/star5">
-            
-                    <label for="star1" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star1:text-yellow-400">★</label>
-                    <label for="star2" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star2:text-yellow-400">★</label>
-                    <label for="star3" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star3:text-yellow-400">★</label>
-                    <label for="star4" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star4:text-yellow-400">★</label>
-                    <label for="star5" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star5:text-yellow-400">★</label>
+                <div class="feedback">
+                    <div class="stars flex justify-center">
+                        <input type="radio" id="star1" name="rating" value="1" /><input type="radio" id="star2" name="rating" value="2" /><input type="radio" id="star3" name="rating" value="3" /><input type="radio" id="star4" name="rating" value="4" /><input type="radio" id="star5" name="rating" value="5" />
+                        
+                        <label for="star1" aria-label="Banana">1 star</label>
+                        <label for="star2">2 stars</label>
+                        <label for="star3">3 stars</label>
+                        <label for="star4">4 stars</label>
+                        <label for="star5">5 stars</label>
+                      </div>
                 </div>
             </div>
 
@@ -122,27 +120,6 @@
         </form>
     </div>
 </div>
-<style>
-    /* Star rating hover effect */
-    .star-label:hover ~ .star-label {
-        color: #d1d5db !important; /* gray-300 */
-    }
-    
-    .star-label:hover,
-    .star-label:has(~ .star-label:hover) {
-        color: #FACC15 !important; /* yellow-400 */
-    }
-
-    /* Selected stars effect */
-    input[type="radio"]:checked ~ .star-label {
-        color: #d1d5db !important; /* gray-300 */
-    }
-    
-    input[type="radio"]:checked + .star-label,
-    input[type="radio"]:checked + .star-label ~ .star-label {
-        color: #FACC15 !important; /* yellow-400 */
-    }
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // Load active sit-in session on page load
@@ -156,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 reservationsTableBody.innerHTML = approvedReservations.map(reservation => `
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.labno}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.time_start} - ${reservation.time_end}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.labno}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.purpose}</td>
                     </tr>
                 `).join('');
@@ -235,32 +212,32 @@ async function loadActiveSitIn() {
     }
 }
 
-async function startSitIn(reservationId) {
-    const pcNumber = prompt('Enter PC Number:');
-    if (!pcNumber) return;
+// async function startSitIn(reservationId) {
+//     const pcNumber = prompt('Enter PC Number:');
+//     if (!pcNumber) return;
 
-    try {
-        const response = await fetch(`/api/check-in/${reservationId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ pc_number: pcNumber })
-        });
+//     try {
+//         const response = await fetch(`/api/check-in/${reservationId}`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({ pc_number: pcNumber })
+//         });
 
-        const result = await response.json();
+//         const result = await response.json();
 
-        if (response.ok) {
-            alert('Sit-in started successfully');
-            window.location.reload();
-        } else {
-            throw new Error(result.error || 'Failed to start sit-in');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
-    }
-}
+//         if (response.ok) {
+//             alert('Sit-in started successfully');
+//             window.location.reload();
+//         } else {
+//             throw new Error(result.error || 'Failed to start sit-in');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert(error.message);
+//     }
+// }
 
 async function endSitIn(sitInId) {
     if (!confirm('Are you sure you want to end this session?')) {
