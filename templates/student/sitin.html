@@ -35,10 +35,10 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="bg-gray-50 sticky top-0 z-10">
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                     </tr>
                 </thead>
                 <tbody id="reservationsTableBody">
@@ -50,6 +50,99 @@
     </div>
 </div>
 
+<div id="feedback-container" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden flex items-center justify-center">
+    <div id="feedback-content" class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <form id="feedbackForm" class="space-y-6">
+            <input type="hidden" id="sitInId" name="sitInId">
+            
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Session Feedback</h1>
+                <button type="button" onclick="closeFeedback()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Star Rating -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Rate your experience</label>
+                <div class="flex justify-start gap-2">
+                    <input type="radio" name="rating" id="star1" value="1" class="hidden peer/star1" required>
+                    <input type="radio" name="rating" id="star2" value="2" class="hidden peer/star2">
+                    <input type="radio" name="rating" id="star3" value="3" class="hidden peer/star3">
+                    <input type="radio" name="rating" id="star4" value="4" class="hidden peer/star4">
+                    <input type="radio" name="rating" id="star5" value="5" class="hidden peer/star5">
+            
+                    <label for="star1" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star1:text-yellow-400">★</label>
+                    <label for="star2" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star2:text-yellow-400">★</label>
+                    <label for="star3" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star3:text-yellow-400">★</label>
+                    <label for="star4" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star4:text-yellow-400">★</label>
+                    <label for="star5" class="star-label cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star5:text-yellow-400">★</label>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="space-y-2">
+                <label for="comments" class="block text-sm font-medium text-gray-700">Additional Comments</label>
+                <textarea
+                    id="comments"
+                    name="comments"
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Share your experience..."
+                    required
+                ></textarea>
+            </div>
+
+            <!-- Issues Checklist -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Did you experience any issues?</label>
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="issues" value="pc_performance" class="rounded text-blue-600">
+                        <span class="text-sm text-gray-700">PC Performance Issues</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="issues" value="internet" class="rounded text-blue-600">
+                        <span class="text-sm text-gray-700">Internet Connectivity</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="issues" value="software" class="rounded text-blue-600">
+                        <span class="text-sm text-gray-700">Software Problems</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Submit Feedback
+            </button>
+        </form>
+    </div>
+</div>
+<style>
+    /* Star rating hover effect */
+    .star-label:hover ~ .star-label {
+        color: #d1d5db !important; /* gray-300 */
+    }
+    
+    .star-label:hover,
+    .star-label:has(~ .star-label:hover) {
+        color: #FACC15 !important; /* yellow-400 */
+    }
+
+    /* Selected stars effect */
+    input[type="radio"]:checked ~ .star-label {
+        color: #d1d5db !important; /* gray-300 */
+    }
+    
+    input[type="radio"]:checked + .star-label,
+    input[type="radio"]:checked + .star-label ~ .star-label {
+        color: #FACC15 !important; /* yellow-400 */
+    }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // Load active sit-in session on page load
@@ -62,10 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (approvedReservations.length > 0) {
                 reservationsTableBody.innerHTML = approvedReservations.map(reservation => `
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.labno}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.time_start} - ${reservation.time_end}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${reservation.purpose}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.labno}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.time_start} - ${reservation.time_end}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.purpose}</td>
                     </tr>
                 `).join('');
             } else {
@@ -170,27 +263,74 @@ async function startSitIn(reservationId) {
 }
 
 async function endSitIn(sitInId) {
+    if (!confirm('Are you sure you want to end this session?')) {
+        return;
+    }
+    document.getElementById('sitInId').value = sitInId; // Store sitInId for feedback
+    showFeedback();
+}
+
+function showFeedback() {
+    document.getElementById('feedback-container').classList.remove('hidden');
+}
+
+function closeFeedback() {
+    if (confirm('Are you sure you want to close without submitting feedback?')) {
+        document.getElementById('feedback-container').classList.add('hidden');
+        window.location.reload(); // Reload page to update the UI
+    }
+}
+
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        sitin_id: document.getElementById('sitInId').value,
+        rating: document.querySelector('input[name="rating"]:checked')?.value,
+        comments: document.getElementById('comments').value,
+        issues: Array.from(document.querySelectorAll('input[name="issues"]:checked')).map(cb => cb.value)
+    };
+
     try {
-        const response = await fetch(`/api/sitin/${sitInId}/end`, {
+        // First submit feedback
+        const feedbackResponse = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const feedbackResult = await feedbackResponse.json();
+        
+        if (!feedbackResponse.ok) {
+            throw new Error(feedbackResult.message || 'Failed to submit feedback');
+        }
+
+        // If feedback was successful, end the session
+        const endSessionResponse = await fetch(`/api/sitin/${formData.sitin_id}/end`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             }
         });
 
-        const result = await response.json();
+        const endSessionResult = await endSessionResponse.json();
 
-        if (response.ok) {
-            alert('Session ended successfully');
-            // Redirect to logout
-            window.location.href = '/history';
-        } else {
-            throw new Error(result.error || 'Failed to end session');
+        if (!endSessionResponse.ok) {
+            throw new Error(endSessionResult.message || 'Failed to end session');
         }
+
+        // If everything succeeded, close feedback and reload
+        showNotification('Session ended and feedback submitted successfully!', 'success');
+        document.getElementById('feedback-container').classList.add('hidden');
+        window.location.reload();
+        
     } catch (error) {
         console.error('Error:', error);
-        alert(error.message);
+        showNotification(error.message, 'error');
     }
-}
+});
 </script>
+
 {% endblock %}
