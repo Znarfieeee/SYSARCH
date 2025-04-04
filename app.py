@@ -481,7 +481,18 @@ def add_feedback():
         rating = data.get('rating')
         idno = session['user']['idno']
         comments = data.get('comments')
-        issues = ','.join(data.get('issues', []))
+        issues = ','.join(data.get('issues', [])).upper() if data.get('issues') else 'No Issues'
+        
+        # Get labno from active_sitin
+        sql = "SELECT labno FROM active_sitin WHERE id = ?"
+        result = getallprocess(sql, (sitin_id,))
+        if not result:
+            return jsonify({
+                'message': 'Could not find sit-in session', 
+                'status': 'error'
+            }), 404
+            
+        labno = result[0]['labno']
         
         if not all([sitin_id, rating, comments]):
             return jsonify({
@@ -495,7 +506,7 @@ def add_feedback():
             }), 400
         
         success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
-                           comments=comments, issues=issues, idno=idno)
+                           comments=comments, issues=issues, idno=idno, labno=labno)
         
         if not success:
             return jsonify({
