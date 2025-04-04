@@ -1,65 +1,65 @@
 {% extends 'staff.html' %}
 {% block content %}
-    <div class="container mt-5 px-10">
-        <div class="flex flex-col md:flex-row z-999 justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
-            <div class="input-group">
-                <select name="level" id="purposeFilter" class="input w-full" required onchange="filterTable()">
-                    <option value="" selected></option>
-                    <option value="Java programming">Date</option>
-                    <option value="C programming">Rating</option>
-                    <option value="C# programming">Laboratory</option>
-                    <option value="Php programming">Issues</option>
-      
-                </select>
-                <label class="user-label bg-gray-200">Filter by</label>
-            </div>
-            <div class="relative">
-                <button id="generateReportBtn" 
-                        class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                               transition duration-300 ease-in-out flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Feedbacks
-                </button>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
-            <div  class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50 sticky top-0 z-10">
-                        <tr>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Laboratory</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Issues</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% if feedbacks|length == 0 %}
-                        <tr class="student-row hover:bg-gray-50">
-                            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center">No feedbacks available</td>
-                        </tr>
-                        {% endif %}
-                        {% if feedbacks|length > 0 %}
-                            {% for feedback in feedbacks %}
-                            <tr class="student-row hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.created_at | datetimeformat("%b %d, %Y") }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.labno }}</td>                    
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.idno }}</td>                    
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.rating }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.issues.upper() }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.comments }}</td>
-                            </tr>   
-                            {% endfor %}
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+		<div class="container mt-5 px-10">
+				<div class="flex flex-col md:flex-row z-999 justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+						<div class="input-group">
+								<select name="level" id="purposeFilter" class="input w-full" required onchange="filterTable()">
+										<option value="" selected></option>
+										<option value="Java programming">Date</option>
+										<option value="C programming">Rating</option>
+										<option value="C# programming">Laboratory</option>
+										<option value="Php programming">Issues</option>
+			
+								</select>
+								<label class="user-label bg-gray-200">Filter by</label>
+						</div>
+						<div class="relative">
+								<button id="generateReportBtn" 
+												class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+															 transition duration-300 ease-in-out flex items-center gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+												<polyline points="7 10 12 15 17 10"></polyline>
+												<line x1="12" y1="15" x2="12" y2="3"></line>
+										</svg>
+										Feedbacks
+								</button>
+						</div>
+				</div>
+				<div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
+						<div  class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
+								<table class="min-w-full divide-y divide-gray-200">
+										<thead class="bg-gray-50 sticky top-0 z-10">
+												<tr>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Laboratory</th>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Issues</th>
+														<th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
+												</tr>
+										</thead>
+										<tbody class="bg-white divide-y divide-gray-200">
+												{% if feedbacks|length == 0 %}
+												<tr class="student-row hover:bg-gray-50">
+														<td colspan="5" class="px-6 py-4 whitespace-nowrap text-center">No feedbacks available</td>
+												</tr>
+												{% endif %}
+												{% if feedbacks|length > 0 %}
+														{% for feedback in feedbacks %}
+														<tr class="student-row hover:bg-gray-50">
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.created_at | datetimeformat("%b %d, %Y") }}</td>
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.labno }}</td>                    
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.idno }}</td>                    
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.rating }}</td>
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.issues.upper() }}</td>
+																<td class="px-6 py-4 whitespace-nowrap text-start">{{ feedback.comments }}</td>
+														</tr>   
+														{% endfor %}
+												{% endif %}
+										</tbody>
+								</table>
+						</div>
+				</div>
+		</div>
 {% endblock %}
