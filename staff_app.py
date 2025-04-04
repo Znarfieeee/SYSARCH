@@ -141,7 +141,13 @@ def staff_reports_level():
 def staff_feedbacks():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template("staff/feedbacks.html", pagetitle='Feedbacks')
+    
+    feedbacks = getallprocess("SELECT * FROM feedbacks ORDER BY created_at DESC")
+
+    if not feedbacks: 
+        return jsonify({'message': 'Failed to fetch feedbacks.', 'status': 'error'}), 500
+    
+    return render_template("staff/feedbacks.html", pagetitle='Feedbacks', feedbacks = feedbacks)
 
 @staff_app.route('/staff/history')
 def staff_history():
@@ -588,7 +594,7 @@ def end_sitin_route(sitin_id):
         if not session.get('logged_in'):
             return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
         
-        sql = "SELECT id, idno FROM active_sitin WHERE id = ? AND status = 'active'"
+        sql = "SELECT id, idno, labno FROM active_sitin WHERE id = ? AND status = 'active'"
         sitin = getallprocess(sql, (sitin_id,))
         
         if not sitin:
@@ -596,12 +602,17 @@ def end_sitin_route(sitin_id):
         
         sitin_id = sitin[0]['id']
         student_idno = sitin[0]['idno']
+        labno = sitin[0]['labno']
         
         success = end_sitin(sitin_id)
         
         if success:
             update_sessions(student_idno)
-            return jsonify({'message': 'Sit-in ended successfully', 'status': 'success'}), 200
+            return jsonify({
+                'message': 'Sit-in ended successfully', 
+                'status': 'success',
+                'labno': labno
+            }), 200
         
         return jsonify({'message': 'Failed to end sit-in', 'status': 'error'}), 400
             

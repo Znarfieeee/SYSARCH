@@ -25,6 +25,16 @@ def addheader(response):
 def datetimeformat(value, format="%b %d, %Y %H:%M"):
     return datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
 
+# Functionalities for Student
+def json_response(message, status='success', data=None, code=200):
+    response = {
+        'message': message,
+        'status': status
+    }
+    if data is not None:
+        response['data'] = data
+    return jsonify(response), code
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if session.get('logged_in'):
@@ -201,16 +211,6 @@ def reservation():
     
     return render_template('student/reservation.html', pagetitle=pagetitle)
 
-# Functionalities for Student
-def json_response(message, status='success', data=None, code=200):
-    response = {
-        'message': message,
-        'status': status
-    }
-    if data is not None:
-        response['data'] = data
-    return jsonify(response), code
-
 @app.route('/reservation/<int:id>', methods=['DELETE'])
 def delete_reservation(id):
     try:
@@ -363,28 +363,6 @@ def get_active_sitins_route():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# @app.route('/api/check-out/<int:reservation_id>', methods=['POST'])
-# def check_out(reservation_id):
-#     if not session.get('logged_in'):
-#         return jsonify({'error': 'Not authenticated'}), 401
-    
-#     try:
-#         # Get the active sit-in for this reservation
-#         sql = "SELECT id FROM active_sitin WHERE reservation_id = ? AND status = 'active'"
-#         sitin = getallprocess(sql, (reservation_id,))
-        
-#         if not sitin:
-#             return jsonify({'error': 'No active sit-in found'}), 404
-            
-#         success = end_sitin(sitin[0]['id'])
-        
-#         if success:
-#             return jsonify({'message': 'Check-out successful'}), 200
-#         return jsonify({'error': 'Failed to check out'}), 400
-            
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 @app.route('/api/reservation/<int:reservation_id>/edit', methods=['POST'])
 def edit_reservation(reservation_id):
     if not session.get('logged_in'):
@@ -493,6 +471,62 @@ def get_user_sitins():
     except Exception as e:
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
     
+    
+@app.route('/api/feedback', methods=['POST'])
+def add_feedback(): 
+    try:
+        data = request.json
+        
+        sitin_id = data.get('sitin_id')
+        rating = data.get('rating')
+        idno = session['user']['idno']
+        comments = data.get('comments')
+        issues = ','.join(data.get('issues', [])).upper() if data.get('issues') else 'No Issues'
+        
+        # Get labno from active_sitin
+        sql = "SELECT labno FROM active_sitin WHERE id = ?"
+        result = getallprocess(sql, (sitin_id,))
+        if not result:
+            return jsonify({
+                'message': 'Could not find sit-in session', 
+                'status': 'error'
+            }), 404
+            
+        labno = result[0]['labno']
+        
+        if not all([sitin_id, rating, comments]):
+            return jsonify({
+                'message': 'Missing required fields', 
+                'status': 'error',
+                'details': {
+                    'sitin_id': not sitin_id,
+                    'rating': not rating,
+                    'comments': not comments
+                }
+            }), 400
+        
+        success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
+                           comments=comments, issues=issues, idno=idno, labno=labno)
+        
+        if not success:
+            return jsonify({
+                'message': 'Failed to save feedback', 
+                'status': 'error'
+            }), 500
+        
+        return jsonify({
+            'message': 'Feedback submitted successfully!', 
+            'status': 'success'
+        }), 200
+    
+    except Exception as e:
+        print(f"Error in /api/feedback: {e}")
+        return jsonify({
+            'message': 'Internal server error', 
+            'status': 'error',
+            'details': str(e)
+        }), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
     # app.run(debug=True, host='172.19.131.161', port=5000)
