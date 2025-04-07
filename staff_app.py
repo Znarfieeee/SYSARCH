@@ -748,11 +748,25 @@ def reset_sessions():
             return jsonify({'message': 'Invalid password', 'status': 'error'}), 403
         
         success = reset_sessions()
-        if success:
-            return jsonify({'message': 'Student sessions reset successfully', 'status': 'success'}), 200
+        if not success:
+            return jsonify({'message': 'Failed to reset student sessions', 'status': 'error'}), 400
         
-        return jsonify({'message': 'Failed to reset student sessions', 'status': 'error'}), 400
+        return jsonify({'message': 'Student sessions reset successfully', 'status': 'success'}), 200
         
+    except Exception as e:
+        return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
+
+@staff_app.route('/reset_sessions/<int:id>', methods=['POST'])
+def reset_session_by_id(id):
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+        success = reset_session_by_id(id)
+
+        if not success:
+            return jsonify({'message': 'Failed to reset student session', 'status': 'error'}), 400
+        return
     except Exception as e:
         return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
 
