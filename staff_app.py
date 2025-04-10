@@ -316,7 +316,7 @@ def get_student(idno):
             return jsonify({'message': 'Failed to fetch student data!', 'status': 'error'}), 400
         
         student = [dict(row) for row in success]
-        print(student)
+
         return jsonify(student)
     except Exception as e:
         return jsonify({'message': str(e), 'status':'error'}), 500
@@ -756,19 +756,54 @@ def reset_sessions():
     except Exception as e:
         return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
 
-@staff_app.route('/reset_sessions/<int:id>', methods=['POST'])
-def reset_session_by_id(id):
+@staff_app.route('/reset_sessions/<int:idno>', methods=['POST'])
+def reset_session_by_id(idno):
     try:
         if not session.get('logged_in'):
             return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+        
+        if not session.get('user', {}).get('role') == 'admin':
+            return jsonify({'message': 'Only admin can reset sessions', 'status': 'error'}), 403
+        
+        password = request.form.get('password')
+        if not password:
+            return jsonify({'message': 'Password is required', 'status': 'error'}), 400
+            
+        admin_idno = session.get('user', {}).get('idno')
+        sql = "SELECT * FROM users WHERE idno = ?"
+        admin = getallprocess(sql, (admin_idno,))
+        
+        if not admin or admin[0]['password'] != password:
+            return jsonify({'message': 'Invalid password', 'status': 'error'}), 403
+        
+        sql = "SELECT * FROM users WHERE idno = ?"
+        student = getallprocess(sql, (idno,))
 
-        success = reset_session_by_id(id)
+        # Ensure the student exists
+        if not student or len(student) == 0:
+            return jsonify({'message': 'Student not found', 'status': 'error'}), 404
 
-        if not success:
-            return jsonify({'message': 'Failed to reset student session', 'status': 'error'}), 400
-        return
+        # Convert the first record to a dictionary
+        student_dict = dict(student[0])
+        course = student_dict.get('course')
+        if not course:
+            return jsonify({'message': 'Course information is missing', 'status': 'error'}), 400
+
+        session_count = 30 if course.lower() in ['bsit', 'bscs', 'bscpe'] else 15
+
+        # Update the session count for the student
+        sql_update = "UPDATE users SET no_session = ? WHERE idno = ?"
+        success = postprocess(sql_update, (session_count, idno))
+
+        if success:
+            return jsonify({'message': 'Student sessions reset successfully', 'status': 'success'}), 200
+
+        return jsonify({'message': f'Failed to reset student {idno} sessions', 'status': 'error'}), 400
     except Exception as e:
-        return jsonify({'message': f'Error resetting sessions: {str(e)}', 'status': 'error'}), 500
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error.'
+        }), 500
 
 @staff_app.route('/staff/generate-report', methods=['POST'])
 def generate_report():

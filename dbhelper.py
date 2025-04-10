@@ -655,14 +655,3 @@ def reset_sessions():
         
         """
     return postprocess(sql)
-
-def get_student_by_idno(idno):
-    sql = """
-        UPDATE users
-        SET no_session = CASE
-            WHEN course = 'BSIT', 'BSCS', 'BSCPE' THEN 30
-            ELSE 15
-        END
-        WHERE Idno = ?
-    """
-    return postprocess(sql, (idno,))
