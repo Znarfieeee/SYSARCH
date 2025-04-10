@@ -576,7 +576,10 @@ def get_total_sitins():
             a.idno,
             u.firstname,
             u.lastname,
-            u.middlename,
+            CASE 
+                WHEN u.middlename IS NULL OR u.middlename = 'None' THEN ''
+                ELSE u.middlename
+            END AS middlename,
             u.course,
             u.yr_lvl,
             u.email,
@@ -598,7 +601,10 @@ def get_total_sitins_purpose():
             a.idno,
             u.firstname,
             u.lastname,
-            u.middlename,
+            CASE 
+                WHEN u.middlename IS NULL OR u.middlename = 'None' THEN ''
+                ELSE u.middlename
+            END AS middlename,
             u.course,
             u.yr_lvl,
             u.email,
@@ -614,13 +620,16 @@ def get_total_sitins_purpose():
             """
     return getallprocess(sql)
 
-def get_total_sitins_level():
+def get_total_sitins_lab():
     sql = """
             SELECT 
             a.idno,
             u.firstname,
             u.lastname,
-            u.middlename,
+            CASE 
+                WHEN u.middlename IS NULL OR u.middlename = 'None' THEN ''
+                ELSE u.middlename
+            END AS middlename,
             u.course,
             u.yr_lvl,
             u.email,
@@ -632,7 +641,7 @@ def get_total_sitins_level():
             FROM active_sitin a
             JOIN users u ON a.idno = u.idno
             WHERE a.status = 'done'
-            ORDER BY u.yr_lvl ASC, date ASC
+            ORDER BY a.labno ASC, date ASC
             """
     return getallprocess(sql)
 

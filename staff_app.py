@@ -115,26 +115,26 @@ def staff_reports_purpose():
                            pagetitle='Reports per Purpose',
                            students=students_list)
 
-@staff_app.route('/staff/reports/level')
+@staff_app.route('/staff/reports/lab')
 def staff_reports_level():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
-    students = get_total_sitins_level()
+    students = get_total_sitins_lab()
     
     if students:
         students_list = []
         for student in students:
             student_dict = dict(student)
             # Ensure all fields are included for filtering
-            student_dict['yr_lvl'] = student_dict.get('yr_lvl', '')
+            student_dict['labno'] = student_dict.get('labno', '')
             student_dict['date'] = student_dict.get('date', '')
             students_list.append(student_dict)
     else:
         students_list = []
     
     return render_template("staff/reports-pl.html", 
-                           pagetitle='Reports per Level',
+                           pagetitle='Reports per Lab',
                            students=students_list)
 
 @staff_app.route('/staff/feedbacks')
@@ -816,7 +816,7 @@ def generate_report():
         headers = data.get('headers')
         rows = data.get('data')
         purpose = data.get('purpose')
-        level = data.get('level')
+        labno = data.get('lab')
         date = data.get('date')
         page = data.get('page')
         
@@ -829,8 +829,8 @@ def generate_report():
             date = "ALL DATES"
         
         if page == 'pl':
-            if level:
-                report_title = f"REPORT FOR LEVEL {level} ON {date}"
+            if labno:
+                report_title = f"REPORT FOR LAB {labno} ON {date}"
             else:  
                 report_title = f"REPORT FOR ALL LEVELS {date}"
         elif page == 'pp':
@@ -869,14 +869,14 @@ def generate_report():
                 # Define formats
                 header_format = workbook.add_format({
                     'bold': True,
-                    'bg_color': '#D3D3D3',  # Light grey background like PDF
-                    'font_color': '#000000', # Black text like PDF
-                    'font_size': 14,         # Match PDF font size
+                    'bg_color': '#D3D3D3',  
+                    'font_color': '#000000', 
+                    'font_size': 14,         
                     'font_name': 'Helvetica',
-                    'align': 'left',         # Left align like PDF
-                    'border_color': '#D3D3D3', # Light grey border like PDF
-                    'bottom': 1,             # Bottom border only like PDF
-                    'text_wrap': True,       # Enable text wrapping
+                    'align': 'left',         
+                    'border_color': '#D3D3D3', 
+                    'bottom': 1,             
+                    'text_wrap': True,      
                 })
 
                 title_format = workbook.add_format({
