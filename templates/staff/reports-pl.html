@@ -1,80 +1,150 @@
-{% extends 'staff.html' %}
-{% block content %}
+{% extends 'staff.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
     <!-- Header and Search Section -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
         <div class="flex gap-2">
             <div class="input-group">
-                <select name="level" id="levelFilter" class="input w-full" required onchange="filterTable()">
+                <select
+                    name="lab"
+                    id="labFilter"
+                    class="input w-full"
+                    required
+                    onchange="filterTable()">
                     <option value="" selected></option>
-                    <option value="1">1 year</option>
-                    <option value="2">2 year</option>
-                    <option value="3">3 year</option>
-                    <option value="4">4 year</option>
+                    <option value="524">524</option>
+                    <option value="526">526</option>
+                    <option value="528">528</option>
+                    <option value="530">530</option>
+                    <option value="542">542</option>
+                    <option value="Mac Laboratory">Mac Laboratory</option>
                 </select>
-                <label class="user-label bg-gray-200">Level</label>
+                <label class="user-label bg-gray-200">Lab</label>
             </div>
             <div class="input-group">
-                <input required="" type="date" name="date" id="dateFilter" autocomplete="off" class="input w-full" onchange="filterTable()">
+                <input
+                    required=""
+                    type="date"
+                    name="date"
+                    id="dateFilter"
+                    autocomplete="off"
+                    class="input w-full"
+                    onchange="filterTable()" />
                 <label class="user-label bg-gray-200">Date</label>
             </div>
         </div>
-        
+
         <div class="radio-inputs flex flex-wrap justify-center gap-2">
             <a href="/staff/reports" class="radio">
-                <input type="radio" name="radio">
+                <input type="radio" name="radio" />
                 <span class="name">All Students</span>
             </a>
-            <a href="/staff/reports/purpose" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/reports/purpose"
+                class="radio hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">Per Purpose</span>
             </a>
-            <a href="/staff/reports/level" class="radio  hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio" checked="">
-                <span class="name">Per Level</span>
+            <a
+                href="/staff/reports/lab"
+                class="radio hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" checked="" />
+                <span class="name">Per Lab</span>
             </a>
         </div>
 
-        <button id="generateReportBtn" 
-                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                        transition duration-300 ease-in-out flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        <button
+            id="generateReportBtn"
+            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2">
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Generate Report
         </button>
     </div>
 
     <!-- Student Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
-        <div id="tableContainer" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
-            <table id="studentTable" class="min-w-full divide-y divide-gray-200">
+    <div
+        class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto rise-up">
+        <div
+            id="tableContainer"
+            class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+            <table
+                id="studentTable"
+                class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th
+                            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID Number
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Course
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Purpose
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for student in students %}
                     <tr class="student-row hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.idno }}</td>
-                        {% if student.middlename.lower() == 'none' %}   
-                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.lastname.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.idno }}
+                        </td>
+                        {% if student.middlename == '' %}
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.firstname.upper() }} {{
+                            student.lastname.upper() }}
+                        </td>
                         {% else %}
-                            <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.firstname.upper() }} {{ student.middlename.upper() }} {{ student.lastname.upper() }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.firstname.upper() }} {{
+                            student.middlename[0].upper() }}. {{
+                            student.lastname.upper() }}
+                        </td>
                         {% endif %}
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.course.upper() }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.yr_lvl }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.purpose }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-start">{{ student.date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.email }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.course.upper() }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            Lab {{ student.labno }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.purpose }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ student.date }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -84,28 +154,42 @@
 </div>
 
 <!-- Dropdown -->
-<div id="dropdown-portal" class="hidden fixed bg-white rounded-lg shadow-xl p-4 min-w-[200px] z-[9999]">
+<div
+    id="dropdown-portal"
+    class="hidden fixed bg-white rounded-lg shadow-xl p-4 min-w-[200px] z-[9999]">
     <div class="text-gray-700 font-semibold mb-3">Choose format</div>
     <div class="flex flex-col gap-2">
-        <button onclick="handleFileTypeSelect('csv')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
+        <button
+            onclick="handleFileTypeSelect('csv')"
+            class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
             CSV
         </button>
-        <button onclick="handleFileTypeSelect('excel')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
+        <button
+            onclick="handleFileTypeSelect('excel')"
+            class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
             Excel
         </button>
-        <button onclick="handleFileTypeSelect('pdf')" 
-                class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
+        <button
+            onclick="handleFileTypeSelect('pdf')"
+            class="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-left transition-colors">
             PDF
         </button>
-        <div id="downloadButtonContainer" class="hidden pt-3 mt-3 border-t border-gray-200">
-            <button onclick="downloadReport()" 
-                    class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg 
-                           transition duration-300 ease-in-out flex items-center justify-center gap-px cursor-pointer">
-                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        <div
+            id="downloadButtonContainer"
+            class="hidden pt-3 mt-3 border-t border-gray-200">
+            <button
+                onclick="downloadReport()"
+                class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition duration-300 ease-in-out flex items-center justify-center gap-px cursor-pointer">
+                <svg
+                    class="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <p class="text-sm">Download Report</p>
             </button>
@@ -114,180 +198,201 @@
 </div>
 
 <script>
-let selectedFileType = null;
-const generateReportBtn = document.getElementById('generateReportBtn');
-const dropdownPortal = document.getElementById('dropdown-portal');
-const downloadContainer = document.getElementById('downloadButtonContainer');
-let isDropdownOpen = false;
+    let selectedFileType = null
+    const generateReportBtn = document.getElementById("generateReportBtn")
+    const dropdownPortal = document.getElementById("dropdown-portal")
+    const downloadContainer = document.getElementById("downloadButtonContainer")
+    let isDropdownOpen = false
 
-// Position and show dropdown
-function showDropdown(e) {
-    const button = e.target.closest('button');
-    const rect = button.getBoundingClientRect();
-    
-    dropdownPortal.style.top = `${rect.bottom + 5}px`;
-    dropdownPortal.style.left = `${rect.left}px`;
-    dropdownPortal.classList.remove('hidden');
-    isDropdownOpen = true;
-}
+    // Position and show dropdown
+    function showDropdown(e) {
+        const button = e.target.closest("button")
+        const rect = button.getBoundingClientRect()
 
-// Function to close the dropdown and reset selectedFileType
-function closeDropdown() {
-    dropdownPortal.classList.add('hidden');
-    isDropdownOpen = false;
-
-    // Reset selectedFileType and hide the download button
-    selectedFileType = null;
-    downloadContainer.classList.add('hidden');
-
-    // Remove any highlighted file type buttons
-    const buttons = dropdownPortal.querySelectorAll('button:not([onclick*="downloadReport"])');
-    buttons.forEach(btn => {
-        btn.classList.remove('bg-blue-50', 'text-blue-600');
-    });
-}
-
-// Handle file type selection
-function handleFileTypeSelect(fileType) {
-    selectedFileType = fileType;
-
-    // Show the download button only if a file type is selected
-    if (selectedFileType) {
-        downloadContainer.classList.remove('hidden');
-    } else {
-        downloadContainer.classList.add('hidden');
+        dropdownPortal.style.top = `${rect.bottom + 5}px`
+        dropdownPortal.style.left = `${rect.left}px`
+        dropdownPortal.classList.remove("hidden")
+        isDropdownOpen = true
     }
 
-    // Highlight the selected option
-    const buttons = dropdownPortal.querySelectorAll('button:not([onclick*="downloadReport"])');
-    buttons.forEach(btn => {
-        if (btn.textContent.trim().toLowerCase() === fileType.toLowerCase()) {
-            btn.classList.add('bg-blue-50', 'text-blue-600');
-        } else {
-            btn.classList.remove('bg-blue-50', 'text-blue-600');
-        }
-    });
-}
+    // Function to close the dropdown and reset selectedFileType
+    function closeDropdown() {
+        dropdownPortal.classList.add("hidden")
+        isDropdownOpen = false
 
-// Toggle dropdown on button click
-generateReportBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isDropdownOpen) {
-        closeDropdown()
-    } else {
-        showDropdown(e);
-    }
-});
+        // Reset selectedFileType and hide the download button
+        selectedFileType = null
+        downloadContainer.classList.add("hidden")
 
-// Close dropdown when clicking outside
-document.addEventListener('click', (e) => {
-    if (isDropdownOpen && !dropdownPortal.contains(e.target) && e.target !== generateReportBtn) {
-        closeDropdown()
-    }
-});
-
-function downloadReport() {
-    if (!selectedFileType) {
-        showNotification('Please select a file type', 'error');
-        return;
-    }
-
-    // Get table data
-    const table = document.querySelector('table');
-    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr'))
-        .filter(row => row.style.display !== 'none')
-        .map(row => Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim()));
-
-    if (rows.length === 0) {
-        showNotification('No data to export', 'error');
-        return;
-    }
-
-    const levelFilter = document.getElementById('levelFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
-
-    // Send data to server
-    fetch('/staff/generate-report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            fileType: selectedFileType,
-            headers: headers,
-            data: rows,
-            level: levelFilter,
-            date: dateFilter,
-            page: 'pl',
+        // Remove any highlighted file type buttons
+        const buttons = dropdownPortal.querySelectorAll(
+            'button:not([onclick*="downloadReport"])'
+        )
+        buttons.forEach((btn) => {
+            btn.classList.remove("bg-blue-50", "text-blue-600")
         })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.message || 'Failed to generate report');
-            });
-        }
-        return response.blob();
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        
-        let filename = 'report';
-        switch (selectedFileType) {
-            case 'excel':
-                filename += '.xlsx';
-                break;
-            case 'pdf':
-                filename += '.pdf';
-                break;
-            case 'csv':
-                filename += '.csv';
-                break;
-        }
-        a.download = filename;
-        
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        a.remove();
-        closeDropdown();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification(error.message || 'Failed to generate report', 'error');
-    });
-}
+    }
 
-// Add this notification function if it doesn't exist
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white transform transition-all duration-300 translate-y-0`;
-    
-    notification.innerHTML = message;
-    document.body.appendChild(notification);
+    // Handle file type selection
+    function handleFileTypeSelect(fileType) {
+        selectedFileType = fileType
 
-    // Remove the notification after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-y-[-100%]');
+        // Show the download button only if a file type is selected
+        if (selectedFileType) {
+            downloadContainer.classList.remove("hidden")
+        } else {
+            downloadContainer.classList.add("hidden")
+        }
+
+        // Highlight the selected option
+        const buttons = dropdownPortal.querySelectorAll(
+            'button:not([onclick*="downloadReport"])'
+        )
+        buttons.forEach((btn) => {
+            if (
+                btn.textContent.trim().toLowerCase() === fileType.toLowerCase()
+            ) {
+                btn.classList.add("bg-blue-50", "text-blue-600")
+            } else {
+                btn.classList.remove("bg-blue-50", "text-blue-600")
+            }
+        })
+    }
+
+    // Toggle dropdown on button click
+    generateReportBtn.addEventListener("click", (e) => {
+        e.stopPropagation()
+        if (isDropdownOpen) {
+            closeDropdown()
+        } else {
+            showDropdown(e)
+        }
+    })
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+        if (
+            isDropdownOpen &&
+            !dropdownPortal.contains(e.target) &&
+            e.target !== generateReportBtn
+        ) {
+            closeDropdown()
+        }
+    })
+
+    function downloadReport() {
+        if (!selectedFileType) {
+            showNotification("Please select a file type", "error")
+            return
+        }
+
+        // Get table data
+        const table = document.querySelector("table")
+        const headers = Array.from(table.querySelectorAll("thead th")).map(
+            (th) => th.textContent.trim()
+        )
+        const rows = Array.from(table.querySelectorAll("tbody tr"))
+            .filter((row) => row.style.display !== "none")
+            .map((row) =>
+                Array.from(row.querySelectorAll("td")).map((cell) =>
+                    cell.textContent.trim()
+                )
+            )
+
+        if (rows.length === 0) {
+            showNotification("No data to export", "error")
+            return
+        }
+
+        const labFilter = document.getElementById("labFilter").value
+        const dateFilter = document.getElementById("dateFilter").value
+
+        // Send data to server
+        fetch("/staff/generate-report", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                fileType: selectedFileType,
+                headers: headers,
+                data: rows,
+                lab: labFilter,
+                date: dateFilter,
+                page: "pl",
+            }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    return response.json().then((data) => {
+                        throw new Error(
+                            data.message || "Failed to generate report"
+                        )
+                    })
+                }
+                return response.blob()
+            })
+            .then((blob) => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement("a")
+                a.style.display = "none"
+                a.href = url
+
+                let filename = "report"
+                switch (selectedFileType) {
+                    case "excel":
+                        filename += ".xlsx"
+                        break
+                    case "pdf":
+                        filename += ".pdf"
+                        break
+                    case "csv":
+                        filename += ".csv"
+                        break
+                }
+                a.download = filename
+
+                document.body.appendChild(a)
+                a.click()
+
+                // Cleanup
+                window.URL.revokeObjectURL(url)
+                a.remove()
+                closeDropdown()
+            })
+            .catch((error) => {
+                console.error("Error:", error)
+                showNotification(
+                    error.message || "Failed to generate report",
+                    "error"
+                )
+            })
+    }
+
+    // Add this notification function if it doesn't exist
+    function showNotification(message, type = "success") {
+        const notification = document.createElement("div")
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === "success" ? "bg-green-500" : "bg-red-500"
+        } text-white transform transition-all duration-300 translate-y-0`
+
+        notification.innerHTML = message
+        document.body.appendChild(notification)
+
+        // Remove the notification after 3 seconds
         setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
-}
+            notification.classList.add("translate-y-[-100%]")
+            setTimeout(() => {
+                notification.remove()
+            }, 300)
+        }, 3000)
+    }
 
-async function loadTotalSitins(data) {
-    const tableBody = document.getElementById('totalsitinTableBody');
-    // Show loading state
-    tableBody.innerHTML = `
+    async function loadTotalSitins(data) {
+        const tableBody = document.getElementById("totalsitinTableBody")
+        // Show loading state
+        tableBody.innerHTML = `
         <tr id="loadingRow" class="animate-pulse">
             <td colspan="7" class="px-6 py-4">
                 <div class="flex flex-col items-center justify-center py-12">
@@ -299,89 +404,108 @@ async function loadTotalSitins(data) {
                     <div class="text-center text-gray-500">Loading data...</div>
                 </div>
             </td>
-        </tr>`;
+        </tr>`
 
-    try {
-        // Clear loading state
-        tableBody.innerHTML = '';
-        
-        if (data.length === 0) {
-            tableBody.innerHTML = `
+        try {
+            // Clear loading state
+            tableBody.innerHTML = ""
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" class="px-6 text-center">
                         <p class="text-2xl text-gray-500 text-center p-4">No Sit-ins</p>
                     </td>
-                </tr>`;
-            return;
-        }
+                </tr>`
+                return
+            }
 
-        // Render data
-        data.forEach(student => {
-            const date = new Date(student.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            const row = document.createElement('tr');
-            row.className = 'totalsitin-row hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.idno}</td>
+            // Render data
+            data.forEach((student) => {
+                const date = new Date(student.date).toLocaleDateString(
+                    "en-US",
+                    {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                    }
+                )
+
+                const row = document.createElement("tr")
+                row.className = "totalsitin-row hover:bg-gray-50"
+                row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.idno
+                }</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">${student.firstname.toUpperCase()} ${student.lastname.toUpperCase()}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">${date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.start_time} - ${student.end_time}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.purpose}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${student.labno}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        tableBody.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.start_time
+                } - ${student.end_time}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.purpose
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${
+                    student.labno
+                }</td>
+            `
+                tableBody.appendChild(row)
+            })
+        } catch (error) {
+            tableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="px-6 py-4 text-center text-red-500">
                     Error loading data. Please try again.
                 </td>
-            </tr>`;
-        console.error('Error:', error);
-    }
-}
-
-function filterTable() {
-    const levelFilter = document.getElementById('levelFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
-    const rows = document.querySelectorAll('#studentTable tbody tr');
-
-    rows.forEach(row => {
-        const level = row.querySelector('td:nth-child(5)').textContent.trim();
-        const date = row.querySelector('td:nth-child(7)').textContent.trim();
-        const matchesLevel = !levelFilter || level === levelFilter;
-        const matchesDate = !dateFilter || date === dateFilter;
-
-        if (matchesLevel && matchesDate) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+            </tr>`
+            console.error("Error:", error)
         }
-    });
-}
+    }
 
-function showFileTypeModal() {
-    document.getElementById('fileTypeModal').classList.remove('hidden');
-}
+    function filterTable() {
+        const labFilter = document.getElementById("labFilter").value
+        const dateFilter = document.getElementById("dateFilter").value
+        const rows = document.querySelectorAll("#studentTable tbody tr")
 
-function closeFileTypeModal() {
-    document.getElementById('fileTypeModal').classList.add('hidden');
-}
+        rows.forEach((row) => {
+            const labCell = row.querySelector("td:nth-child(5)")
+            const dateCell = row.querySelector("td:nth-child(7)")
+            
+            // Get lab number by removing "Lab " prefix if it exists
+            const lab = labCell.textContent.trim().replace("Lab ", "")
+            const date = dateCell.textContent.trim()
+            
+            // Convert date to YYYY-MM-DD format for comparison
+            const formattedDate = new Date(date).toISOString().split('T')[0]
+            
+            const matchesLab = !labFilter || lab === labFilter
+            const matchesDate = !dateFilter || formattedDate === dateFilter
 
-function generateReport(fileType) {
-    const table = document.querySelector('table');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    const data = rows.map(row => Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim()));
+            row.style.display = matchesLab && matchesDate ? "" : "none"
+        })
+    }
 
-    // Send data to the server or process it for file generation
-    console.log('Generating report as', fileType, 'with data:', data);
+    function showFileTypeModal() {
+        document.getElementById("fileTypeModal").classList.remove("hidden")
+    }
 
-    closeFileTypeModal();
-}
+    function closeFileTypeModal() {
+        document.getElementById("fileTypeModal").classList.add("hidden")
+    }
+
+    function generateReport(fileType) {
+        const table = document.querySelector("table")
+        const rows = Array.from(table.querySelectorAll("tr"))
+        const data = rows.map((row) =>
+            Array.from(row.querySelectorAll("td, th")).map((cell) =>
+                cell.textContent.trim()
+            )
+        )
+
+        // Send data to the server or process it for file generation
+        console.log("Generating report as", fileType, "with data:", data)
+
+        closeFileTypeModal()
+    }
 </script>
 {% endblock %}
