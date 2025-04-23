@@ -9,8 +9,8 @@ import csv
 import xlsxwriter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, landscape, legal
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.pagesizes import landscape, legal
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 staff_app = Blueprint('staff_app', __name__)
@@ -828,18 +828,9 @@ def generate_report():
         else:
             date = "ALL DATES"
         
-        if page == 'pl':
-            if labno:
-                report_title = f"REPORT FOR LAB {labno} ON {date}"
-            else:  
-                report_title = f"REPORT FOR ALL LEVELS {date}"
-        elif page == 'pp':
-            if purpose: 
-                report_title = f"REPORT FOR {purpose.upper()} ON {date}"
-            else:
-                report_title = f"REPORT FOR ALL PURPOSES ON {date}"
-        else:
-            report_title = f"RERORT FOR ALL STUDENTS"
+        report_header = "University of Cebu - Main Campus"
+        report_header2 = "College of Computer Studies"
+        report_header3 = "Computer Laboratory Sit-in Monitoring System Report"
 
         # Create buffer here before any file type handling
         buffer = BytesIO()
@@ -848,7 +839,11 @@ def generate_report():
             try:
                 text_buffer = io.StringIO()
                 writer = csv.writer(text_buffer)
-                writer.writerow([report_title])
+
+                writer.writerow([report_header])
+                writer.writerow([report_header2])
+                writer.writerow([report_header3])
+                writer.writerow([])
                 writer.writerow([])  # Empty row for spacing
                 writer.writerow(headers)
                 writer.writerows(rows)
@@ -866,7 +861,6 @@ def generate_report():
                 workbook = xlsxwriter.Workbook(buffer)
                 worksheet = workbook.add_worksheet()
 
-                # Define formats
                 header_format = workbook.add_format({
                     'bold': True,
                     'bg_color': '#D3D3D3',  
@@ -881,57 +875,40 @@ def generate_report():
 
                 title_format = workbook.add_format({
                     'bold': True,
-                    'font_size': 18,         # Match PDF title size
+                    'font_size': 18,         
                     'font_name': 'Helvetica',
                     'align': 'center',
                     'valign': 'vcenter',
                 })
 
                 data_format = workbook.add_format({
-                    'font_size': 12,         # Match PDF body text size
+                    'font_size': 12,         
                     'font_name': 'Helvetica',
                     'align': 'left',
                     'border_color': '#D3D3D3',
-                    'bottom': 1,             # Bottom border only
-                    'text_wrap': True,       # Enable text wrapping
-                    'valign': 'vcenter',     # Vertically center wrapped text
+                    'bottom': 1,             
+                    'text_wrap': True,      
+                    'valign': 'vcenter',     
                 })
 
-                # Add extra space after title
-                worksheet.set_row(0, 30)  # Taller row for title
-                worksheet.set_row(1, 20)  # Empty row for spacing
-
-                # Write title
-                worksheet.merge_range(0, 0, 0, len(headers) - 1, report_title, title_format)
-                worksheet.write_blank(1, 0, None) 
-
+                # Add header with formatting
+                worksheet.write_blank(0, 0, None)  # Empty row
+                worksheet.merge_range(1, 0, 1, len(headers) - 1, report_header, title_format)
+                worksheet.merge_range(2, 0, 2, len(headers) - 1, report_header2, title_format)
+                worksheet.merge_range(3, 0, 3, len(headers) - 1, report_header3, title_format)
+                worksheet.write_blank(4, 0, None)  # Empty row before title
+                worksheet.merge_range(5, 0, 5, len(headers) - 1, title_format)
+                worksheet.write_blank(6, 0, None)  # Empty row before data
+                
                 # Write headers
                 for col, header in enumerate(headers):
-                    worksheet.write(2, col, header, header_format)
+                    worksheet.write(4, col, header, header_format)
 
                 # Write data with consistent formatting
-                for row_idx, row in enumerate(rows, start=3):
+                for row_idx, row in enumerate(rows, start=5):
                     worksheet.set_row(row_idx, 30)  # Match PDF row height
                     for col_idx, cell in enumerate(row):
                         worksheet.write(row_idx, col_idx, cell, data_format)
-
-                # Adjust column widths based on content with padding
-                for col_idx, header in enumerate(headers):
-                    max_width = len(header)
-                    for row in rows:
-                        cell_content = str(row[col_idx])
-                        # Calculate width based on full cell content
-                        content_width = len(cell_content)
-                        max_width = max(max_width, content_width)
-                    
-                    # Add left and right padding (3 characters each side)
-                    padded_width = max_width + 6
-                    
-                    # Set minimum width to ensure readability
-                    final_width = max(padded_width, 10)
-                    
-                    # Set column width with automatic text wrapping
-                    worksheet.set_column(col_idx, col_idx, final_width, None, {'text_wrap': True})
 
                 workbook.close()
                 mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -944,25 +921,30 @@ def generate_report():
             try:
                 # Use landscape orientation and adjust page size
                 doc = SimpleDocTemplate(
-                    buffer,
-                    pagesize=landscape(legal),
-                    leftMargin=20,
-                    rightMargin=20,
-                    topMargin=20,
-                    bottomMargin=20
+                buffer,
+                pagesize=landscape(legal),
+                leftMargin=20,
+                rightMargin=20,
+                topMargin=20,
+                bottomMargin=20
                 )
                 elements = []
                 
-                # Add title with smaller font
-                title_style = ParagraphStyle(
-                    'CustomTitle',
+                # Add header
+                header_style = ParagraphStyle(
+                    'CustomHeader',
                     parent=getSampleStyleSheet()['Title'],
-                    fontSize=18,
-                    spaceAfter=20,
-                    alignment=1  # Center alignment
+                    fontSize=14,
+                    leading=16,
+                    alignment=1,  # Left alignment
+                    textColor=colors.black
                 )
-                title = Paragraph(report_title, title_style)
-                elements.append(title)
+                
+                # Create header paragraphs
+                elements.append(Paragraph(report_header, header_style))
+                elements.append(Paragraph(report_header2, header_style))
+                elements.append(Paragraph(report_header3, header_style))
+                elements.append(Spacer(1, 20))  # Add spacing
                 
                 # Create table with adjusted style
                 table_data = [headers] + rows
@@ -972,28 +954,21 @@ def generate_report():
                     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 14),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 20),  # Increased gap
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
                     ('BACKGROUND', (0, 1), (-1, -1), colors.white),
                     ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
                     ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
                     ('FONTSIZE', (0, 1), (-1, -1), 12),
-                    ('LINEBELOW', (0, 0), (-1, -1), 1, colors.lightgrey),  # Bottom border only in light grey
+                    ('LINEBELOW', (0, 0), (-1, -1), 1, colors.lightgrey),
                     ('LEFTPADDING', (0, 0), (-1, -1), 5),
                     ('RIGHTPADDING', (0, 0), (-1, -1), 5)
                 ])
                 
-                # Calculate column widths based on content
-                table = Table(table_data)
-                table.setStyle(table_style)
-                
-                # Create table without repeating headers
                 table = Table(table_data)
                 table.setStyle(table_style)
                 elements.append(table)
-                
-                # Build the PDF
+
                 doc.build(elements)
-                
                 mimetype = 'application/pdf'
                 filename = 'report.pdf'
 
