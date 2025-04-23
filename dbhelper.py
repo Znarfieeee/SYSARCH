@@ -545,7 +545,7 @@ def get_pending_reservations():
         FROM reservations r
         JOIN users u ON r.idno = u.idno
         WHERE r.status = 'pending'
-        ORDER BY r.date DESC
+        ORDER BY r.created_at DESC
     """
     return getallprocess(sql)
 

@@ -1,5 +1,4 @@
-{% extends 'home.html' %}
-{% block content %}
+{% extends 'home.html' %} {% block content %}
 <div class="container flex flex-col mx-auto w-[80%] py-8 rise-up gap-6">
     <!-- Active Sit-in Section -->
     <div class="bg-white rounded-lg shadow-md p-6 h-[30%]">
@@ -10,35 +9,54 @@
             <!-- Active sit-in content will be loaded here -->
             <div class="animate-pulse">
                 <div class="flex items-center justify-center space-x-2">
-                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
-                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                    <div
+                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div
+                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                    <div
+                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
                 </div>
-                <p class="text-center text-gray-500">Loading active sit-in...</p>
+                <p class="text-center text-gray-500">
+                    Loading active sit-in...
+                </p>
             </div>
         </div>
     </div>
 
     <!-- Approved Reservations Section -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-full mx-auto rise-up p-6">
+    <div
+        class="bg-white rounded-lg shadow overflow-hidden w-full mx-auto rise-up p-6">
         <div id="header" class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold">Approved Reservations</h2>
             <div class="cursor-pointer">
-                <a href="{{ url_for('reservation') }}" 
-                   class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <a
+                    href="{{ url_for('reservation') }}"
+                    class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Make a Reservation
                 </a>
             </div>
         </div>
-        
+
         <div id="reservationsSection" class="overflow-x-auto overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="bg-gray-50 sticky top-0 z-10">
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Lab No</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab No
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Purpose
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="reservationsTableBody">
@@ -46,79 +64,147 @@
                 </tbody>
             </table>
         </div>
-        
     </div>
 </div>
 
-<div id="feedback-container" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden flex items-center justify-center">
-    <div id="feedback-content" class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+<div
+    id="feedback-container"
+    class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden flex items-center justify-center">
+    <div
+        id="feedback-content"
+        class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
         <form id="feedbackForm" class="space-y-6">
-            <input type="hidden" id="sitInId" name="sitInId">
-            <input type="hidden" id="labno" name="labno" value="{{ labno }}">
-            
+            <input type="hidden" id="sitInId" name="sitInId" />
+            <input type="hidden" id="labno" name="labno" value="{{ labno }}" />
+
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gray-800">Session Feedback</h1>
-                <button type="button" onclick="closeFeedback()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <h1 class="text-2xl font-bold text-gray-800">
+                    Session Feedback
+                </h1>
+                <button
+                    type="button"
+                    onclick="closeFeedback()"
+                    class="text-gray-500 hover:text-gray-700">
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
             <!-- Star Rating -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Rate your experience</label>
+                <label class="block text-sm font-medium text-gray-700"
+                    >Rate your experience</label
+                >
                 <div class="feedback">
                     <div class="stars flex justify-center">
-                        <input type="radio" id="star1" name="rating" value="1" /><input type="radio" id="star2" name="rating" value="2" /><input type="radio" id="star3" name="rating" value="3" /><input type="radio" id="star4" name="rating" value="4" /><input type="radio" id="star5" name="rating" value="5" />
-                        
+                        <input
+                            type="radio"
+                            id="star1"
+                            name="rating"
+                            value="1" /><input
+                            type="radio"
+                            id="star2"
+                            name="rating"
+                            value="2" /><input
+                            type="radio"
+                            id="star3"
+                            name="rating"
+                            value="3" /><input
+                            type="radio"
+                            id="star4"
+                            name="rating"
+                            value="4" /><input
+                            type="radio"
+                            id="star5"
+                            name="rating"
+                            value="5" />
+
                         <label for="star1" aria-label="Banana">1 star</label>
                         <label for="star2">2 stars</label>
                         <label for="star3">3 stars</label>
                         <label for="star4">4 stars</label>
                         <label for="star5">5 stars</label>
-                      </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Comments -->
             <div class="space-y-2">
-                <label for="comments" class="block text-sm font-medium text-gray-700">Additional Comments</label>
+                <label
+                    for="comments"
+                    class="block text-sm font-medium text-gray-700"
+                    >Additional Comments</label
+                >
                 <textarea
                     id="comments"
                     name="comments"
                     rows="4"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Share your experience..."
-                    required
-                ></textarea>
+                    required></textarea>
             </div>
 
             <!-- Issues Checklist -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Did you experience any issues?</label>
+                <label class="block text-sm font-medium text-gray-700"
+                    >Did you experience any issues?</label
+                >
                 <div class="space-y-2">
                     <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="issues" value="pc performance" class="rounded text-blue-600">
-                        <span class="text-sm text-gray-700">PC Performance Issues</span>
+                        <input
+                            type="checkbox"
+                            name="issues"
+                            value="pc performance"
+                            class="rounded text-blue-600" />
+                        <span class="text-sm text-gray-700"
+                            >PC Performance Issues</span
+                        >
                     </label>
                     <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="issues" value="internet" class="rounded text-blue-600">
-                        <span class="text-sm text-gray-700">Internet Connectivity</span>
+                        <input
+                            type="checkbox"
+                            name="issues"
+                            value="internet"
+                            class="rounded text-blue-600" />
+                        <span class="text-sm text-gray-700"
+                            >Internet Connectivity</span
+                        >
                     </label>
                     <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="issues" value="software" class="rounded text-blue-600">
-                        <span class="text-sm text-gray-700">Software Problems</span>
+                        <input
+                            type="checkbox"
+                            name="issues"
+                            value="software"
+                            class="rounded text-blue-600" />
+                        <span class="text-sm text-gray-700"
+                            >Software Problems</span
+                        >
                     </label>
                     <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="issues" value="hardware" class="rounded text-blue-600">
-                        <span class="text-sm text-gray-700">Hardware Problems</span>
+                        <input
+                            type="checkbox"
+                            name="issues"
+                            value="hardware"
+                            class="rounded text-blue-600" />
+                        <span class="text-sm text-gray-700"
+                            >Hardware Problems</span
+                        >
                     </label>
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit"
+            <button
+                type="submit"
                 class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 Submit Feedback
             </button>
@@ -126,62 +212,84 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Load active sit-in session on page load
-    loadActiveSitIn();
-    fetch('/get_reservations')
-        .then(response => response.json())
-        .then(data => {
-            const reservationsTableBody = document.getElementById('reservationsTableBody');
-            const approvedReservations = data.filter(reservation => reservation.status === 'approved');
-            if (approvedReservations.length > 0) {
-                reservationsTableBody.innerHTML = approvedReservations.map(reservation => `
+    document.addEventListener("DOMContentLoaded", () => {
+        // Load active sit-in session on page load
+        loadActiveSitIn()
+        fetch("/get_reservations")
+            .then(response => response.json())
+            .then(data => {
+                const reservationsTableBody = document.getElementById(
+                    "reservationsTableBody"
+                )
+                const approvedReservations = data.filter(
+                    reservation => reservation.status === "approved"
+                )
+                if (approvedReservations.length > 0) {
+                    reservationsTableBody.innerHTML = approvedReservations
+                        .map(
+                            reservation => `
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.date}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.time_start} - ${reservation.time_end}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.labno}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.purpose}</td>
                     </tr>
-                `).join('');
-            } else {
-                reservationsTableBody.innerHTML = `
+                `
+                        )
+                        .join("")
+                } else {
+                    reservationsTableBody.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center text-gray-500 py-4">No approved reservations found.</td>
                     </tr>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching reservations:', error);
-            const reservationsTableBody = document.getElementById('reservationsTableBody');
-            reservationsTableBody.innerHTML = `
+                `
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching reservations:", error)
+                const reservationsTableBody = document.getElementById(
+                    "reservationsTableBody"
+                )
+                reservationsTableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="text-center text-red-500 py-4">Error loading reservations.</td>
                 </tr>
-            `;
-        });
-});
+            `
+            })
+    })
 
-async function loadActiveSitIn() {
-    const activeSitinSection = document.getElementById('activeSitinSection');
-    
-    try {
-        const response = await fetch('/api/sitin/active');
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-            const sitin = data[0];
-            
-            activeSitinSection.innerHTML = `
+    async function loadActiveSitIn() {
+        const activeSitinSection = document.getElementById("activeSitinSection")
+
+        try {
+            const response = await fetch("/api/sitin/active")
+            const data = await response.json()
+
+            if (data && data.length > 0) {
+                const sitin = data[0]
+
+                activeSitinSection.innerHTML = `
                 <div class="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Date</p>
-                            <p class="font-semibold">${new Date(sitin.start_time).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</p>
+                            <p class="font-semibold">${new Date(
+                                sitin.start_time
+                            ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "2-digit",
+                                year: "numeric",
+                            })}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Start Time</p>
-                            <p class="font-semibold">${new Date(sitin.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                            <p class="font-semibold">${new Date(
+                                sitin.start_time
+                            ).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                            })}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Lab</p>
@@ -192,127 +300,110 @@ async function loadActiveSitIn() {
                             <p class="font-semibold">${sitin.purpose}</p>
                         </div>
                         <div>
-                            <button onclick="endSitIn(${sitin.id})"
-                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                                End Session
+                            <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300"
+                                onclick="showFeedback()">
+                                Show Feedback
                             </button>
                         </div>
                     </div>
                 </div>
-            `;
-        } else {
-            activeSitinSection.innerHTML = `
+            `
+            } else {
+                activeSitinSection.innerHTML = `
                 <p class="text-center text-gray-500">No active sit-in session.</p>
-            `;
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        activeSitinSection.innerHTML = `
-            <p class="text-center text-red-500">Error loading active sit-in data.</p>
-        `;
-    }
-}
-
-// async function startSitIn(reservationId) {
-//     const pcNumber = prompt('Enter PC Number:');
-//     if (!pcNumber) return;
-
-//     try {
-//         const response = await fetch(`/api/check-in/${reservationId}`, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ pc_number: pcNumber })
-//         });
-
-//         const result = await response.json();
-
-//         if (response.ok) {
-//             alert('Sit-in started successfully');
-//             window.location.reload();
-//         } else {
-//             throw new Error(result.error || 'Failed to start sit-in');
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//         alert(error.message);
-//     }
-// }
-
-async function endSitIn(sitInId) {
-    if (!confirm('Are you sure you want to end this session?')) {
-        return;
-    }
-    document.getElementById('sitInId').value = sitInId; // Store sitInId for feedback
-    showFeedback();
-}
-
-function showFeedback() {
-    document.getElementById('feedback-container').classList.remove('hidden');
-}
-
-function closeFeedback() {
-    if (confirm('Are you sure you want to close without submitting feedback?')) {
-        document.getElementById('feedback-container').classList.add('hidden');
-        window.location.reload(); // Reload page to update the UI
-    }
-}
-
-document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = {
-        sitin_id: document.getElementById('sitInId').value,
-        rating: document.querySelector('input[name="rating"]:checked')?.value,
-        comments: document.getElementById('comments').value,
-        issues: Array.from(document.querySelectorAll('input[name="issues"]:checked')).map(cb => cb.value)
-    };
-
-    try {
-        // First submit feedback
-        const feedbackResponse = await fetch('/api/feedback', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
-        console.log(formData.labno)
-        const feedbackResult = await feedbackResponse.json();
-        
-        if (!feedbackResponse.ok) {
-            throw new Error(feedbackResult.message || 'Failed to submit feedback');
-        }
-
-        // If feedback was successful, end the session
-        const endSessionResponse = await fetch(`/api/sitin/${formData.sitin_id}/end`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+            `
             }
-        });
-
-        const endSessionResult = await endSessionResponse.json();
-
-        if (!endSessionResponse.ok) {
-            throw new Error(endSessionResult.message || 'Failed to end session');
+        } catch (error) {
+            console.error("Error:", error)
+            activeSitinSection.innerHTML = `
+            <p class="text-center text-red-500">Error loading active sit-in data.</p>
+        `
         }
-
-        // If everything succeeded, close feedback and reload
-        showNotification('Session ended and feedback submitted successfully!', 'success');
-        document.getElementById('feedback-container').classList.add('hidden');
-        window.location.reload();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification(error.message, 'error');
     }
-});
+
+    function showFeedback() {
+        document.getElementById("feedback-container").classList.remove("hidden")
+    }
+
+    function closeFeedback() {
+        if (
+            confirm(
+                "Are you sure you want to close without submitting feedback?"
+            )
+        ) {
+            document
+                .getElementById("feedback-container")
+                .classList.add("hidden")
+            window.location.reload() // Reload page to update the UI
+        }
+    }
+
+    document
+        .getElementById("feedbackForm")
+        .addEventListener("submit", async e => {
+            e.preventDefault()
+
+            const formData = {
+                sitin_id: document.getElementById("sitInId").value,
+                rating: document.querySelector('input[name="rating"]:checked')
+                    ?.value,
+                comments: document.getElementById("comments").value,
+                issues: Array.from(
+                    document.querySelectorAll('input[name="issues"]:checked')
+                ).map(cb => cb.value),
+            }
+
+            try {
+                // First submit feedback
+                const feedbackResponse = await fetch("/api/feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                })
+                console.log(formData.labno)
+                const feedbackResult = await feedbackResponse.json()
+
+                if (!feedbackResponse.ok) {
+                    throw new Error(
+                        feedbackResult.message || "Failed to submit feedback"
+                    )
+                }
+
+                // If feedback was successful, end the session
+                const endSessionResponse = await fetch(
+                    `/api/sitin/${formData.sitin_id}/end`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                )
+
+                const endSessionResult = await endSessionResponse.json()
+
+                if (!endSessionResponse.ok) {
+                    throw new Error(
+                        endSessionResult.message || "Failed to end session"
+                    )
+                }
+
+                // If everything succeeded, close feedback and reload
+                showNotification(
+                    "Session ended and feedback submitted successfully!",
+                    "success"
+                )
+                document
+                    .getElementById("feedback-container")
+                    .classList.add("hidden")
+                window.location.reload()
+            } catch (error) {
+                console.error("Error:", error)
+                showNotification(error.message, "error")
+            }
+        })
 </script>
 
 {% endblock %}

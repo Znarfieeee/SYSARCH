@@ -1,529 +1,686 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <title>Sit-in | {{ pagetitle }}</title>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .status-approved {
-            color: rgb(40, 167, 69);
-        }
-        .status-pending {
-            color: #FFDE21;
-        }
-        .status-denied {
-            color: rgb(220, 53, 69);
-        }
-
-        .flash-messages {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: auto !important;
-            color: white;
-            padding: 20px;
-            align-items: center;
-        }
-
-        .flash {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .flash.success {
-        background-color: rgba(40, 167, 69, 0.8);
-        }
-
-        .flash.error {
-        background-color: rgba(220, 53, 69, 0.8);
-        }
-
-        /* From Uiverse.io by JulanDeAlb */ 
-        .hamburger {
-            cursor: pointer;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="./static/favicon.ico" />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/main.css') }}" />
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+            integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet" />
+        <title>Sit-in | {{ pagetitle }}</title>
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
             }
 
-        .hamburger input {
-            display: none;
+            .status-approved {
+                color: rgb(40, 167, 69);
+            }
+            .status-pending {
+                color: #ffde21;
+            }
+            .status-denied {
+                color: rgb(220, 53, 69);
             }
 
-        .hamburger svg {
-            /* The size of the SVG defines the overall size */
-            height: 3em;
-            /* Define the transition for transforming the SVG */
-            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .line {
-            fill: none;
-            stroke: white;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-width: 3;
-            /* Define the transition for transforming the Stroke */
-            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .line-top-bottom {
-            stroke-dasharray: 12 63;
-        }
-
-        .hamburger input:checked + svg {
-            transform: rotate(-45deg);
-        }
-
-        .hamburger input:checked + svg .line-top-bottom {
-            stroke-dasharray: 20 300;
-            stroke-dashoffset: -32.42;
-        }
-        #sidebar {
-            z-index: 999;
-        }
-
-        /* dashboard css */
-        #tableContainer::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        #tableContainer::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.3); /*transparent */
-            border-radius: 10px;
-        }
-
-        #tableContainer::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.5); /*transparent */
-        }
-
-        #tableContainer::-webkit-scrollbar-track{
-            background: transparent; /* Invisible track */
-        }
-
-        #schedule-table::-webkit-scrollbar, #lab-info::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        #schedule-table::-webkit-scrollbar-thumb, #lab-info::-webkit-scrollbar-thumb{
-            background-color: rgba(0, 0, 0, 0.3); /*transparent */
-            border-radius: 10px;
-        }
-
-        #schedule-table::-webkit-scrollbar-thumb:hover, #lab-info::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.5); /*transparent */
-        }
-
-        #schedule-table::-webkit-scrollbar-track, #lab-info::-webkit-scrollbar-track {
-            background: transparent; /* Invisible track */
-        }
-
-        /* From Uiverse.io by vinodjangid07 */ 
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(156, 163, 175, 0.8); /* gray-400 with opacity */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .loader {
-        width: fit-content;
-        height: fit-content;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        }
-        .wrapper {
-        width: fit-content;
-        height: fit-content;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        }
-        .catContainer {
-        width: 100%;
-        height: fit-content;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        }
-        .catbody {
-        width: 80px;
-        }
-        .tail {
-        position: absolute;
-        width: 17px;
-        top: 50%;
-        animation: tail 0.5s ease-in infinite alternate-reverse;
-        transform-origin: top;
-        }
-        @keyframes tail {
-        0% {
-            transform: rotateZ(60deg);
-        }
-        50% {
-            transform: rotateZ(0deg);
-        }
-        100% {
-            transform: rotateZ(-20deg);
-        }
-        }
-        .wall {
-        width: 300px;
-        }
-        .text {
-        display: flex;
-        flex-direction: column;
-        width: 50px;
-        position: absolute;
-        margin: 0px 0px 100px 120px;
-        }
-        .zzz {
-        color: black;
-        font-weight: 700;
-        font-size: 15px;
-        animation: zzz 2s linear infinite;
-        }
-        .bigzzz {
-        color: black;
-        font-weight: 700;
-        font-size: 25px;
-        margin-left: 10px;
-        animation: zzz 2.3s linear infinite;
-        }
-        @keyframes zzz {
-        0% {
-            color: transparent;
-        }
-        50% {
-            color: black;
-        }
-        100% {
-            color: transparent;
-        }
-        }
-
-        @keyframes riseUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+            .flash-messages {
+                position: fixed;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                width: auto !important;
+                color: white;
+                padding: 20px;
+                align-items: center;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .flash {
+                margin-bottom: 15px;
+                padding: 10px;
+                border-radius: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
-        }
 
-        .input-group, .input-group2 {
-        position: relative;
-        }
-
-        .input, .input2 {
-        border: 1px solid #a0a0a0;
-        border-radius: 1rem;
-        background: none;
-        padding: 10px;
-        font-size: 15px;
-        color: #2e2e2e;
-        transition: border 150ms cubic-bezier(0.4,0,0.2,1);
-        }
-
-        .user-label, .user-label2 {
-        position: absolute;
-        left: 15px;
-        color: #b9b9b9;
-        pointer-events: none;
-        transform: translateY(10px);
-        transition: 150ms cubic-bezier(0.4,0,0.2,1);
-        }
-
-        .input:focus, .input:valid{
-        outline: none;
-        border: 1.5px solid #303030;
-        }
-
-        .input:focus ~ label, .input:valid ~ label {
-        transform: translateY(-50%) scale(0.9);
-        padding: 0 .2em;
-        color: #303030;
-        }
-
-        /* Style for optional middlename field */
-        .input:focus, .input2[value]:not([value=""]){
-        outline: none;
-        border: 1.5px solid #303030;
-        }
-
-        .input2:focus ~ label,
-        .input2[value]:not([value=""]) ~ label {
-            transform: translateY(-50%) scale(0.9);
-            padding: 0 .2em;
-            color: #303030;
-        }  
-
-        .rise-up {
-            animation: riseUp 0.5s ease-out forwards;
-        }
-
-        .notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 5px;
-            color: white;
-            font-size: 1rem;
-            z-index: 9999;
-            animation: slideIn 0.5s ease-in-out forwards;
-        }
-
-        .notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 5px;
-            color: white;
-            font-size: 1rem;
-            z-index: 9999;
-            animation: slideIn 0.5s ease-in-out forwards;
-        }
-
-        .notification.success {
-            background-color: rgba(40, 167, 69, 0.8);
-        }
-
-        .notification.error {
-            background-color: rgba(220, 53, 69, 0.8);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translate(-50%, -100%);
-                opacity: 0;
+            .flash.success {
+                background-color: rgba(40, 167, 69, 0.8);
             }
-            to {
-                transform: translate(-50%, 0);
-                opacity: 1;
+
+            .flash.error {
+                background-color: rgba(220, 53, 69, 0.8);
             }
-        }
 
-        @keyframes slideOut {
-            from {
-                transform: translate(-50%, 0);
-                opacity: 1;
+            /* From Uiverse.io by JulanDeAlb */
+            .hamburger {
+                cursor: pointer;
             }
-            to {
-                transform: translate(-50%, -100%);
-                opacity: 0;
+
+            .hamburger input {
+                display: none;
             }
-        }
 
-        .stars label {
-            width: 30px;
-            height: 30px;
-            background-color: slategray;
-        }
+            .hamburger svg {
+                /* The size of the SVG defines the overall size */
+                height: 3em;
+                /* Define the transition for transforming the SVG */
+                transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
 
-        .stars label {
-            background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='transparent' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        }
+            .line {
+                fill: none;
+                stroke: white;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 3;
+                /* Define the transition for transforming the Stroke */
+                transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                    stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
 
-        .stars input {
-        position: absolute;
-        clip: rect(0,0,0,0);
-        }
+            .line-top-bottom {
+                stroke-dasharray: 12 63;
+            }
 
-        .stars label {
-            box-sizing: border-box;
-            display: inline-block;
-            margin-right: 6px;
-            height: 30px;
-            width: 30px;
-            background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='transparent' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            font-size: 0;
-            cursor: pointer;
-        }
+            .hamburger input:checked + svg {
+                transform: rotate(-45deg);
+            }
 
-        .stars input:nth-child(1):checked ~ label:nth-of-type(-n + 1),
-        .stars input:nth-child(2):checked ~ label:nth-of-type(-n + 2),
-        .stars input:nth-child(3):checked ~ label:nth-of-type(-n + 3),
-        .stars input:nth-child(4):checked ~ label:nth-of-type(-n + 4),
-        .stars input:nth-child(5):checked ~ label:nth-of-type(-n + 5) {
-            background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='slategray' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        }
-    </style>
-</head>
-<body class="overflow-hidden bg-gray-200">
-    <header class="flex items-center h-20 bg-zinc-500 text-white z-15 shadow-md px-4" >
-        <label class="hamburger cursor-pointer">
-            <input type="checkbox" class="duration-500 ease-in"  onclick="toggleSidebar()">
-            <svg class="h-10 w-10" viewBox="0 0 32 32">
-                <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
-                <path class="line" d="M7 16 27 16"></path>
-            </svg>
+            .hamburger input:checked + svg .line-top-bottom {
+                stroke-dasharray: 20 300;
+                stroke-dashoffset: -32.42;
+            }
+            #sidebar {
+                z-index: 999;
+            }
+
+            /* dashboard css */
+            #tableContainer::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #tableContainer::-webkit-scrollbar-thumb {
+                background-color: rgba(0, 0, 0, 0.3); /*transparent */
+                border-radius: 10px;
+            }
+
+            #tableContainer::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.5); /*transparent */
+            }
+
+            #tableContainer::-webkit-scrollbar-track {
+                background: transparent; /* Invisible track */
+            }
+
+            #schedule-table::-webkit-scrollbar,
+            #lab-info::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #schedule-table::-webkit-scrollbar-thumb,
+            #lab-info::-webkit-scrollbar-thumb {
+                background-color: rgba(0, 0, 0, 0.3); /*transparent */
+                border-radius: 10px;
+            }
+
+            #schedule-table::-webkit-scrollbar-thumb:hover,
+            #lab-info::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.5); /*transparent */
+            }
+
+            #schedule-table::-webkit-scrollbar-track,
+            #lab-info::-webkit-scrollbar-track {
+                background: transparent; /* Invisible track */
+            }
+
+            /* From Uiverse.io by vinodjangid07 */
+            .loader-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(
+                    156,
+                    163,
+                    175,
+                    0.8
+                ); /* gray-400 with opacity */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+            .loader {
+                width: fit-content;
+                height: fit-content;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .wrapper {
+                width: fit-content;
+                height: fit-content;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .catContainer {
+                width: 100%;
+                height: fit-content;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+            .catbody {
+                width: 80px;
+            }
+            .tail {
+                position: absolute;
+                width: 17px;
+                top: 50%;
+                animation: tail 0.5s ease-in infinite alternate-reverse;
+                transform-origin: top;
+            }
+            @keyframes tail {
+                0% {
+                    transform: rotateZ(60deg);
+                }
+                50% {
+                    transform: rotateZ(0deg);
+                }
+                100% {
+                    transform: rotateZ(-20deg);
+                }
+            }
+            .wall {
+                width: 300px;
+            }
+            .text {
+                display: flex;
+                flex-direction: column;
+                width: 50px;
+                position: absolute;
+                margin: 0px 0px 100px 120px;
+            }
+            .zzz {
+                color: black;
+                font-weight: 700;
+                font-size: 15px;
+                animation: zzz 2s linear infinite;
+            }
+            .bigzzz {
+                color: black;
+                font-weight: 700;
+                font-size: 25px;
+                margin-left: 10px;
+                animation: zzz 2.3s linear infinite;
+            }
+            @keyframes zzz {
+                0% {
+                    color: transparent;
+                }
+                50% {
+                    color: black;
+                }
+                100% {
+                    color: transparent;
+                }
+            }
+
+            @keyframes riseUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .input-group,
+            .input-group2 {
+                position: relative;
+            }
+
+            .input,
+            .input2 {
+                border: 1px solid #a0a0a0;
+                border-radius: 1rem;
+                background: none;
+                padding: 10px;
+                font-size: 15px;
+                color: #2e2e2e;
+                transition: border 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .user-label,
+            .user-label2 {
+                position: absolute;
+                left: 15px;
+                color: #b9b9b9;
+                pointer-events: none;
+                transform: translateY(10px);
+                transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .input:focus,
+            .input:valid {
+                outline: none;
+                border: 1.5px solid #303030;
+            }
+
+            .input:focus ~ label,
+            .input:valid ~ label {
+                transform: translateY(-50%) scale(0.9);
+                padding: 0 0.2em;
+                color: #303030;
+            }
+
+            /* Style for optional middlename field */
+            .input:focus,
+            .input2[value]:not([value=""]) {
+                outline: none;
+                border: 1.5px solid #303030;
+            }
+
+            .input2:focus ~ label,
+            .input2[value]:not([value=""]) ~ label {
+                transform: translateY(-50%) scale(0.9);
+                padding: 0 0.2em;
+                color: #303030;
+            }
+
+            .rise-up {
+                animation: riseUp 0.5s ease-out forwards;
+            }
+
+            .notification {
+                position: fixed;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                border-radius: 5px;
+                color: white;
+                font-size: 1rem;
+                z-index: 9999;
+                animation: slideIn 0.5s ease-in-out forwards;
+            }
+
+            .notification {
+                position: fixed;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                border-radius: 5px;
+                color: white;
+                font-size: 1rem;
+                z-index: 9999;
+                animation: slideIn 0.5s ease-in-out forwards;
+            }
+
+            .notification.success {
+                background-color: rgba(40, 167, 69, 0.8);
+            }
+
+            .notification.error {
+                background-color: rgba(220, 53, 69, 0.8);
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translate(-50%, -100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translate(-50%, 0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translate(-50%, 0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translate(-50%, -100%);
+                    opacity: 0;
+                }
+            }
+
+            .stars label {
+                width: 30px;
+                height: 30px;
+                background-color: slategray;
+            }
+
+            .stars label {
+                background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='transparent' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            }
+
+            .stars input {
+                position: absolute;
+                clip: rect(0, 0, 0, 0);
+            }
+
+            .stars label {
+                box-sizing: border-box;
+                display: inline-block;
+                margin-right: 6px;
+                height: 30px;
+                width: 30px;
+                background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='transparent' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+                font-size: 0;
+                cursor: pointer;
+            }
+
+            .stars input:nth-child(1):checked ~ label:nth-of-type(-n + 1),
+            .stars input:nth-child(2):checked ~ label:nth-of-type(-n + 2),
+            .stars input:nth-child(3):checked ~ label:nth-of-type(-n + 3),
+            .stars input:nth-child(4):checked ~ label:nth-of-type(-n + 4),
+            .stars input:nth-child(5):checked ~ label:nth-of-type(-n + 5) {
+                background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='slategray' stroke='slategray' stroke-width='38' d='M259.216 29.942L330.27 173.92l158.89 23.087L374.185 309.08l27.145 158.23-142.114-74.698-142.112 74.698 27.146-158.23L29.274 197.007l158.89-23.088z' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            }
+        </style>
+    </head>
+    <body class="overflow-hidden bg-gray-200">
+        <header
+            class="flex items-center h-20 bg-zinc-500 text-white z-15 shadow-md px-4">
+            <label class="hamburger cursor-pointer">
+                <input
+                    type="checkbox"
+                    class="duration-500 ease-in"
+                    onclick="toggleSidebar()" />
+                <svg class="h-10 w-10" viewBox="0 0 32 32">
+                    <path
+                        class="line line-top-bottom"
+                        d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+                    <path class="line" d="M7 16 27 16"></path>
+                </svg>
             </label>
-        <a href="{{ url_for('home') }}"><img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6"></a>
-        <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
-    </header>
-    <div id="sidebar" class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
-        <div class="flex-1">
-            <a href="{{ url_for('home') }}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
-                <img src="/static/img/dashboard.png" class="size-5 mx-4">
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ url_for('history')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in  ">
-                <img src="/static/img/history.png" class="size-5 mx-4">
-                <span>History</span>
-            </a>
-            <a href="{{ url_for('sitin') }}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
-                <img src="/static/img/pc.png" class="size-5 mx-4">
-                <span>Sit-in</span>
-            </a>
-            <a href="{{ url_for('reservation')}}" class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in ">
-                <img src="/static/img/booking.png" class="size-5 mx-4">
-                <span>Reservation</span>
-            </a>
-            <button onclick="logout()" class="flex items-center cursor-pointer p-5 w-full text-black hover:bg-gray-200 transition ease-in">
-                <i class="fas fa-sign-out-alt mx-4 size-5"></i>
-                <span>Logout</span>
-            </button>
-        </div>
-    </div>
-
-    {% block content %}
-    {% endblock %}
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-    <!-- From Uiverse.io by vinodjangid07 --> 
-    <div id="loader" class="loader-container">
-        <div class="loader">
-            <div class="wrapper">
-                <div class="catContainer">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 733 673" class="catbody">
-                        <path fill="#212121" d="M111.002 139.5C270.502 -24.5001 471.503 2.4997 621.002 139.5C770.501 276.5 768.504 627.5 621.002 649.5C473.5 671.5 246 687.5 111.002 649.5C-23.9964 611.5 -48.4982 303.5 111.002 139.5Z"></path>
-                        <path fill="#212121" d="M184 9L270.603 159H97.3975L184 9Z"></path>
-                        <path fill="#212121" d="M541 0L627.603 150H454.397L541 0Z"></path>
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 158 564" class="tail">
-                        <path fill="#191919" d="M5.97602 76.066C-11.1099 41.6747 12.9018 0 51.3036 0V0C71.5336 0 89.8636 12.2558 97.2565 31.0866C173.697 225.792 180.478 345.852 97.0691 536.666C89.7636 553.378 73.0672 564 54.8273 564V564C16.9427 564 -5.4224 521.149 13.0712 488.085C90.2225 350.15 87.9612 241.089 5.97602 76.066Z"></path>
-                    </svg>
-                    <div class="text">
-                        <span class="bigzzz">Z</span>
-                        <span class="zzz">Z</span>
-                    </div>
-                </div>
-                <div class="wallContainer">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 500 126" class="wall">
-                        <line stroke-width="6" stroke="#7C7C7C" y2="3" x2="450" y1="3" x1="50"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="85" x2="400" y1="85" x1="100"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="122" x2="375" y1="122" x1="125"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="500" y1="43"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="1.99391" x2="115.5" y1="43.0061" x1="115.5"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="2.00002" x2="189" y1="43.0122" x1="189"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="2.00612" x2="262.5" y1="43.0183" x1="262.5"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="2.01222" x2="336" y1="43.0244" x1="336"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="2.01833" x2="409.5" y1="43.0305" x1="409.5"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="153" y1="84.0122" x1="153"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="228" y1="84.0122" x1="228"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="303" y1="84.0122" x1="303"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="43" x2="378" y1="84.0122" x1="378"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="192" y1="125.012" x1="192"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="267" y1="125.012" x1="267"></line>
-                        <line stroke-width="6" stroke="#7C7C7C" y2="84" x2="342" y1="125.012" x1="342"></line>
-                    </svg>
-                </div>
+            <a href="{{ url_for('home') }}"
+                ><img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6"
+            /></a>
+            <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
+        </header>
+        <div
+            id="sidebar"
+            class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
+            <div class="flex-1">
+                <a
+                    href="{{ url_for('home') }}"
+                    class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
+                    <img src="/static/img/dashboard.png" class="size-5 mx-4" />
+                    <span>Dashboard</span>
+                </a>
+                <a
+                    href="{{ url_for('history')}}"
+                    class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
+                    <img src="/static/img/history.png" class="size-5 mx-4" />
+                    <span>History</span>
+                </a>
+                <a
+                    href="{{ url_for('sitin') }}"
+                    class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
+                    <img src="/static/img/pc.png" class="size-5 mx-4" />
+                    <span>Sit-in</span>
+                </a>
+                <a
+                    href="{{ url_for('reservation')}}"
+                    class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
+                    <img src="/static/img/booking.png" class="size-5 mx-4" />
+                    <span>Reservation</span>
+                </a>
+                <button
+                    onclick="logout()"
+                    class="flex items-center cursor-pointer p-5 w-full text-black hover:bg-gray-200 transition ease-in">
+                    <i class="fas fa-sign-out-alt mx-4 size-5"></i>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
-    </div>
-  
-</body>
-<script>
-    function logout(){document.location.href = "/logout";}
 
-    // Timeout for flash messages
-    setTimeout(() => {
-        const flashMessages = document.querySelectorAll('.flash');
-        flashMessages.forEach(flash => {
-            flash.style.display = 'none';
-        });
-    }, 5000);
-
-    function showNotification(message, type = 'success') {
-        // Remove any existing notifications
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) {
-            existingNotification.remove();
+        {% block content %} {% endblock %} {% with messages =
+        get_flashed_messages(with_categories=true) %} {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+        <!-- From Uiverse.io by vinodjangid07 -->
+        <div id="loader" class="loader-container">
+            <div class="loader">
+                <div class="wrapper">
+                    <div class="catContainer">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 733 673"
+                            class="catbody">
+                            <path
+                                fill="#212121"
+                                d="M111.002 139.5C270.502 -24.5001 471.503 2.4997 621.002 139.5C770.501 276.5 768.504 627.5 621.002 649.5C473.5 671.5 246 687.5 111.002 649.5C-23.9964 611.5 -48.4982 303.5 111.002 139.5Z"></path>
+                            <path
+                                fill="#212121"
+                                d="M184 9L270.603 159H97.3975L184 9Z"></path>
+                            <path
+                                fill="#212121"
+                                d="M541 0L627.603 150H454.397L541 0Z"></path>
+                        </svg>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 158 564"
+                            class="tail">
+                            <path
+                                fill="#191919"
+                                d="M5.97602 76.066C-11.1099 41.6747 12.9018 0 51.3036 0V0C71.5336 0 89.8636 12.2558 97.2565 31.0866C173.697 225.792 180.478 345.852 97.0691 536.666C89.7636 553.378 73.0672 564 54.8273 564V564C16.9427 564 -5.4224 521.149 13.0712 488.085C90.2225 350.15 87.9612 241.089 5.97602 76.066Z"></path>
+                        </svg>
+                        <div class="text">
+                            <span class="bigzzz">Z</span>
+                            <span class="zzz">Z</span>
+                        </div>
+                    </div>
+                    <div class="wallContainer">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 500 126"
+                            class="wall">
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="3"
+                                x2="450"
+                                y1="3"
+                                x1="50"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="85"
+                                x2="400"
+                                y1="85"
+                                x1="100"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="122"
+                                x2="375"
+                                y1="122"
+                                x1="125"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="43"
+                                x2="500"
+                                y1="43"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="1.99391"
+                                x2="115.5"
+                                y1="43.0061"
+                                x1="115.5"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="2.00002"
+                                x2="189"
+                                y1="43.0122"
+                                x1="189"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="2.00612"
+                                x2="262.5"
+                                y1="43.0183"
+                                x1="262.5"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="2.01222"
+                                x2="336"
+                                y1="43.0244"
+                                x1="336"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="2.01833"
+                                x2="409.5"
+                                y1="43.0305"
+                                x1="409.5"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="43"
+                                x2="153"
+                                y1="84.0122"
+                                x1="153"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="43"
+                                x2="228"
+                                y1="84.0122"
+                                x1="228"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="43"
+                                x2="303"
+                                y1="84.0122"
+                                x1="303"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="43"
+                                x2="378"
+                                y1="84.0122"
+                                x1="378"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="84"
+                                x2="192"
+                                y1="125.012"
+                                x1="192"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="84"
+                                x2="267"
+                                y1="125.012"
+                                x1="267"></line>
+                            <line
+                                stroke-width="6"
+                                stroke="#7C7C7C"
+                                y2="84"
+                                x2="342"
+                                y1="125.012"
+                                x1="342"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        function logout() {
+            document.location.href = "/logout"
         }
 
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-
-        // Add to document
-        document.body.appendChild(notification);
-
-        // Remove after 3 seconds
+        // Timeout for flash messages
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.5s ease-in-out forwards';
+            const flashMessages = document.querySelectorAll(".flash")
+            flashMessages.forEach(flash => {
+                flash.style.display = "none"
+            })
+        }, 5000)
+
+        function showNotification(message, status) {
+            // Remove any existing notifications
+            const existingNotification = document.querySelector(".notification")
+            if (existingNotification) {
+                existingNotification.remove()
+            }
+
+            // Create notification element
+            const notification = document.createElement("div")
+            notification.className = `notification ${status}`
+            notification.textContent = message
+
+            // Add to document
+            document.body.appendChild(notification)
+
+            // Remove after 3 seconds
             setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 3000);
-    }
-
-    function confirmAction(message) {
-        return new Promise((resolve) => {
-            const confirmed = window.confirm(message);
-            resolve(confirmed);
-        });
-    }
-
-    function toggleSidebar() {
-        var sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-    }
-        
-    window.addEventListener('load', function() {
-        const loader = document.getElementById('loader');
-        if (loader) {
-            loader.style.display = 'none';
+                notification.style.animation =
+                    "slideOut 0.5s ease-in-out forwards"
+                setTimeout(() => {
+                    notification.remove()
+                }, 500)
+            }, 5000)
         }
-    });
-</script>
+
+        function confirmAction(message) {
+            return new Promise(resolve => {
+                const confirmed = window.confirm(message)
+                resolve(confirmed)
+            })
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar")
+            sidebar.classList.toggle("-translate-x-full")
+        }
+
+        window.addEventListener("load", function () {
+            const loader = document.getElementById("loader")
+            if (loader) {
+                loader.style.display = "none"
+            }
+        })
+    </script>
 </html>
