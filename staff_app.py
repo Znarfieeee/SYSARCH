@@ -273,7 +273,7 @@ def add_resource():
         type_ = request.form.get('type')
         link = request.form.get('link')
 
-        if not all([title, type_, link]):
+        if not all([title, type_ ]):
             return jsonify({'message': 'All fields are required', 'status': 'error'}), 400
 
         success = addprocess('resources', 
@@ -1448,3 +1448,95 @@ def delete_material(id):
 
     except Exception as e:
         return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/api/sitin/<int:sitin_id>/reward', methods=['POST'])
+def reward_student(sitin_id):
+    if not session.get('user'):
+        return json_response('Unauthorized', 'error', code=401)
+    
+    staff_id = session['user']['idno']
+    
+    try:
+        print(f"Attempting to reward student for sit-in ID: {sitin_id}")
+        
+        # Get the sit-in details
+        sitin = get_active_sitin_by_id(sitin_id)
+        
+        # Debug logging
+        print(f"Sit-in data: {sitin}")
+        
+        if not sitin:
+            print(f"Sit-in not found for ID: {sitin_id}")
+            return json_response('Sit-in not found', 'error', code=404)
+        
+        # Check if sit-in is active - sitin is a list of Row objects
+        if sitin[0]['status'] != 'active':
+            print(f"Sit-in is not active. Status: {sitin[0]['status']}")
+            return json_response('Cannot reward an inactive sit-in', 'error', code=400)
+        
+        student_idno = sitin[0]['idno']
+        labno = sitin[0]['labno']
+        print(f"Found student ID: {student_idno} for sit-in {sitin_id}")
+        
+        # Check if student has available sessions
+        student = get_student_points(student_idno)
+        if not student:
+            print(f"Student not found with ID: {student_idno}")
+            return json_response('Student not found', 'error', code=404)
+            
+        if student[0]['no_session'] <= 0:
+            print(f"Student {student_idno} has no available sessions")
+            return json_response('No available sessions', 'error', code=400)
+        
+        # Reward the student
+        print(f"Rewarding student {student_idno} for sit-in {sitin_id}")
+        success = reward_student_points(student_idno, sitin_id, staff_id)
+        
+        if success:
+            # End the sit-in session after rewarding
+            print(f"Ending sit-in session {sitin_id} after rewarding")
+            end_success = end_sitin(sitin_id)
+            
+            if end_success:
+                return json_response('Student rewarded and session ended successfully')
+            else:
+                # The reward was successful but ending the session failed
+                print(f"Failed to end sit-in session {sitin_id} after rewarding")
+                return json_response('Student rewarded but failed to end session', 'warning', code=200)
+        
+        print(f"Failed to reward student {student_idno} for sit-in {sitin_id}")
+        return json_response('Failed to reward student', 'error', code=500)
+            
+    except Exception as e:
+        import traceback
+        print(f"Error in reward_student: {str(e)}")
+        print(traceback.format_exc())
+        return json_response(str(e), 'error', code=500)
+
+@staff_app.route('/api/leaderboard/<string:type>')
+def get_leaderboard(type):
+    if type not in ['points', 'sitins', 'percentage']:
+        return json_response('Invalid leaderboard type', 'error', code=400)
+    
+    try:
+        if type == 'points':
+            data = get_leaderboard_points()
+        elif type == 'sitins':
+            data = get_leaderboard_sitins()
+        else:  # percentage
+            data = get_leaderboard_percentage()
+        
+        # Convert the SQLite Row objects to dictionaries
+        if data:
+            serializable_data = [dict(row) for row in data]
+            return json_response('Success', data=serializable_data)
+        else:
+            return json_response('Success', data=[])
+    except Exception as e:
+        return json_response(str(e), 'error', code=500)
+
+@staff_app.route('/staff/leaderboard')
+def staff_leaderboard():
+    if not session.get('user') or session['user']['role'] != 'staff':
+        return redirect(url_for('login'))
+    return render_template('staff/leaderboard.html')
