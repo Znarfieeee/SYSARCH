@@ -15,6 +15,16 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 staff_app = Blueprint('staff_app', __name__)
 
+# Configuration for file uploads
+UPLOAD_FOLDER = 'static/uploads/materials'
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'exe', 'msi'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 def json_response(message, status='success', data=None, code=200):
     response = {
         'message': message,
@@ -224,14 +234,197 @@ def update_lab_schedule(id):
     except Exception as e:
         return jsonify({"message": f"Error: {str(e)}", "status": "error"}), 500
 
-@staff_app.route('/staff/laboratory/resources')
-def lab_resources():
+@staff_app.route('/staff/laboratory/resources', methods=['GET'])
+def get_resources():
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
     
-    return render_template("staff/lab-resources.html", 
-                           pagetitle='Laboratory Resources')
+    try:
+        sql = """
+            SELECT id, title, type, link, is_active, created_at, updated_at 
+            FROM resources 
+            ORDER BY created_at DESC
+        """
+        resources = getallprocess(sql)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if resources:
+                return jsonify([dict(resource) for resource in resources])
+            return jsonify([])
+            
+        return render_template("staff/lab-resources.html", 
+                           pagetitle='Laboratory Resources', 
+                           resources=resources)
+    except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'message': str(e), 'status': 'error'}), 500
+        flash('Error loading resources', 'error')
+        return render_template("staff/lab-resources.html", 
+                           pagetitle='Laboratory Resources', 
+                           resources=[])
 
+@staff_app.route('/staff/laboratory/resources', methods=['POST'])
+def add_resource():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        title = request.form.get('title')
+        type_ = request.form.get('type')
+        link = request.form.get('link')
+
+        if not all([title, type_, link]):
+            return jsonify({'message': 'All fields are required', 'status': 'error'}), 400
+
+        success = addprocess('resources', 
+            title=title,
+            type=type_,
+            link=link,
+            is_active=True
+        )
+
+        if success:
+            return jsonify({'message': 'Resource added successfully', 'status': 'success'})
+        return jsonify({'message': 'Failed to add resource', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/staff/laboratory/resources/<int:id>/toggle', methods=['POST'])
+def toggle_resource(id):
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        data = request.json
+        new_status = data.get('status', False)
+
+        sql = "UPDATE resources SET is_active = ? WHERE id = ?"
+        success = postprocess(sql, (new_status, id))
+
+        if success:
+            return jsonify({'message': 'Resource status updated', 'status': 'success'})
+        return jsonify({'message': 'Failed to update resource status', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/staff/laboratory/resources/<int:id>', methods=['DELETE'])
+def delete_resource(id):
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        sql = "DELETE FROM resources WHERE id = ?"
+        success = postprocess(sql, (id,))
+
+        if success:
+            return jsonify({'message': 'Resource deleted successfully', 'status': 'success'}), 200
+        return jsonify({'message': 'Failed to delete resource', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+# Materials routes
+@staff_app.route('/staff/laboratory/materials', methods=['GET'])
+def get_materials():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        sql = """
+            SELECT id, title, category, description, file_path, is_active, created_at, updated_at 
+            FROM materials 
+            ORDER BY created_at DESC
+        """
+        materials = getallprocess(sql)
+        
+        if materials:
+            return jsonify([dict(material) for material in materials])
+        return jsonify([])
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/staff/laboratory/materials', methods=['POST'])
+def add_material():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        title = request.form.get('title')
+        category = request.form.get('category')
+        description = request.form.get('description')
+        file = request.files.get('file')
+
+        if not all([title, category]):
+            return jsonify({'message': 'Title and category are required', 'status': 'error'}), 400
+
+        file_path = None
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Add timestamp to filename to prevent duplicates
+            filename = f"{int(datetime.now().timestamp())}_{filename}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+
+        success = addprocess('materials',
+            title=title,
+            category=category,
+            description=description,
+            file_path=file_path,
+            is_active=True
+        )
+
+        if success:
+            return jsonify({'message': 'Material added successfully', 'status': 'success'})
+        return jsonify({'message': 'Failed to add material', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/staff/laboratory/materials/<int:id>/toggle', methods=['POST'])
+def toggle_material(id):
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        data = request.json
+        new_status = data.get('status', False)
+
+        sql = "UPDATE materials SET is_active = ? WHERE id = ?"
+        success = postprocess(sql, (new_status, id))
+
+        if success:
+            return jsonify({'message': 'Material status updated', 'status': 'success'})
+        return jsonify({'message': 'Failed to update material status', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@staff_app.route('/staff/laboratory/materials/download/<int:id>')
+def download_material(id):
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        sql = "SELECT file_path, title FROM materials WHERE id = ?"
+        material = getallprocess(sql, (id,))
+
+        if not material or not material[0]['file_path']:
+            return jsonify({'message': 'File not found', 'status': 'error'}), 404
+
+        file_path = material[0]['file_path']
+        if not os.path.exists(file_path):
+            return jsonify({'message': 'File not found', 'status': 'error'}), 404
+
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=os.path.basename(file_path).split('_', 1)[1]  # Remove timestamp from filename
+        )
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
 
 @staff_app.route('/staff/reports/purpose')
 def staff_reports_purpose():
@@ -1226,3 +1419,32 @@ def get_pc_status(lab_no):
             "message": f"Error fetching PC status: {str(e)}",
             "status": "error"
         }), 500
+
+@staff_app.route('/staff/laboratory/materials/<int:id>', methods=['DELETE'])
+def delete_material(id):
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+
+    try:
+        # First get the material to check if it has a file to delete
+        sql = "SELECT file_path FROM materials WHERE id = ?"
+        material = getallprocess(sql, (id,))
+        
+        if material and material[0]['file_path']:
+            try:
+                # Try to delete the file if it exists
+                os.remove(material[0]['file_path'])
+            except OSError:
+                # If file doesn't exist, just continue
+                pass
+
+        # Delete the material from database
+        sql = "DELETE FROM materials WHERE id = ?"
+        success = postprocess(sql, (id,))
+
+        if success:
+            return jsonify({'message': 'Material deleted successfully', 'status': 'success'}), 200
+        return jsonify({'message': 'Failed to delete material', 'status': 'error'}), 400
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
