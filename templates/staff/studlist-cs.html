@@ -1,82 +1,135 @@
-{% extends 'staff.html' %}
-{% block content %}
+{% extends 'staff.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
     <!-- Header and Navigation Section -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
         <div class="w-full md:w-64">
             <div class="relative">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search students..." 
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search students..."
                     class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeyup="filterStudents()"
-                >
+                    onkeyup="filterStudents()" />
                 <span class="absolute right-3 top-2.5 text-gray-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </span>
             </div>
         </div>
-        
+
         <!-- Navigation Buttons -->
         <div class="radio-inputs flex flex-wrap justify-center gap-2">
-            <a href="/staff/students" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">All Students</span>
             </a>
             <a href="/staff/students/current" class="radio">
-                <input type="radio" name="radio" checked="">
+                <input type="radio" name="radio" checked="" />
                 <span class="name">Current Sit-in</span>
             </a>
-            <a href="/staff/students/pending" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students/pending"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">Pending Reservations</span>
             </a>
-            <a href="/staff/students/total" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students/total"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">Total Sit-in</span>
             </a>
         </div>
-        <button onclick="showAddSitinModal()" 
-                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                        transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        <button
+            onclick="showAddSitinModal()"
+            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             Add Sit-In
         </button>
     </div>
-    
 
     <!-- Current Sit-in Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
-        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
+    <div
+        class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
+        <div
+            class="overflow-x-auto max-h-[70vh] overflow-y-auto"
+            id="tableContainer">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Course & Year</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID Number
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Course & Year
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Start Time
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Purpose
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
                     <tr id="loadingRow" class="animate-pulse">
                         <td colspan="8" class="px-6 py-4">
-                            <div class="flex flex-col items-center justify-center py-12">
-                                <div class="flex items-center justify-center space-x-2 mb-4">
-                                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-                                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
-                                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                            <div
+                                class="flex flex-col items-center justify-center py-12">
+                                <div
+                                    class="flex items-center justify-center space-x-2 mb-4">
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
                                 </div>
-                                <div class="text-center text-gray-500">Loading data...</div>
+                                <div class="text-center text-gray-500">
+                                    Loading data...
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -87,38 +140,71 @@
 </div>
 
 <!-- Add Sit-in Modal -->
-<div id="addSitinModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
-    <div class="bg-gray-200 shadow-md p-5 rounded-xl w-[500px] transform scale-75 opacity-0 transition-all duration-300">
+<div
+    id="addSitinModal"
+    class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center">
+    <div
+        class="bg-gray-200 shadow-md p-5 rounded-xl w-[500px] transform scale-75 opacity-0 transition-all duration-300">
         <form id="addSitinForm" class="space-y-4">
             <h2 class="text-2xl font-bold text-center mb-6">Add New Sit-in</h2>
             <div class="space-y-4">
                 <div class="input-group">
-                    <input required="" type="text" name="idno" autocomplete="off" class="input w-full">
+                    <input
+                        required=""
+                        type="text"
+                        name="idno"
+                        autocomplete="off"
+                        class="input w-full" />
                     <label class="user-label bg-gray-200">Student ID</label>
                 </div>
                 <div class="input-group">
                     <select name="purpose" class="input w-full" required="">
+                        <option value="" selected disabled></option>
                         <option value="C programming">C Programming</option>
-                        <option value="Java programming">Java Programming</option>
-                        <option value="Python programming">Python Programming</option>
+                        <option value="Java programming">
+                            Java Programming
+                        </option>
+                        <option value="Python programming">
+                            Python Programming
+                        </option>
                         <option value="C# programming">C# Programming</option>
                         <option value="Database">Database</option>
-                        <option value="Digital Logic & Design">Digital Logic & Design</option>
-                        <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
-                        <option value="System Integration & Architecture">System Integration & Arch.</option>
-                        <option value="Computer Application">Computer Application</option>
-                        <option value="Project Management">Project Management</option>
+                        <option value="Digital Logic & Design">
+                            Digital Logic & Design
+                        </option>
+                        <option value="Embedded Systems & IoT">
+                            Embedded Systems & IoT
+                        </option>
+                        <option value="System Integration & Architecture">
+                            System Integration & Arch.
+                        </option>
+                        <option value="Computer Application">
+                            Computer Application
+                        </option>
+                        <option value="Project Management">
+                            Project Management
+                        </option>
                         <option value="IT Trends">IT Trends</option>
-                        <option value="Technopreneurship">Technopreneurship</option>
+                        <option value="Technopreneurship">
+                            Technopreneurship
+                        </option>
                         <option value="Capstone">Capstone</option>
                         <option value="Php programming">Php Programming</option>
-                        <option value="Javascript programming">Javascript Programming</option>
-                        <option value="ASP.Net programming">ASP.Net Programming</option>
+                        <option value="Javascript programming">
+                            Javascript Programming
+                        </option>
+                        <option value="ASP.Net programming">
+                            ASP.Net Programming
+                        </option>
                     </select>
                     <label class="user-label bg-gray-200">Purpose</label>
                 </div>
                 <div class="input-group">
-                    <input required="" type="time" name="end_time" class="input w-full">
+                    <input
+                        required=""
+                        type="time"
+                        name="end_time"
+                        class="input w-full" />
                     <label class="user-label bg-gray-200">End Time</label>
                 </div>
                 <div class="input-group">
@@ -131,22 +217,29 @@
                         <option value="542">542</option>
                         <option value="544">544</option>
                         <option value="517">517</option>
-                        
                     </select>
                     <label class="user-label bg-gray-200">Lab Number</label>
                 </div>
                 <div class="input-group">
-                    <textarea name="notes" class="input w-full" rows="2"></textarea>
-                    <label class="user-label bg-gray-200">Notes (Optional)</label>
+                    <textarea
+                        name="notes"
+                        class="input w-full"
+                        rows="2"></textarea>
+                    <label class="user-label bg-gray-200"
+                        >Notes (Optional)</label
+                    >
                 </div>
             </div>
             <div class="flex justify-between mt-6 text-sm">
-                <button type="button" onclick="closeAddSitinModal()" 
-                        class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                <button
+                    type="button"
+                    onclick="closeAddSitinModal()"
+                    class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
                     Cancel
                 </button>
-                <button type="submit" 
-                        class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                <button
+                    type="submit"
+                    class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
                     Save
                 </button>
             </div>
@@ -155,49 +248,53 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', loadCurrentSitIns);
+    document.addEventListener("DOMContentLoaded", loadCurrentSitIns)
 
-function filterStudents() {
-    const searchInput = document.getElementById('searchInput');
-    const filter = searchInput.value.toLowerCase();
-    const rows = document.getElementsByClassName('sitin-row');
+    function filterStudents() {
+        const searchInput = document.getElementById("searchInput")
+        const filter = searchInput.value.toLowerCase()
+        const rows = document.getElementsByClassName("sitin-row")
 
-    for (let row of rows) {
-        const idno = row.children[0].textContent.toLowerCase();
-        const name = row.children[1].textContent.toLowerCase();
-        const course = row.children[2].textContent.toLowerCase();
+        for (let row of rows) {
+            const idno = row.children[0].textContent.toLowerCase()
+            const name = row.children[1].textContent.toLowerCase()
+            const course = row.children[2].textContent.toLowerCase()
 
-        if (idno.includes(filter) || name.includes(filter) || course.includes(filter)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+            if (
+                idno.includes(filter) ||
+                name.includes(filter) ||
+                course.includes(filter)
+            ) {
+                row.style.display = ""
+            } else {
+                row.style.display = "none"
+            }
         }
     }
-}
 
-function formatDateTime(dateTimeStr) {
-    if (!dateTimeStr || dateTimeStr === 'N/A') return 'N/A';
-    try {
-        const date = new Date(dateTimeStr);
-        if (isNaN(date.getTime())) {
-            const [datePart, timePart] = dateTimeStr.split(' ');
-            return timePart || 'N/A';
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr || dateTimeStr === "N/A") return "N/A"
+        try {
+            const date = new Date(dateTimeStr)
+            if (isNaN(date.getTime())) {
+                const [datePart, timePart] = dateTimeStr.split(" ")
+                return timePart || "N/A"
+            }
+            return date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            })
+        } catch (e) {
+            console.error("Date parsing error:", e)
+            return "N/A"
         }
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    } catch (e) {
-        console.error('Date parsing error:', e);
-        return 'N/A';
     }
-}
 
-async function loadCurrentSitIns() {
-    const tableBody = document.getElementById('tableBody');
-    // Show loading state
-    tableBody.innerHTML = `
+    async function loadCurrentSitIns() {
+        const tableBody = document.getElementById("tableBody")
+        // Show loading state
+        tableBody.innerHTML = `
         <tr id="loadingRow" class="animate-pulse">
             <td colspan="8" class="px-6 py-4">
                 <div class="flex flex-col items-center justify-center py-12">
@@ -209,173 +306,245 @@ async function loadCurrentSitIns() {
                     <div class="text-center text-gray-500">Loading data...</div>
                 </div>
             </td>
-        </tr>`;
+        </tr>`
 
-    try {
-        const response = await fetch('/api/sitin/active');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("Received sit-in data:", data);
-        
-        // Clear loading state
-        tableBody.innerHTML = '';
-        
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = `
+        try {
+            const response = await fetch("/api/sitin/active")
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+
+            const data = await response.json()
+
+            // Clear loading state
+            tableBody.innerHTML = ""
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" class="px-6 py-4 text-center">
                         <p class="text-2xl text-gray-500 text-center p-4">No students currently sitting in</p>
                     </td>
-                </tr>`;
-            
-            // Update statistics to ensure 0 current sit-ins
-            if (typeof updateStatistics === 'function') {
-                updateStatistics();
+                </tr>`
+
+                // Update statistics to ensure 0 current sit-ins
+                if (typeof updateStatistics === "function") {
+                    updateStatistics()
+                }
+                return
             }
-            return;
-        }
-        // TODO to add Start button to start sit in
-        // Render data
-        data.forEach(student => {
-            const row = document.createElement('tr');
-            row.className = 'sitin-row hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.idno || 'N/A'}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.firstname ? student.firstname.toUpperCase() : ''} ${student.lastname ? student.lastname.toUpperCase() : ''}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.course ? student.course.toUpperCase() : 'N/A'} - ${student.yr_lvl || 'N/A'}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${student.labno}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${new Date(student.start_time).toLocaleString('en-US', {  hour: '2-digit', minute: '2-digit', hour12: false })}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${student.purpose}</td>
+            // TODO to add Start button to start sit in
+            // Render data
+            data.forEach(student => {
+                const row = document.createElement("tr")
+                row.className = "sitin-row hover:bg-gray-50"
+                row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.idno || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.firstname ? student.firstname.toUpperCase() : ""
+                } ${student.lastname ? student.lastname.toUpperCase() : ""}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.course ? student.course.toUpperCase() : "N/A"
+                } - ${student.yr_lvl || "N/A"}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${
+                    student.labno
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${new Date(
+                    student.start_time
+                ).toLocaleString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                })}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    student.purpose
+                }</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">
                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${student.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                        ${student.status ? student.status.charAt(0).toUpperCase() + student.status.slice(1) : 'Unknown'}
+                        ${
+                            student.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                        }">
+                        ${
+                            student.status
+                                ? student.status.charAt(0).toUpperCase() +
+                                  student.status.slice(1)
+                                : "Unknown"
+                        }
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">
-                    ${student.status === 'active' ? `
-
-                        <button onclick="endSitIn(${student.id})" 
-                                class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
-                            End
-                        </button>
-                    ` : ''}
+                    ${
+                        student.status === "active"
+                            ? `
+                        <div class="flex gap-2">
+                            <button onclick="endSitIn(${student.id})" 
+                                    class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                                End
+                            </button>
+                            <button onclick="rewardStudent(${student.id})" 
+                                    class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                                Reward
+                            </button>
+                        </div>
+                    `
+                            : ""
+                    }
                 </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        tableBody.innerHTML = `
+            `
+                tableBody.appendChild(row)
+            })
+        } catch (error) {
+            tableBody.innerHTML = `
             <tr>
                 <td colspan="8" class="px-6 py-4 text-center text-red-500">
                     Error loading data: ${error.message}
                 </td>
-            </tr>`;
-        console.error('Error:', error);
-        
-        // Update statistics to ensure proper display on error
-        if (typeof updateStatistics === 'function') {
-            updateStatistics();
-        }
-    }
-}
+            </tr>`
+            console.error("Error:", error)
 
-async function endSitIn(sitInId) {
-    const confirmed = await confirmAction('Are you sure you want to end this sit-in session?');
-    if (!confirmed) return;
-
-    try {
-        const response = await fetch(`/api/sitin/${sitInId}/end`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+            // Update statistics to ensure proper display on error
+            if (typeof updateStatistics === "function") {
+                updateStatistics()
             }
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            showNotification(data.message, "success");
-            setTimeout(() => window.location.href = '/staff/students/total', 1000);
-        } else {
-            showNotification(data.error || "Failed to end sit-in", "error");
         }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification("An unexpected error occurred", "error");
     }
-}
 
-function showAddSitinModal() {
-    const modal = document.getElementById('addSitinModal');
-    const modalContent = modal.children[0];
-    modal.classList.remove('hidden');
-    document.getElementById('addSitinForm').reset();
-    setTimeout(() => {
-        modalContent.classList.remove('scale-75', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
-    }, 50);
-}
+    async function endSitIn(sitInId) {
+        const confirmed = await confirmAction(
+            "Are you sure you want to end this sit-in session?"
+        )
+        if (!confirmed) return
 
-function closeAddSitinModal() {
-    const modal = document.getElementById('addSitinModal');
-    const modalContent = modal.children[0];
-    modalContent.classList.remove('scale-100', 'opacity-0');
-    modalContent.classList.add('scale-75', 'opacity-0');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        document.getElementById('addSitinForm').reset();
-    }, 300);
-}
+        try {
+            const response = await fetch(`/api/sitin/${sitInId}/end`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
 
-document.getElementById('addSitinForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const idno = formData.get('idno');
-    
-    try {
-        const checkResponse = await fetch(`/api/student/${idno}`);
-        if (!checkResponse.ok) {
-            showNotification('Student not registered in the system. Please register the student first.', "error");
-            return;
+            const data = await response.json()
+            if (response.ok) {
+                showNotification(data.message, "success")
+                setTimeout(
+                    () => (window.location.href = "/staff/students/total"),
+                    1000
+                )
+            } else {
+                showNotification(data.error || "Failed to end sit-in", "error")
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("An unexpected error occurred", "error")
         }
-        
-        const labno = formData.get('labno');
-        const data = {
-            idno: idno,
-            labno: labno,
-            end_time: formData.get('end_time'),
-            notes: formData.get('notes') || null,
-            purpose: formData.get('purpose'),
-            status: 'active'
-        };
-
-        const response = await fetch('/api/sitin/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showNotification(result.message, "success");
-            closeAddSitinModal();
-            loadCurrentSitIns();
-        } else {
-            throw new Error(result.error || 'Failed to add sit-in');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification(error.message, "error");
     }
-});
 
-// Add auto-refresh for current sit-ins
-setInterval(loadCurrentSitIns, 30000); // Refresh every 30 seconds
+    async function rewardStudent(sitInId) {
+        const confirmed = await confirmAction(
+            "Are you sure you want to reward this student?"
+        )
+        if (!confirmed) return
+
+        try {
+            const response = await fetch(`/api/sitin/${sitInId}/reward`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+
+            const data = await response.json()
+            if (data.status === "success") {
+                showNotification(data.message, "success")
+                loadCurrentSitIns() // Refresh the list
+            } else {
+                showNotification(
+                    data.message || "Failed to reward student",
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("An unexpected error occurred", "error")
+        }
+    }
+
+    function showAddSitinModal() {
+        const modal = document.getElementById("addSitinModal")
+        const modalContent = modal.children[0]
+        modal.classList.remove("hidden")
+        document.getElementById("addSitinForm").reset()
+        setTimeout(() => {
+            modalContent.classList.remove("scale-75", "opacity-0")
+            modalContent.classList.add("scale-100", "opacity-100")
+        }, 50)
+    }
+
+    function closeAddSitinModal() {
+        const modal = document.getElementById("addSitinModal")
+        const modalContent = modal.children[0]
+        modalContent.classList.remove("scale-100", "opacity-0")
+        modalContent.classList.add("scale-75", "opacity-0")
+        setTimeout(() => {
+            modal.classList.add("hidden")
+            document.getElementById("addSitinForm").reset()
+        }, 300)
+    }
+
+    document
+        .getElementById("addSitinForm")
+        .addEventListener("submit", async e => {
+            e.preventDefault()
+            const formData = new FormData(e.target)
+            const idno = formData.get("idno")
+
+            try {
+                const checkResponse = await fetch(`/api/student/${idno}`)
+                if (!checkResponse.ok) {
+                    showNotification(
+                        "Student not registered in the system. Please register the student first.",
+                        "error"
+                    )
+                    return
+                }
+
+                const labno = formData.get("labno")
+                const data = {
+                    idno: idno,
+                    labno: labno,
+                    end_time: formData.get("end_time"),
+                    notes: formData.get("notes") || null,
+                    purpose: formData.get("purpose"),
+                    status: "active",
+                }
+
+                const response = await fetch("/api/sitin/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                })
+
+                const result = await response.json()
+
+                if (response.ok) {
+                    showNotification(result.message, "success")
+                    closeAddSitinModal()
+                    loadCurrentSitIns()
+                } else {
+                    throw new Error(result.error || "Failed to add sit-in")
+                }
+            } catch (error) {
+                console.error("Error:", error)
+                showNotification(error.message, "error")
+            }
+        })
+
+    document.addEventListener("DOMContentLoaded", loadCurrentSitIns)
 </script>
 {% endblock %}

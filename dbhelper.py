@@ -664,3 +664,106 @@ def reset_sessions():
         
         """
     return postprocess(sql)
+
+def get_leaderboard_points():
+    sql = "SELECT * FROM leaderboard_points LIMIT 10"
+    return getallprocess(sql)
+
+def get_leaderboard_sitins():
+    sql = "SELECT * FROM leaderboard_sitins LIMIT 10"
+    return getallprocess(sql)
+
+def get_leaderboard_percentage():
+    sql = "SELECT * FROM leaderboard_percentage LIMIT 10"
+    return getallprocess(sql)
+
+def update_student_points(student_idno, points=1):
+    sql = """
+        UPDATE users 
+        SET points = points + ?,
+            total_sitins = total_sitins + 1
+        WHERE idno = ?
+    """
+    return postprocess(sql, (points, student_idno))
+
+def get_student_points(student_idno):
+    sql = "SELECT points, total_sitins, no_session FROM users WHERE idno = ?"
+    return getallprocess(sql, (student_idno,))
+
+def get_active_sitin_by_id(sitin_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, idno, labno, status, purpose 
+            FROM active_sitin 
+            WHERE id = ?
+        """, (sitin_id,))
+        
+        result = cursor.fetchall()  # Use fetchall() to ensure we get a list
+        
+        if result and len(result) > 0:
+            return result  # This will return a list of Row objects that can be accessed by index and key
+        
+        return None  # Return None if no results found
+    except Exception as e:
+        print(f"Error in get_active_sitin_by_id: {str(e)}")
+        return None
+    finally:
+        conn.close()
+
+def reward_student_points(student_idno, sitin_id, staff_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    success = False
+    
+    try:
+        # Start transaction
+        cursor.execute("BEGIN TRANSACTION")
+        
+        # Check if student has sessions available
+        cursor.execute("SELECT no_session FROM users WHERE idno = ?", (student_idno,))
+        student = cursor.fetchone()
+        
+        if not student:
+            print(f"Student {student_idno} not found")
+            return False
+            
+        if student['no_session'] <= 0:
+            print(f"Student {student_idno} has no available sessions")
+            return False
+        
+        # Deduct session and add point
+        cursor.execute("""
+            UPDATE users 
+            SET no_session = no_session - 1,
+                points = points + 1,
+                total_sitins = total_sitins + 1
+            WHERE idno = ?
+        """, (student_idno,))
+        
+        if cursor.rowcount == 0:
+            print(f"Failed to update user {student_idno}")
+            conn.rollback()
+            return False
+        
+        # Record the reward in points_history
+        cursor.execute("""
+            INSERT INTO points_history (idno, sitin_id, points_earned, action_type, staff_id)
+            VALUES (?, ?, 1, 'reward', ?)
+        """, (student_idno, sitin_id, staff_id))
+        
+        # Commit transaction
+        conn.commit()
+        success = True
+        print(f"Successfully rewarded student {student_idno} for sit-in {sitin_id}")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error in reward_student_points: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise e
+    finally:
+        conn.close()
+    
+    return success
