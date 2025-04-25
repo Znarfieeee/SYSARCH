@@ -92,6 +92,31 @@ def staff_reports():
     return render_template('staff/reports.html', 
                            pagetitle='Sit-in Reports', 
                            students=students_list)
+    
+@staff_app.route('/staff/laboratory')
+def staff_laboratory():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    
+    return render_template("staff/laboratory.html", 
+                           pagetitle='Laboratory')
+
+@staff_app.route('/staff/laboratory/schedule')
+def staff_lab_schedules():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/lab-schedules.html", 
+                           pagetitle='Laboratory Schedule')
+    
+@staff_app.route('/staff/laboratory/resources')
+def lab_resources():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/lab-resources.html", 
+                           pagetitle='Laboratory Resources')
 
 @staff_app.route('/staff/reports/purpose')
 def staff_reports_purpose():
