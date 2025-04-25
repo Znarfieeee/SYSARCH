@@ -1526,7 +1526,12 @@ def get_leaderboard(type):
         else:  # percentage
             data = get_leaderboard_percentage()
         
-        return json_response('Success', data=data)
+        # Convert the SQLite Row objects to dictionaries
+        if data:
+            serializable_data = [dict(row) for row in data]
+            return json_response('Success', data=serializable_data)
+        else:
+            return json_response('Success', data=[])
     except Exception as e:
         return json_response(str(e), 'error', code=500)
 
