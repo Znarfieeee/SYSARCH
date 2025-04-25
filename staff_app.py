@@ -107,9 +107,58 @@ def staff_lab_schedules():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
-    return render_template("staff/lab-schedules.html", 
-                           pagetitle='Laboratory Schedule')
+    sql = "SELECT * FROM lab_schedule"
+    schedule = getallprocess(sql)
     
+    
+    return render_template("staff/lab-schedules.html", 
+                           pagetitle='Laboratory Schedule', schedules=schedule)
+    
+
+@staff_app.route('/staff/laboratory/schedule', methods=['POST'])
+def add_lab_schedule():
+    try:
+        data = request.json
+        
+        labno = data.get('lab_no')
+        days = data.get('days')  # This will be an array of selected days ['M', 'T', 'W', etc.]
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        
+        if not all([labno, days, start_time, end_time]):
+            return jsonify({
+                "message": "All fields are required", 
+                "status": "error"
+            }), 400
+
+        # Join all days with a comma and store in one row
+        days_str = ', '.join(days)
+        schedule_data = {
+            'labno': labno,
+            'day': days_str,
+            'time': f"{start_time} - {end_time}",
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        result = addprocess('lab_schedule', **schedule_data)
+
+        if result:
+            return jsonify({
+                "message": "Schedule added successfully", 
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "message": "Failed to add schedule", 
+                "status": "error"
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            "message": f"Error adding schedule: {str(e)}", 
+            "status": "error"
+        }), 500
+
 @staff_app.route('/staff/laboratory/resources')
 def lab_resources():
     if not session.get('logged_in'):
