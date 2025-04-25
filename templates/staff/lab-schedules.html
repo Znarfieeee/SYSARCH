@@ -329,14 +329,30 @@
 <div
     id="computerControlModal"
     class="fixed inset-0 bg-black/30 backdrop-blur-md hidden items-center justify-center z-50">
-    <div class="bg-gray-200 rounded-lg p-6 w-full max-w-4xl">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Computer Control</h2>
+    <div
+        class="bg-gray-100 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div
+            class="bg-white px-4 py-3 rounded-t-lg border-b flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h2 class="text-lg font-semibold">Computer Control</h2>
+                <select
+                    id="labFilter"
+                    class="px-3 py-1.5 text-sm rounded border border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select Laboratory</option>
+                    <option value="524">Lab 524</option>
+                    <option value="526">Lab 526</option>
+                    <option value="528">Lab 528</option>
+                    <option value="530">Lab 530</option>
+                    <option value="542">Lab 542</option>
+                    <option value="544">Lab 544</option>
+                </select>
+            </div>
             <button
                 onclick="closeComputerControlModal()"
                 class="text-gray-500 hover:text-gray-700">
                 <svg
-                    class="w-6 h-6"
+                    class="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -349,24 +365,44 @@
             </button>
         </div>
 
-        <div class="space-y-4">
-            <!-- Lab Filter -->
-            <div class="flex gap-4 mb-4">
-                <select
-                    id="labFilter"
-                    class="px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Select Laboratory</option>
-                    <option value="524">524</option>
-                    <option value="526">526</option>
-                    <option value="528">528</option>
-                    <option value="530">530</option>
-                    <option value="542">542</option>
-                    <option value="544">544</option>
-                </select>
+        <!-- Stats Bar -->
+        <div
+            class="bg-white px-4 py-2 border-b flex items-center justify-between text-sm">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span
+                        >Available:
+                        <span id="availablePCs" class="font-semibold"
+                            >-</span
+                        ></span
+                    >
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                    <span
+                        >Unavailable:
+                        <span id="unavailablePCs" class="font-semibold"
+                            >-</span
+                        ></span
+                    >
+                </div>
+                <div>
+                    Total: <span id="totalPCs" class="font-semibold">-</span>
+                </div>
             </div>
+            <div class="flex items-center gap-2">
+                <input
+                    type="text"
+                    id="pcSearch"
+                    placeholder="Search PC"
+                    class="px-3 py-1 text-sm rounded border border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-24" />
+            </div>
+        </div>
 
-            <!-- PC Grid -->
-            <div class="grid grid-cols-5 gap-4">
+        <!-- PC Grid -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <div id="pcGrid" class="pc-grid">
                 <!-- PCs will be dynamically added here -->
             </div>
         </div>
@@ -376,6 +412,7 @@
 <script>
     let isEdit = false
     let currentEditId = null
+    let currentLabPCs = []
 
     function openAddScheduleModal() {
         isEdit = false
@@ -522,12 +559,33 @@
             }
         })
 
+    function updateLabStatus() {
+        const totalPCs = currentLabPCs.length
+        const availablePCs = currentLabPCs.filter(pc => pc.is_available).length
+        const unavailablePCs = totalPCs - availablePCs
+
+        document.getElementById("totalPCs").textContent = totalPCs
+        document.getElementById("availablePCs").textContent = availablePCs
+        document.getElementById("unavailablePCs").textContent = unavailablePCs
+    }
+
+    function filterPCs(searchTerm) {
+        const pcDivs = document.querySelectorAll(".pc-item")
+        pcDivs.forEach(div => {
+            const pcNumber = div.getAttribute("data-pc-number")
+            if (searchTerm === "" || pcNumber.includes(searchTerm)) {
+                div.style.display = "flex"
+            } else {
+                div.style.display = "none"
+            }
+        })
+    }
+
     function openComputerControlModal() {
         document
             .getElementById("computerControlModal")
             .classList.remove("hidden")
         document.getElementById("computerControlModal").classList.add("flex")
-        loadPCs()
     }
 
     function closeComputerControlModal() {
@@ -543,19 +601,28 @@
             if (data.status === "success") {
                 const pcGrid = document.getElementById("pcGrid")
                 pcGrid.innerHTML = ""
+                currentLabPCs = []
 
-                // Create a 5x6 grid of PCs (30 PCs per lab)
                 for (let i = 1; i <= 50; i++) {
                     const pc = data.data.find(p => p.pc_number === i) || {
                         pc_number: i,
                         is_available: true,
                     }
+                    currentLabPCs.push(pc)
 
                     const pcDiv = document.createElement("div")
                     pcDiv.className = `pc-item ${
                         pc.is_available ? "available" : "unavailable"
                     }`
-                    pcDiv.innerHTML = `PC ${i}`
+                    pcDiv.innerHTML = `
+                        <div class="pc-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="pc-number">PC ${i}</span>
+                    `
                     pcDiv.setAttribute("data-pc-number", i)
                     pcDiv.setAttribute(
                         "data-is-available",
@@ -592,6 +659,15 @@
                                     "data-is-available",
                                     newStatus ? "1" : "0"
                                 )
+
+                                const pcIndex = currentLabPCs.findIndex(
+                                    p => p.pc_number === i
+                                )
+                                if (pcIndex !== -1) {
+                                    currentLabPCs[pcIndex].is_available =
+                                        newStatus
+                                }
+                                updateLabStatus()
                             } else {
                                 alert("Failed to update PC status")
                             }
@@ -603,6 +679,7 @@
 
                     pcGrid.appendChild(pcDiv)
                 }
+                updateLabStatus()
             } else {
                 alert("Failed to load PC status")
             }
@@ -612,7 +689,7 @@
         }
     }
 
-    // Add event listener for lab selection
+    // Add event listeners
     document
         .getElementById("labFilter")
         .addEventListener("change", function () {
@@ -621,39 +698,71 @@
                 loadPCs(selectedLab)
             }
         })
+
+    document.getElementById("pcSearch").addEventListener("input", function (e) {
+        filterPCs(e.target.value)
+    })
 </script>
 
 <style>
-    /* ... existing styles ... */
-
     .pc-grid {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        padding: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
     }
 
     .pc-item {
-        padding: 15px;
-        text-align: center;
-        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: white;
+        padding: 8px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .pc-item.available {
-        background-color: #4caf50;
-        color: white;
-    }
-
-    .pc-item.unavailable {
-        background-color: #f44336;
-        color: white;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
     }
 
     .pc-item:hover {
-        opacity: 0.8;
-        transform: scale(1.05);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .pc-item.available {
+        border-left: 3px solid #4caf50;
+    }
+
+    .pc-item.unavailable {
+        border-left: 3px solid #f44336;
+    }
+
+    .pc-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+    }
+
+    .pc-number {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    /* Make the modal scrollable on smaller screens */
+    @media (max-height: 800px) {
+        .computer-control-modal {
+            max-height: 90vh;
+        }
+    }
+
+    /* Adjust grid for different screen sizes */
+    @media (max-width: 640px) {
+        .pc-grid {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
     }
 </style>
 {% endblock %}
