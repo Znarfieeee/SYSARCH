@@ -1,0 +1,39 @@
+{% extends 'staff.html' %} 
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Laboratory Management</h1>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
+            <a href="/staff/laboratory/resources" class="w-full max-w-sm">
+                <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-w-16 aspect-h-9 relative">
+                        <img src="/static/img/lab-resources-image.jpg" 
+                             alt="Laboratory Resources"
+                             class="w-full h-48 object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">Resources</h2>
+                        <p class="text-gray-600">Manage laboratory equipment, materials, and resources efficiently</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/staff/laboratory/schedule" class="w-full max-w-sm">
+                <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-w-16 aspect-h-9 relative">
+                        <img src="/static/img/lab-schedules-image.jpg" 
+                             alt="Laboratory Schedule"
+                             class="w-full h-48 object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">Schedule</h2>
+                        <p class="text-gray-600">View and manage laboratory schedules and bookings</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

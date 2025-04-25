@@ -92,6 +92,146 @@ def staff_reports():
     return render_template('staff/reports.html', 
                            pagetitle='Sit-in Reports', 
                            students=students_list)
+    
+@staff_app.route('/staff/laboratory')
+def staff_laboratory():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    
+    return render_template("staff/laboratory.html", 
+                           pagetitle='Laboratory')
+
+@staff_app.route('/staff/laboratory/schedule')
+def staff_lab_schedules():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    sql = "SELECT * FROM lab_schedule ORDER BY labno"
+    schedule = getallprocess(sql)
+    
+    
+    return render_template("staff/lab-schedules.html", 
+                           pagetitle='Laboratory Schedule', schedules=schedule)
+    
+
+@staff_app.route('/staff/laboratory/schedule', methods=['POST'])
+def add_lab_schedule():
+    try:
+        data = request.json
+        
+        labno = data.get('lab_no')
+        days = data.get('days')  # This will be an array of selected days ['M', 'T', 'W', etc.]
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        
+        if not all([labno, days, start_time, end_time]):
+            return jsonify({
+                "message": "All fields are required", 
+                "status": "error"
+            }), 400
+
+        # Join all days with a comma and store in one row
+        days_str = ', '.join(days)
+        schedule_data = {
+            'labno': labno,
+            'day': days_str,
+            'time': f"{start_time} - {end_time}",
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        result = addprocess('lab_schedule', **schedule_data)
+
+        if result:
+            return jsonify({
+                "message": "Schedule added successfully", 
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "message": "Failed to add schedule", 
+                "status": "error"
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            "message": f"Error adding schedule: {str(e)}", 
+            "status": "error"
+        }), 500
+
+@staff_app.route('/staff/laboratory/schedule/<int:id>', methods=['DELETE'])
+def delete_lab_schedule(id):
+    try:
+        sql = "DELETE FROM lab_schedule WHERE id = ?"
+        success = postprocess(sql, (id,))
+
+        if success:
+            return jsonify({
+                "message": "Schedule deleted successfully", 
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "message": "Failed to delete schedule", 
+                "status": "error"
+            }), 400
+    except Exception as e:
+        return jsonify({"message": f"Server Error: {str(e)}", "status": "error"}), 500
+
+@staff_app.route('/staff/laboratory/schedule/<int:id>', methods=['GET'])
+def get_lab_schedule(id):
+    try:
+        sql = "SELECT * FROM lab_schedule WHERE id = ?"
+        schedule = getallprocess(sql, (id,))
+        
+        if schedule:
+            return jsonify(dict(schedule[0]))
+        return jsonify({"message": "Schedule not found", "status": "error"}), 404
+    except Exception as e:
+        return jsonify({"message": f"Error: {str(e)}", "status": "error"}), 500
+
+@staff_app.route('/staff/laboratory/schedule/<int:id>/edit', methods=['PATCH'])
+def update_lab_schedule(id):
+    try:
+        data = request.json
+        labno = data.get('lab_no')
+        days = data.get('days')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+
+        days_str = ', '.join(days)
+        schedule_data = {
+            'id': id,
+            'labno': labno,
+            'day': days_str,
+            'time': f"{start_time} - {end_time}",
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        result = updateprocess('lab_schedule', **schedule_data)
+
+        if result:
+            return jsonify({
+                "message": "Schedule updated successfully",
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "message": "Failed to update schedule",
+                "status": "error"
+            }), 400
+
+    except Exception as e:
+        return jsonify({"message": f"Error: {str(e)}", "status": "error"}), 500
+
+@staff_app.route('/staff/laboratory/resources')
+def lab_resources():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    return render_template("staff/lab-resources.html", 
+                           pagetitle='Laboratory Resources')
+
 
 @staff_app.route('/staff/reports/purpose')
 def staff_reports_purpose():
@@ -1011,4 +1151,78 @@ def delete_reservation(id):
         return jsonify({
             'message': f'Error deleting reservation: {str(e)}', 
             'status': 'error'
+        }), 500
+
+@staff_app.route('/staff/laboratory/pc/toggle', methods=['POST'])
+def toggle_pc_status():
+    try:
+        data = request.json
+        lab_no = data.get('lab_no')
+        pc_number = data.get('pc_number')
+        is_available = data.get('is_available')
+
+        if not all([lab_no, pc_number is not None, is_available is not None]):
+            return jsonify({
+                "message": "Missing required fields",
+                "status": "error"
+            }), 400
+
+        # Check if PC exists in database
+        sql = "SELECT * FROM pc_status WHERE lab_no = ? AND pc_number = ?"
+        pc = getallprocess(sql, (lab_no, pc_number))
+
+        if pc:
+            # Update existing PC status
+            sql = """
+                UPDATE pc_status 
+                SET is_available = ?, updated_at = datetime('now', 'localtime')
+                WHERE lab_no = ? AND pc_number = ?
+            """
+            success = postprocess(sql, (is_available, lab_no, pc_number))
+        else:
+            # Insert new PC status
+            sql = """
+                INSERT INTO pc_status (lab_no, pc_number, is_available, created_at, updated_at)
+                VALUES (?, ?, ?, datetime('now', 'localtime'), datetime('now', 'localtime'))
+            """
+            success = postprocess(sql, (lab_no, pc_number, is_available))
+
+        if success:
+            return jsonify({
+                "message": "PC status updated successfully",
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "message": "Failed to update PC status",
+                "status": "error"
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            "message": f"Error updating PC status: {str(e)}",
+            "status": "error"
+        }), 500
+
+@staff_app.route('/staff/laboratory/pc/status/<lab_no>', methods=['GET'])
+def get_pc_status(lab_no):
+    try:
+        sql = "SELECT * FROM pc_status WHERE lab_no = ? ORDER BY pc_number"
+        pcs = getallprocess(sql, (lab_no,))
+        
+        if pcs:
+            return jsonify({
+                "status": "success",
+                "data": [dict(pc) for pc in pcs]
+            }), 200
+        
+        return jsonify({
+            "status": "success",
+            "data": []
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": f"Error fetching PC status: {str(e)}",
+            "status": "error"
         }), 500

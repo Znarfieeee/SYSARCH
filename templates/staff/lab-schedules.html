@@ -1,0 +1,768 @@
+{% extends 'staff.html' %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="size-8">
+        <a href="/staff/laboratory">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-8 mb-4">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+        </a>
+    </div>
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4">
+        <div class="w-full md:w-64">
+            <button
+                onclick="openComputerControlModal()"
+                class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="w-5 h-5">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12H3V5.25" />
+                </svg>
+                Computer Control
+            </button>
+        </div>
+
+        <button
+            id="addScheduleBtn"
+            onclick="openAddScheduleModal()"
+            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Schedule
+        </button>
+    </div>
+
+    <!-- Schedule Table -->
+    <div
+        class="bg-white rounded-lg shadow overflow-hidden w-full md:w-[90%] mx-auto cursor-default">
+        <div
+            id="tableContainer"
+            class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab No.
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Day
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Start Time
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for schedule in schedules %}
+                    <tr class="schedule-row hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ schedule.labno }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            <div class="flex flex-wrap gap-1">
+                                {% for day in schedule.day.split(', ') %}
+                                <span
+                                    class="px-2 py-1 text-xs font-medium rounded-full {% if day == 'M' %}bg-blue-100 text-blue-800 {% elif day == 'T' %}bg-green-100 text-green-800 {% elif day == 'W' %}bg-yellow-100 text-yellow-800 {% elif day == 'TH' %}bg-purple-100 text-purple-800 {% elif day == 'F' %}bg-red-100 text-red-800 {% elif day == 'S' %}bg-gray-100 text-gray-800 {% endif %}">
+                                    {% if day == 'M' %}Monday {% elif day == 'T'
+                                    %}Tuesday {% elif day == 'W' %}Wednesday {%
+                                    elif day == 'TH' %}Thursday {% elif day ==
+                                    'F' %}Friday {% elif day == 'S' %}Saturday
+                                    {% endif %}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            {{ schedule.time }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-start">
+                            <div class="flex items-center gap-2">
+                                <button
+                                    onclick="editSchedule('{{ schedule.id }}')"
+                                    class="text-blue-600 hover:text-blue-800">
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onclick="deleteSchedule('{{ schedule.id }}')"
+                                    class="text-red-600 hover:text-red-800">
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Schedule Modal -->
+<div
+    id="addScheduleModal"
+    class="fixed inset-0 bg-black/30 backdrop-blur-md hidden items-center justify-center z-50">
+    <div class="bg-gray-200 rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Add New Schedule</h2>
+            <button
+                onclick="closeAddScheduleModal()"
+                class="text-gray-500 hover:text-gray-700">
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form id="scheduleForm" class="space-y-4">
+            <div class="input-group">
+                <select
+                    required
+                    name="lab_no"
+                    class="input w-full px-4 py-2 rounded-lg bg-transparent border border-gray-300 focus:border-blue-500 focus:ring-blue-500 appearance-none">
+                    <option value="" disabled selected hidden></option>
+                    <option value="524">524</option>
+                    <option value="526">526</option>
+                    <option value="528">528</option>
+                    <option value="530">530</option>
+                    <option value="542">542</option>
+                    <option value="544">544</option>
+                </select>
+                <label class="user-label bg-gray-200">Laboratory</label>
+                <div
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg
+                        class="w-4 h-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Select Days</label
+                >
+                <div class="grid grid-cols-2 gap-2 gap-x-15">
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="M" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Monday</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="T" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Tuesday</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="W" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Wednesday</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="TH" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Thursday</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="F" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Friday</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="container">
+                            <input type="checkbox" name="days[]" value="S" />
+                            <svg viewBox="0 0 64 64" class="size-5">
+                                <path
+                                    d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                    pathLength="575.0541381835938"
+                                    class="path"></path>
+                            </svg>
+                        </label>
+                        <span class="text-sm text-gray-700">Saturday</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Start Time</label
+                    >
+                    <input
+                        type="time"
+                        name="start_time"
+                        required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >End Time</label
+                    >
+                    <input
+                        type="time"
+                        name="end_time"
+                        required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                </div>
+            </div>
+            <div class="flex justify-between gap-3 mt-6">
+                <button
+                    type="button"
+                    onclick="closeAddScheduleModal()"
+                    class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                    Save Schedule
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Computer Control Modal -->
+<div
+    id="computerControlModal"
+    class="fixed inset-0 bg-black/30 backdrop-blur-md hidden items-center justify-center z-50">
+    <div
+        class="bg-gray-100 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div
+            class="bg-white px-4 py-3 rounded-t-lg border-b flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h2 class="text-lg font-semibold">Computer Control</h2>
+                <select
+                    id="labFilter"
+                    class="px-3 py-1.5 text-sm rounded border border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select Laboratory</option>
+                    <option value="524">Lab 524</option>
+                    <option value="526">Lab 526</option>
+                    <option value="528">Lab 528</option>
+                    <option value="530">Lab 530</option>
+                    <option value="542">Lab 542</option>
+                    <option value="544">Lab 544</option>
+                </select>
+            </div>
+            <button
+                onclick="closeComputerControlModal()"
+                class="text-gray-500 hover:text-gray-700">
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Stats Bar -->
+        <div
+            class="bg-white px-4 py-2 border-b flex items-center justify-between text-sm">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span
+                        >Available:
+                        <span id="availablePCs" class="font-semibold"
+                            >-</span
+                        ></span
+                    >
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                    <span
+                        >Unavailable:
+                        <span id="unavailablePCs" class="font-semibold"
+                            >-</span
+                        ></span
+                    >
+                </div>
+                <div>
+                    Total: <span id="totalPCs" class="font-semibold">-</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <input
+                    type="text"
+                    id="pcSearch"
+                    placeholder="Search PC"
+                    class="px-3 py-1 text-sm rounded border border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-24" />
+            </div>
+        </div>
+
+        <!-- PC Grid -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <div id="pcGrid" class="pc-grid">
+                <!-- PCs will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isEdit = false
+    let currentEditId = null
+    let currentLabPCs = []
+
+    function openAddScheduleModal() {
+        isEdit = false
+        currentEditId = null
+        const form = document.getElementById("scheduleForm")
+        form.reset() // Reset form when opening for new schedule
+        document.getElementById("addScheduleModal").classList.remove("hidden")
+        document.getElementById("addScheduleModal").classList.add("flex")
+    }
+
+    function closeAddScheduleModal() {
+        isEdit = false
+        currentEditId = null
+        document.getElementById("addScheduleModal").classList.add("hidden")
+        document.getElementById("addScheduleModal").classList.remove("flex")
+    }
+
+    async function editSchedule(id) {
+        try {
+            isEdit = true
+            currentEditId = id
+
+            // First get the current schedule data
+            const response = await fetch(`/staff/laboratory/schedule/${id}`)
+            const schedule = await response.json()
+
+            if (!schedule) {
+                alert("Failed to fetch schedule data")
+                return
+            }
+
+            // Open the modal and populate the form
+            const modal = document.getElementById("addScheduleModal")
+            const form = document.getElementById("scheduleForm")
+
+            // Set the form values
+            form.querySelector('[name="lab_no"]').value =
+                schedule.lab_no || schedule.labno
+            form.querySelector('[name="start_time"]').value =
+                schedule.time.split(" - ")[0]
+            form.querySelector('[name="end_time"]').value =
+                schedule.time.split(" - ")[1]
+
+            // Clear and set the days
+            const dayCheckboxes = form.querySelectorAll('[name="days[]"]')
+            dayCheckboxes.forEach(checkbox => (checkbox.checked = false))
+
+            schedule.day.split(", ").forEach(day => {
+                const checkbox = form.querySelector(
+                    `[name="days[]"][value="${day}"]`
+                )
+                if (checkbox) checkbox.checked = true
+            })
+
+            // Show the modal
+            modal.classList.remove("hidden")
+            modal.classList.add("flex")
+        } catch (err) {
+            alert("Error: " + err.message)
+        }
+    }
+
+    // Handle form submission
+    document
+        .getElementById("scheduleForm")
+        .addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const formData = new FormData(this)
+
+            // Get selected days
+            const selectedDays = Array.from(formData.getAll("days[]"))
+            if (selectedDays.length === 0) {
+                alert("Please select at least one day")
+                return
+            }
+
+            // Convert form data to object
+            const data = {
+                lab_no: formData.get("lab_no"),
+                days: selectedDays,
+                start_time: formData.get("start_time"),
+                end_time: formData.get("end_time"),
+            }
+
+            try {
+                const url = isEdit
+                    ? `/staff/laboratory/schedule/${currentEditId}/edit`
+                    : "/staff/laboratory/schedule"
+                const method = isEdit ? "PATCH" : "POST"
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                })
+
+                const result = await response.json()
+
+                if (result.status === "success") {
+                    closeAddScheduleModal()
+                    window.location.reload()
+                } else {
+                    alert(
+                        result.message ||
+                            `Failed to ${isEdit ? "update" : "add"} schedule`
+                    )
+                }
+            } catch (err) {
+                alert(
+                    `Error ${isEdit ? "updating" : "adding"} schedule: ` +
+                        err.message
+                )
+            }
+        })
+
+    async function deleteSchedule(id) {
+        if (confirm(`Are you sure you want to delete shedule ${id}?`)) {
+            const response = await fetch(`/staff/laboratory/schedule/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+
+            const result = await response.json()
+
+            if (result.status === "success") {
+                closeAddScheduleModal()
+                window.location.reload()
+            } else {
+                showwNotification(result.message || "Failed to add schedule")
+            }
+        }
+    }
+
+    // Close modal when clicking outside
+    document
+        .getElementById("addScheduleModal")
+        .addEventListener("click", function (e) {
+            if (e.target === this) {
+                closeAddScheduleModal()
+            }
+        })
+
+    function updateLabStatus() {
+        const totalPCs = currentLabPCs.length
+        const availablePCs = currentLabPCs.filter(pc => pc.is_available).length
+        const unavailablePCs = totalPCs - availablePCs
+
+        document.getElementById("totalPCs").textContent = totalPCs
+        document.getElementById("availablePCs").textContent = availablePCs
+        document.getElementById("unavailablePCs").textContent = unavailablePCs
+    }
+
+    function filterPCs(searchTerm) {
+        const pcDivs = document.querySelectorAll(".pc-item")
+        pcDivs.forEach(div => {
+            const pcNumber = div.getAttribute("data-pc-number")
+            if (searchTerm === "" || pcNumber.includes(searchTerm)) {
+                div.style.display = "flex"
+            } else {
+                div.style.display = "none"
+            }
+        })
+    }
+
+    function openComputerControlModal() {
+        document
+            .getElementById("computerControlModal")
+            .classList.remove("hidden")
+        document.getElementById("computerControlModal").classList.add("flex")
+    }
+
+    function closeComputerControlModal() {
+        document.getElementById("computerControlModal").classList.add("hidden")
+        document.getElementById("computerControlModal").classList.remove("flex")
+    }
+
+    async function loadPCs(labNo) {
+        try {
+            const response = await fetch(`/staff/laboratory/pc/status/${labNo}`)
+            const data = await response.json()
+
+            if (data.status === "success") {
+                const pcGrid = document.getElementById("pcGrid")
+                pcGrid.innerHTML = ""
+                currentLabPCs = []
+
+                for (let i = 1; i <= 50; i++) {
+                    const pc = data.data.find(p => p.pc_number === i) || {
+                        pc_number: i,
+                        is_available: true,
+                    }
+                    currentLabPCs.push(pc)
+
+                    const pcDiv = document.createElement("div")
+                    pcDiv.className = `pc-item ${
+                        pc.is_available ? "available" : "unavailable"
+                    }`
+                    pcDiv.innerHTML = `
+                        <div class="pc-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="pc-number">PC ${i}</span>
+                    `
+                    pcDiv.setAttribute("data-pc-number", i)
+                    pcDiv.setAttribute(
+                        "data-is-available",
+                        pc.is_available ? "1" : "0"
+                    )
+
+                    pcDiv.onclick = async () => {
+                        const isCurrentlyAvailable =
+                            pcDiv.getAttribute("data-is-available") === "1"
+                        const newStatus = !isCurrentlyAvailable
+
+                        try {
+                            const response = await fetch(
+                                "/staff/laboratory/pc/toggle",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        lab_no: labNo,
+                                        pc_number: i,
+                                        is_available: newStatus,
+                                    }),
+                                }
+                            )
+
+                            const result = await response.json()
+                            if (result.status === "success") {
+                                pcDiv.className = `pc-item ${
+                                    newStatus ? "available" : "unavailable"
+                                }`
+                                pcDiv.setAttribute(
+                                    "data-is-available",
+                                    newStatus ? "1" : "0"
+                                )
+
+                                const pcIndex = currentLabPCs.findIndex(
+                                    p => p.pc_number === i
+                                )
+                                if (pcIndex !== -1) {
+                                    currentLabPCs[pcIndex].is_available =
+                                        newStatus
+                                }
+                                updateLabStatus()
+                            } else {
+                                alert("Failed to update PC status")
+                            }
+                        } catch (error) {
+                            console.error("Error updating PC status:", error)
+                            alert("Error updating PC status")
+                        }
+                    }
+
+                    pcGrid.appendChild(pcDiv)
+                }
+                updateLabStatus()
+            } else {
+                alert("Failed to load PC status")
+            }
+        } catch (error) {
+            console.error("Error loading PC status:", error)
+            alert("Error loading PC status")
+        }
+    }
+
+    // Add event listeners
+    document
+        .getElementById("labFilter")
+        .addEventListener("change", function () {
+            const selectedLab = this.value
+            if (selectedLab) {
+                loadPCs(selectedLab)
+            }
+        })
+
+    document.getElementById("pcSearch").addEventListener("input", function (e) {
+        filterPCs(e.target.value)
+    })
+</script>
+
+<style>
+    .pc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+    }
+
+    .pc-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: white;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .pc-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .pc-item.available {
+        border-left: 3px solid #4caf50;
+    }
+
+    .pc-item.unavailable {
+        border-left: 3px solid #f44336;
+    }
+
+    .pc-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+    }
+
+    .pc-number {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    /* Make the modal scrollable on smaller screens */
+    @media (max-height: 800px) {
+        .computer-control-modal {
+            max-height: 90vh;
+        }
+    }
+
+    /* Adjust grid for different screen sizes */
+    @media (max-width: 640px) {
+        .pc-grid {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
+    }
+</style>
+{% endblock %}
