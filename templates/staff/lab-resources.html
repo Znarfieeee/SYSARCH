@@ -1,6 +1,803 @@
-{% extends 'staff.html' %} 
-{% block content %}
-    <div class="container mx-auto px-4 py-8">
-        
+{% extends 'staff.html' %} {% block content %}
+<div class="mx-auto px-8 py-8">
+    <div class="mb-8 flex justify-between items-center">
+        <div class="size-8">
+            <a href="/staff/laboratory">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-8 mb-4">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
+        </div>
+        <div class="flex gap-3">
+            <button
+                onclick="openAddResourceModal()"
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Resource
+            </button>
+            <button
+                onclick="openAddMaterialModal()"
+                class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Material
+            </button>
+        </div>
     </div>
+
+    <!-- Resources and Materials Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-gray-200 py-2">
+            <nav class="-mb-px flex gap-4" aria-label="Tabs">
+                <button
+                    onclick="switchTab('resources')"
+                    class="tab-button active"
+                    data-tab="resources">
+                    Resources
+                </button>
+                <button
+                    onclick="switchTab('materials')"
+                    class="tab-button"
+                    data-tab="materials">
+                    Materials
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Resources Table -->
+    <div id="resourcesTab" class="tab-content active">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Title
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Type
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody
+                    class="bg-white divide-y divide-gray-200"
+                    id="resourcesTableBody">
+                    <!-- Resources will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Materials Table -->
+    <div id="materialsTab" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Title
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody
+                    class="bg-white divide-y divide-gray-200"
+                    id="materialsTableBody">
+                    <!-- Materials will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Resource Modal -->
+    <div
+        id="addResourceModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Add Resource</h2>
+                <button
+                    onclick="closeAddResourceModal()"
+                    class="text-gray-500 hover:text-gray-700">
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form
+                id="resourceForm"
+                class="space-y-4"
+                enctype="multipart/form-data">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Title</label
+                    >
+                    <input
+                        type="text"
+                        name="title"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Type</label
+                    >
+                    <select
+                        name="type"
+                        id="resourceType"
+                        onchange="toggleResourceInput()"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">Select Type</option>
+                        <option value="document">Document</option>
+                        <option value="link">Link</option>
+                    </select>
+                </div>
+                <div id="linkInput" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Link</label
+                    >
+                    <input
+                        type="url"
+                        name="link"
+                        placeholder="https://"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
+                <div id="fileInput" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Document</label
+                    >
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".pdf,.doc,.docx,.txt"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button
+                        type="button"
+                        onclick="closeAddResourceModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                        Add Resource
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Material Modal -->
+    <div
+        id="addMaterialModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Add Material</h2>
+                <button
+                    onclick="closeAddMaterialModal()"
+                    class="text-gray-500 hover:text-gray-700">
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form
+                id="materialForm"
+                class="space-y-4"
+                enctype="multipart/form-data">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Title</label
+                    >
+                    <input
+                        type="text"
+                        name="title"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Category</label
+                    >
+                    <select
+                        name="category"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">Select Category</option>
+                        <option value="software">Software</option>
+                        <option value="hardware">Hardware</option>
+                        <option value="tool">Tool</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Description</label
+                    >
+                    <textarea
+                        name="description"
+                        rows="3"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >File Upload</label
+                    >
+                    <input
+                        type="file"
+                        name="file"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button
+                        type="button"
+                        onclick="closeAddMaterialModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                        Add Material
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tab-button {
+        @apply px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap border-b-2 border-transparent transition-colors;
+    }
+
+    .tab-button.active {
+        @apply border-blue-500 text-blue-600;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+</style>
+
+<script>
+    // Modal functions
+    function openAddResourceModal() {
+        document.getElementById("addResourceModal").classList.remove("hidden")
+        document.getElementById("addResourceModal").classList.add("flex")
+    }
+
+    function closeAddResourceModal() {
+        document.getElementById("addResourceModal").classList.add("hidden")
+        document.getElementById("addResourceModal").classList.remove("flex")
+        document.getElementById("resourceForm").reset()
+        document.getElementById("linkInput").classList.add("hidden")
+        document.getElementById("fileInput").classList.add("hidden")
+    }
+
+    function openAddMaterialModal() {
+        document.getElementById("addMaterialModal").classList.remove("hidden")
+        document.getElementById("addMaterialModal").classList.add("flex")
+    }
+
+    function closeAddMaterialModal() {
+        document.getElementById("addMaterialModal").classList.add("hidden")
+        document.getElementById("addMaterialModal").classList.remove("flex")
+        document.getElementById("materialForm").reset()
+    }
+
+    function switchTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll(".tab-content").forEach(tab => {
+            tab.classList.remove("active")
+            tab.classList.add("hidden")
+        })
+
+        // Remove active class from all buttons
+        document.querySelectorAll(".tab-button").forEach(button => {
+            button.classList.remove("active")
+        })
+
+        // Show selected tab
+        document.getElementById(tabName + "Tab").classList.remove("hidden")
+        document.getElementById(tabName + "Tab").classList.add("active")
+
+        // Set active button
+        document
+            .querySelector(`[data-tab="${tabName}"]`)
+            .classList.add("active")
+    }
+
+    // Form submission handlers
+    document
+        .getElementById("resourceForm")
+        .addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const formData = new FormData(this)
+            const type = formData.get("type")
+
+            // Remove the unused input value
+            if (type === "document") {
+                formData.delete("link")
+            } else if (type === "link") {
+                formData.delete("file")
+            }
+
+            try {
+                const response = await fetch("/staff/laboratory/resources", {
+                    method: "POST",
+                    body: formData,
+                })
+                const result = await response.json()
+
+                if (response.ok) {
+                    closeAddResourceModal()
+                    loadResources()
+                    showNotification(
+                        result.message || "Resource added successfully",
+                        "success"
+                    )
+                } else {
+                    showNotification(
+                        result.message || "Failed to add resource",
+                        "error"
+                    )
+                }
+            } catch (error) {
+                console.error("Error:", error)
+                showNotification("Failed to add resource", "error")
+            }
+        })
+
+    document
+        .getElementById("materialForm")
+        .addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const formData = new FormData(this)
+
+            try {
+                const response = await fetch("/staff/laboratory/materials", {
+                    method: "POST",
+                    body: formData,
+                })
+                const result = await response.json()
+
+                if (response.ok) {
+                    closeAddMaterialModal()
+                    loadMaterials()
+                    showNotification(
+                        result.message || "Material added successfully",
+                        "success"
+                    )
+                } else {
+                    showNotification(
+                        result.message || "Failed to add material",
+                        "error"
+                    )
+                }
+            } catch (error) {
+                console.error("Error:", error)
+                showNotification("Failed to add material", "error")
+            }
+        })
+
+    async function toggleStatus(id, type, currentStatus) {
+        try {
+            const response = await fetch(
+                `/staff/laboratory/${type}/${id}/toggle`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: JSON.stringify({ status: !currentStatus }),
+                    credentials: "same-origin",
+                }
+            )
+            const result = await response.json()
+
+            if (response.ok) {
+                if (type === "resources") {
+                    await loadResources()
+                } else {
+                    await loadMaterials()
+                }
+                showNotification(
+                    result.message || `${type} status updated successfully`,
+                    "success"
+                )
+            } else {
+                showNotification(
+                    result.message || `Failed to update ${type} status`,
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification(`Failed to update ${type} status`, "error")
+        }
+    }
+
+    // Data loading functions
+    async function loadResources() {
+        try {
+            const response = await fetch("/staff/laboratory/resources", {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                },
+                credentials: "same-origin",
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to load resources")
+            }
+
+            const data = await response.json()
+            const tbody = document.getElementById("resourcesTableBody")
+            tbody.innerHTML = ""
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                            No resources found
+                        </td>
+                    </tr>
+                `
+                return
+            }
+
+            data.forEach(resource => {
+                const tr = document.createElement("tr")
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${
+                            resource.title
+                        }</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${
+                            resource.type
+                        }</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            resource.is_active
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                        }">
+                            ${resource.is_active ? "Active" : "Inactive"}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div class="flex gap-2">
+                            <button onclick="toggleStatus(${
+                                resource.id
+                            }, 'resources', ${
+                    resource.is_active ? true : false
+                })" 
+                                class="text-blue-600 hover:text-blue-900 transition-colors">
+                                ${resource.is_active ? "Disable" : "Enable"}
+                            </button>
+                            <button onclick="deleteResource(${resource.id})" 
+                                class="text-red-600 hover:text-red-900 transition-colors">
+                                <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                            </button>
+                        </div>
+                    </td>
+                `
+                tbody.appendChild(tr)
+            })
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("Failed to load resources", "error")
+        }
+    }
+
+    async function loadMaterials() {
+        try {
+            const response = await fetch("/staff/laboratory/materials", {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                },
+                credentials: "same-origin",
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to load materials")
+            }
+
+            const data = await response.json()
+            const tbody = document.getElementById("materialsTableBody")
+            tbody.innerHTML = ""
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                            No materials found
+                        </td>
+                    </tr>
+                `
+                return
+            }
+
+            data.forEach(material => {
+                const tr = document.createElement("tr")
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${
+                            material.title
+                        }</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${
+                            material.category
+                        }</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            material.is_active
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                        }">
+                            ${material.is_active ? "Active" : "Inactive"}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div class="flex gap-2">
+                            <button onclick="toggleStatus(${
+                                material.id
+                            }, 'materials', ${
+                    material.is_active ? true : false
+                })" 
+                                class="text-blue-600 hover:text-blue-900 transition-colors">
+                                ${material.is_active ? "Disable" : "Enable"}
+                            </button>
+                            <button onclick="deleteMaterial(${material.id})" 
+                                class="text-red-600 hover:text-red-900 transition-colors">
+                                <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                            </button>
+                        </div>
+                    </td>
+                `
+                tbody.appendChild(tr)
+            })
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("Failed to load materials", "error")
+        }
+    }
+
+    // Notification function
+    function showNotification(message, type = "success") {
+        // Check if notification container exists
+        let container = document.getElementById("notification-container")
+        if (!container) {
+            container = document.createElement("div")
+            container.id = "notification-container"
+            container.className = "fixed top-4 right-4 z-50"
+            document.body.appendChild(container)
+        }
+
+        const notification = document.createElement("div")
+        notification.className = `
+            ${type === "success" ? "bg-green-500" : "bg-red-500"} 
+            text-white px-4 py-2 rounded-lg shadow-lg mb-2
+            transform transition-all duration-300 ease-in-out
+            translate-x-full opacity-0
+        `
+        notification.textContent = message
+
+        container.appendChild(notification)
+
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.remove("translate-x-full", "opacity-0")
+        }, 100)
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.add("translate-x-full", "opacity-0")
+            setTimeout(() => {
+                container.removeChild(notification)
+            }, 300)
+        }, 3000)
+    }
+
+    // Initial load
+    loadResources()
+    loadMaterials()
+
+    // Add this function to the script section
+    async function deleteResource(id) {
+        if (!confirm("Are you sure you want to delete this resource?")) {
+            return
+        }
+
+        try {
+            const response = await fetch(`/staff/laboratory/resources/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                await loadResources()
+                showNotification(
+                    result.message || "Resource deleted successfully",
+                    "success"
+                )
+            } else {
+                showNotification(
+                    result.message || "Failed to delete resource",
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("Failed to delete resource", "error")
+        }
+    }
+
+    function toggleResourceInput() {
+        const type = document.getElementById("resourceType").value
+        const linkInput = document.getElementById("linkInput")
+        const fileInput = document.getElementById("fileInput")
+
+        // Hide both inputs initially
+        linkInput.classList.add("hidden")
+        fileInput.classList.add("hidden")
+
+        // Remove required attribute from both inputs
+        linkInput.querySelector("input").required = false
+        fileInput.querySelector("input").required = false
+
+        // Show and make required the appropriate input
+        if (type === "link") {
+            linkInput.classList.remove("hidden")
+            linkInput.querySelector("input").required = true
+        } else if (type === "document") {
+            fileInput.classList.remove("hidden")
+            fileInput.querySelector("input").required = true
+        }
+    }
+
+    // Add this function to the script section
+    async function deleteMaterial(id) {
+        if (!confirm("Are you sure you want to delete this material?")) {
+            return
+        }
+
+        try {
+            const response = await fetch(`/staff/laboratory/materials/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                await loadMaterials()
+                showNotification(
+                    result.message || "Material deleted successfully",
+                    "success"
+                )
+            } else {
+                showNotification(
+                    result.message || "Failed to delete material",
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("Failed to delete material", "error")
+        }
+    }
+</script>
 {% endblock %}

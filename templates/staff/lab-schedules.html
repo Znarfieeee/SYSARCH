@@ -1,24 +1,23 @@
 {% extends 'staff.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="size-8">
-        <a href="/staff/laboratory">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-8 mb-4">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
-        </a>
-    </div>
-    <div
-        class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4">
-        <div class="w-full md:w-64">
+    <div class="mb-8 flex justify-between items-center">
+        <div class="size-8">
+            <a href="/staff/laboratory">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-8 mb-4">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
+        </div>
+        <div class="flex gap-3">
             <button
                 onclick="openComputerControlModal()"
                 class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2">
@@ -36,25 +35,24 @@
                 </svg>
                 Computer Control
             </button>
+            <button
+                id="addScheduleBtn"
+                onclick="openAddScheduleModal()"
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Schedule
+            </button>
         </div>
-
-        <button
-            id="addScheduleBtn"
-            onclick="openAddScheduleModal()"
-            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
-            <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Schedule
-        </button>
     </div>
 
     <!-- Schedule Table -->
