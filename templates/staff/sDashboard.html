@@ -86,7 +86,7 @@
                 </div>
                 <div
                     id="chart-container"
-                    class="flex justify-center w-full h-full mt-2">
+                    class="flex justify-center w-full h-[350px] mt-2">
                     <canvas id="myChart" class="w-full"></canvas>
                 </div>
                 <div
@@ -351,15 +351,58 @@
                         plugins: {
                             legend: {
                                 position: "bottom",
+                                align: "start",
                                 labels: {
-                                    boxWidth: 12,
-                                    padding: 15,
+                                    boxWidth: 8,
+                                    boxHeight: 8,
+                                    padding: 10,
                                     font: {
-                                        size: 11,
+                                        size: 12,
                                         family: "'Inter', sans-serif",
                                     },
                                     usePointStyle: true,
                                     pointStyle: "circle",
+                                    generateLabels: function (chart) {
+                                        const original =
+                                            Chart.overrides.pie.plugins.legend
+                                                .labels.generateLabels
+                                        const labels = original.call(
+                                            this,
+                                            chart
+                                        )
+
+                                        labels.forEach(label => {
+                                            if (
+                                                label.text &&
+                                                label.text.length > 15
+                                            ) {
+                                                label.originalText = label.text
+                                                label.text =
+                                                    label.text.substring(
+                                                        0,
+                                                        12
+                                                    ) + "..."
+                                            }
+                                        })
+
+                                        return labels
+                                    },
+                                },
+                                maxHeight: 100,
+                                maxWidth: 300,
+                                fullSize: false,
+                                overflow: "wrap",
+                                onHover: function (event, legendItem) {
+                                    if (legendItem && legendItem.originalText) {
+                                        document.getElementById(
+                                            "myChart"
+                                        ).style.cursor = "pointer"
+                                    }
+                                },
+                                onLeave: function () {
+                                    document.getElementById(
+                                        "myChart"
+                                    ).style.cursor = "default"
                                 },
                             },
                             tooltip: {
@@ -383,6 +426,16 @@
                                 usePointStyle: true,
                                 callbacks: {
                                     title: function (context) {
+                                        if (
+                                            context[0].dataset.labels &&
+                                            context[0].dataset.labels[
+                                                context[0].dataIndex
+                                            ]
+                                        ) {
+                                            return context[0].dataset.labels[
+                                                context[0].dataIndex
+                                            ]
+                                        }
                                         return context[0].label || ""
                                     },
                                     label: function (context) {
