@@ -237,7 +237,105 @@ def lab():
     
     pagetitle = 'Schedule'
     
-    return render_template('student/schedule.html', pagetitle=pagetitle)
+    # Get unique lab room numbers
+    lab_rooms_sql = """
+    SELECT DISTINCT labno 
+    FROM lab_schedule 
+    ORDER BY labno
+    """
+    lab_rooms_data = getallprocess(lab_rooms_sql)
+    
+    # Initialize an empty list for lab rooms with their schedules
+    lab_rooms = []
+    
+    if lab_rooms_data:
+        # Process each lab room
+        for room_data in lab_rooms_data:
+            labno = room_data['labno']
+            
+            # Get schedules for this lab room
+            schedules_sql = """
+            SELECT id, labno, time, day, created_at
+            FROM lab_schedule
+            WHERE labno = ?
+            ORDER BY day, time
+            """
+            schedules_data = getallprocess(schedules_sql, (labno,))
+            
+            # Get PC status for this lab room
+            pc_status_sql = """
+            SELECT COUNT(*) as total_pcs,
+                   SUM(CASE WHEN is_available = 1 THEN 1 ELSE 0 END) as available_pcs
+            FROM pc_status
+            WHERE lab_no = ?
+            """
+            pc_status_data = getallprocess(pc_status_sql, (labno,))
+            
+            # Extract floor from room number (assuming format like '301' where '3' is the floor)
+            floor = labno[0] if len(labno) > 0 else '?'
+            
+            # Process schedule data
+            schedules = []
+            day_colors = {
+                'MONDAY': 'blue',
+                'TUESDAY': 'yellow',
+                'WEDNESDAY': 'green',
+                'THURSDAY': 'red',
+                'FRIDAY': 'purple',
+                'SATURDAY': 'pink',
+                'SUNDAY': 'gray'
+            }
+            
+            days = []
+            
+            if schedules_data:
+                for schedule in schedules_data:
+                    day = schedule['day'].upper()
+                    days.append(day.lower())
+                    
+                    # Determine time category based on time value
+                    time = schedule['time']
+                    time_category = 'morning'
+                    
+                    if time:
+                        # Parse the time string to determine category
+                        if 'PM' in time and not time.startswith('12:'):
+                            if any(hour in time for hour in ['1:', '2:', '3:', '4:', '5:']):
+                                time_category = 'afternoon'
+                            else:
+                                time_category = 'evening'
+                    
+                    schedules.append({
+                        'day': day,
+                        'time': time,
+                        'time_category': time_category,
+                        'color': day_colors.get(day, 'gray'),
+                        'subject_code': f"CS{labno} - Lab Session",  # Placeholder
+                        'instructor': "Lab Instructor"  # Placeholder
+                    })
+            
+            # Get PC counts
+            total_pcs = 0
+            available_pcs = 0
+            
+            if pc_status_data and len(pc_status_data) > 0:
+                # Use direct indexing instead of .get() method
+                total_pcs = pc_status_data[0]['total_pcs'] if 'total_pcs' in pc_status_data[0] else 0
+                available_pcs = pc_status_data[0]['available_pcs'] if 'available_pcs' in pc_status_data[0] else 0
+            
+            # Create room object
+            room = {
+                'labno': labno,
+                'floor': floor,
+                'schedules': schedules,
+                'days': list(set(days)),  # Unique days
+                'total_pcs': total_pcs,
+                'available_pcs': available_pcs
+            }
+            
+            lab_rooms.append(room)
+    
+    return render_template('student/schedule.html', pagetitle=pagetitle, lab_rooms=lab_rooms)
         
 
 @app.route('/reservation/<int:id>', methods=['DELETE'])
@@ -557,6 +655,39 @@ def add_feedback():
             'status': 'error',
             'details': str(e)
         }), 500
+
+@app.route('/api/pc-status/<lab_no>')
+def get_pc_status(lab_no):
+    try:
+        # Get PC status for this lab room
+        pc_status_sql = """
+        SELECT pc_number, is_available, updated_at
+        FROM pc_status
+        WHERE lab_no = ?
+        ORDER BY pc_number
+        """
+        pc_status_data = getallprocess(pc_status_sql, (lab_no,))
+        
+        # Get total count and available count
+        count_sql = """
+        SELECT COUNT(*) as total_pcs,
+               SUM(CASE WHEN is_available = 1 THEN 1 ELSE 0 END) as available_pcs
+        FROM pc_status
+        WHERE lab_no = ?
+        """
+        count_data = getallprocess(count_sql, (lab_no,))
+        
+        result = {
+            'lab_no': lab_no,
+            'pc_status': pc_status_data or [],
+            'total_pcs': count_data[0]['total_pcs'] if count_data and 'total_pcs' in count_data[0] else 0,
+            'available_pcs': count_data[0]['available_pcs'] if count_data and 'available_pcs' in count_data[0] else 0,
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

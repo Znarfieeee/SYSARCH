@@ -1,5 +1,806 @@
 {% extends 'home.html' %} {% block content %}
+<div
+    id="main-container"
+    class="flex flex-col min-h-screen py-10 px-6 mx-auto max-w-7xl bg-gray-100">
+    <!-- Header Section -->
+    <div class="mb-3">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Laboratory Room Schedules
+        </h1>
+    </div>
 
-<h1>Schedule</h1>
+    <!-- Filter Controls -->
+    <div class="flex flex-wrap py-4 gap-4 mb-8">
+        <div class="relative">
+            <label
+                for="day-filter"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Day</label
+            >
+            <div class="relative">
+                <select
+                    id="day-filter"
+                    class="appearance-none bg-white border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-40 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent cursor-pointer">
+                    <option value="all">All Days</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                </select>
+                <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                        class="fill-current h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <path
+                            d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
 
+        <div class="relative">
+            <label
+                for="time-filter"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Time</label
+            >
+            <div class="relative">
+                <select
+                    id="time-filter"
+                    class="appearance-none bg-white border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-48 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent cursor-pointer">
+                    <option value="all">Any Time</option>
+                    <option value="07:00-09:00">7:00 AM - 9:00 AM</option>
+                    <option value="09:00-11:00">9:00 AM - 11:00 AM</option>
+                    <option value="11:00-13:00">11:00 AM - 1:00 PM</option>
+                    <option value="13:00-15:00">1:00 PM - 3:00 PM</option>
+                    <option value="15:00-17:00">3:00 PM - 5:00 PM</option>
+                    <option value="17:00-19:00">5:00 PM - 7:00 PM</option>
+                    <option value="19:00-21:00">7:00 PM - 9:00 PM</option>
+                </select>
+                <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                        class="fill-current h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <path
+                            d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative">
+            <label
+                for="search-room"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Room</label
+            >
+            <div class="relative">
+                <select
+                    id="search-room"
+                    class="appearance-none bg-white border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-40 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent cursor-pointer">
+                    <option value="">All Rooms</option>
+                    {% for room in lab_rooms %}
+                    <option value="{{ room.labno }}">
+                        Room {{ room.labno }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg
+                        class="fill-current h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <path
+                            d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative self-end">
+            <button
+                id="reset-filters"
+                class="py-2 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-300 flex items-center">
+                <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Room Cards Grid -->
+    <div
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        id="room-cards">
+        {% if lab_rooms %} {% for room in lab_rooms %}
+        <div
+            class="room-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            data-room="{{ room.labno }}"
+            data-days="{{ ','.join(room.days) if room.days else '' }}">
+            <div
+                class="bg-gray-500 px-4 py-3 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-white">
+                    Room {{ room.labno }}
+                </h2>
+            </div>
+
+            <div class="p-4">
+                <div class="flex items-center mb-2">
+                    <svg
+                        class="w-4 h-4 text-gray-500 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <p class="text-gray-700 text-sm">
+                        {{ room.floor }} Floor, College Building
+                    </p>
+                </div>
+
+                <div class="flex items-center mb-3">
+                    <svg
+                        class="w-4 h-4 text-gray-500 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-gray-700 text-sm">
+                        {% if room.total_pcs == 0 %} Available {% elif
+                        room.available_pcs == 0 %} Fully Occupied {% elif
+                        room.available_pcs < room.total_pcs * 0.2 %} Limited
+                        Availability {% else %} Available ({{ room.available_pcs
+                        }} PCs) {% endif %}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-1 mb-3">
+                    {% for day in room.days %}
+                    <span
+                        class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                        {% if day == 'monday' or day == 'm' %}Monday {% elif day
+                        == 'tuesday' or day == 't' %}Tuesday {% elif day ==
+                        'wednesday' or day == 'w' %}Wednesday {% elif day ==
+                        'thursday' or day == 'th' %}Thursday {% elif day ==
+                        'friday' or day == 'f' %}Friday {% elif day ==
+                        'saturday' or day == 'sat' %}Saturday {% elif day ==
+                        'sunday' or day == 'sun' %}Sunday {% else %}{{ day|title
+                        }}{% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <div class="flex justify-between mt-3">
+                    <button
+                        class="view-schedules text-gray-600 hover:text-gray-800 text-sm font-medium hover:underline"
+                        data-labno="{{ room.labno }}">
+                        See More
+                    </button>
+                    <button
+                        class="view-pc-status text-gray-600 hover:text-gray-800 text-sm font-medium hover:underline"
+                        data-labno="{{ room.labno }}">
+                        View PC Status
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %} {% else %}
+        <div class="col-span-full text-center py-8">
+            <p class="text-gray-500">No laboratory rooms found.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Empty State -->
+    <div
+        id="empty-state"
+        class="hidden flex flex-col items-center justify-center py-12 text-center">
+        <svg
+            class="w-16 h-16 text-gray-400 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-1">
+            No matching rooms found
+        </h3>
+        <p class="text-gray-500">
+            Try adjusting your filters or search criteria
+        </p>
+        <button
+            id="reset-filters"
+            class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300">
+            Reset Filters
+        </button>
+    </div>
+
+    <!-- PC Status Modal -->
+    <div
+        id="pc-status-modal"
+        class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center transition-all duration-300">
+        <div
+            id="pc-status-content"
+            class="bg-white shadow-lg p-6 rounded-xl w-[800px] max-h-[80vh] transform scale-75 opacity-0 transition-all duration-300 relative overflow-y-auto">
+            <button
+                onclick="closePcStatusModal()"
+                class="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700">
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <h2
+                id="pc-status-title"
+                class="text-2xl font-bold mb-6 text-gray-800">
+                PC Status - Room <span id="modal-room-number"></span>
+            </h2>
+
+            <div id="pc-status-loading" class="py-8 flex flex-col items-center">
+                <svg
+                    class="animate-spin h-10 w-10 text-indigo-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"></circle>
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-600">Loading PC status...</p>
+            </div>
+
+            <div
+                id="pc-status-grid"
+                class="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-10 gap-3 mb-6 hidden">
+                <!-- PC status items will be generated here via JavaScript -->
+            </div>
+
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex gap-6">
+                        <div class="flex items-center">
+                            <div
+                                class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-700">Available</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div
+                                class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                            <span class="text-sm text-gray-700">Occupied</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500" id="last-updated">
+                        Last updated:
+                        <span id="last-updated-time">Just now</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Detail Modal -->
+    <div
+        id="schedule-modal"
+        class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center transition-all duration-300">
+        <div
+            id="schedule-content"
+            class="bg-white shadow-lg p-6 rounded-xl w-[600px] max-h-[80vh] transform scale-75 opacity-0 transition-all duration-300 relative overflow-y-auto">
+            <button
+                onclick="closeScheduleModal()"
+                class="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700">
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <h2
+                id="schedule-title"
+                class="text-2xl font-bold mb-6 text-gray-800">
+                Schedule - Room <span id="modal-schedule-room"></span>
+            </h2>
+
+            <div id="schedule-loading" class="py-8 flex flex-col items-center">
+                <svg
+                    class="animate-spin h-10 w-10 text-indigo-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"></circle>
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-600">Loading schedules...</p>
+            </div>
+
+            <div id="schedule-list" class="space-y-3 hidden">
+                <!-- Schedule items will be generated here via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dayFilter = document.getElementById("day-filter")
+        const timeFilter = document.getElementById("time-filter")
+        const searchInput = document.getElementById("search-room")
+        const roomCards = document.querySelectorAll(".room-card")
+        const emptyState = document.getElementById("empty-state")
+        const resetButton = document.getElementById("reset-filters")
+
+        // PC Status Modal Elements
+        const pcStatusModal = document.getElementById("pc-status-modal")
+        const pcStatusContent = document.getElementById("pc-status-content")
+        const pcStatusGrid = document.getElementById("pc-status-grid")
+        const pcStatusLoading = document.getElementById("pc-status-loading")
+        const modalRoomNumber = document.getElementById("modal-room-number")
+        const lastUpdatedTime = document.getElementById("last-updated-time")
+
+        // Schedule Modal Elements
+        const scheduleModal = document.getElementById("schedule-modal")
+        const scheduleContent = document.getElementById("schedule-content")
+        const scheduleList = document.getElementById("schedule-list")
+        const scheduleLoading = document.getElementById("schedule-loading")
+        const modalScheduleRoom = document.getElementById("modal-schedule-room")
+
+        // Function to apply filters
+        function applyFilters() {
+            const selectedDay = dayFilter.value.toLowerCase()
+            const selectedTime = timeFilter.value
+            const searchRoomValue = searchInput.value
+
+            let visibleCount = 0
+
+            roomCards.forEach(card => {
+                // Room number filter
+                const roomNumber = card.dataset.room
+                const matchesSearch =
+                    searchRoomValue === "" || roomNumber === searchRoomValue
+
+                // Day filter
+                let matchesDay = true
+                if (selectedDay !== "all") {
+                    // Get days from dataset and normalize
+                    const daysString = card.dataset.days || ""
+                    const days = daysString
+                        .split(",")
+                        .map(d => d.trim().toLowerCase())
+
+                    // Short form to full day name mapping
+                    const dayMap = {
+                        m: "monday",
+                        t: "tuesday",
+                        w: "wednesday",
+                        th: "thursday",
+                        f: "friday",
+                        sat: "saturday",
+                        sun: "sunday",
+                    }
+
+                    // Check if the selected day is in the card's days (handling both full names and abbreviations)
+                    matchesDay = days.some(day => {
+                        return (
+                            day === selectedDay || dayMap[day] === selectedDay
+                        )
+                    })
+                }
+
+                // Time filter - assume all time slots for now since we don't have specific time data
+                let matchesTime = true
+                if (selectedTime !== "all") {
+                    // In a real app, we would check if the room has schedules that overlap with the selected time range
+                    // For now, assume all rooms are available at all times unless we have specific schedule data
+                    matchesTime = true
+                }
+
+                // Show/hide based on all filters
+                if (matchesSearch && matchesDay && matchesTime) {
+                    card.classList.remove("hidden")
+                    visibleCount++
+                } else {
+                    card.classList.add("hidden")
+                }
+            })
+
+            // Show empty state if no results
+            if (visibleCount === 0) {
+                emptyState.classList.remove("hidden")
+            } else {
+                emptyState.classList.add("hidden")
+            }
+        }
+
+        // Event listeners for filters
+        dayFilter.addEventListener("change", applyFilters)
+        timeFilter.addEventListener("change", applyFilters)
+        searchInput.addEventListener("input", applyFilters)
+
+        // Reset filters button
+        resetButton.addEventListener("click", function () {
+            dayFilter.value = "all"
+            timeFilter.value = "all"
+            searchInput.value = ""
+            applyFilters()
+        })
+
+        // Add hover animation for cards
+        roomCards.forEach(card => {
+            card.addEventListener("mouseenter", function () {
+                this.classList.add(
+                    "transform",
+                    "scale-105",
+                    "transition-all",
+                    "duration-300"
+                )
+            })
+
+            card.addEventListener("mouseleave", function () {
+                this.classList.remove("transform", "scale-105")
+            })
+        })
+
+        // PC Status Modal Functions
+        function openPcStatusModal(labno) {
+            pcStatusModal.classList.remove("hidden")
+            modalRoomNumber.textContent = labno
+
+            // Show loading state
+            pcStatusGrid.classList.add("hidden")
+            pcStatusLoading.classList.remove("hidden")
+
+            setTimeout(() => {
+                pcStatusContent.classList.remove("scale-75", "opacity-0")
+                pcStatusContent.classList.add("scale-100", "opacity-100")
+
+                // Fetch PC status data
+                fetchPcStatus(labno)
+            }, 50)
+        }
+
+        window.closePcStatusModal = function () {
+            pcStatusContent.classList.remove("scale-100", "opacity-100")
+            pcStatusContent.classList.add("scale-75", "opacity-0")
+            setTimeout(() => {
+                pcStatusModal.classList.add("hidden")
+                pcStatusGrid.innerHTML = "" // Clear the grid
+            }, 300)
+        }
+
+        // Schedule Modal Functions
+        function openScheduleModal(labno) {
+            scheduleModal.classList.remove("hidden")
+            modalScheduleRoom.textContent = labno
+
+            // Show loading state
+            scheduleList.classList.add("hidden")
+            scheduleLoading.classList.remove("hidden")
+
+            setTimeout(() => {
+                scheduleContent.classList.remove("scale-75", "opacity-0")
+                scheduleContent.classList.add("scale-100", "opacity-100")
+
+                // Fetch schedule data
+                fetchSchedules(labno)
+            }, 50)
+        }
+
+        window.closeScheduleModal = function () {
+            scheduleContent.classList.remove("scale-100", "opacity-100")
+            scheduleContent.classList.add("scale-75", "opacity-0")
+            setTimeout(() => {
+                scheduleModal.classList.add("hidden")
+                scheduleList.innerHTML = "" // Clear the list
+            }, 300)
+        }
+
+        // Fetch PC status data for a specific lab room
+        function fetchPcStatus(labno) {
+            // Show loading state
+            pcStatusGrid.classList.add("hidden")
+            pcStatusLoading.classList.remove("hidden")
+
+            // Call the API endpoint
+            fetch(`/api/pc-status/${labno}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok")
+                    }
+                    return response.json()
+                })
+                .then(data => {
+                    // Update the last updated time
+                    const lastUpdated = data.last_updated
+                        ? new Date(data.last_updated)
+                        : new Date()
+                    lastUpdatedTime.textContent =
+                        lastUpdated.toLocaleTimeString()
+
+                    // Generate PC status display
+                    renderPcStatus(data.pc_status || [], data.total_pcs || 50)
+
+                    // Hide loading, show grid
+                    pcStatusLoading.classList.add("hidden")
+                    pcStatusGrid.classList.remove("hidden")
+                })
+                .catch(error => {
+                    console.error("Error fetching PC status:", error)
+
+                    // Generate empty PC status display
+                    renderEmptyPcStatus(50)
+
+                    // Update the last updated time
+                    const now = new Date()
+                    lastUpdatedTime.textContent = now.toLocaleTimeString()
+
+                    // Hide loading, show grid
+                    pcStatusLoading.classList.add("hidden")
+                    pcStatusGrid.classList.remove("hidden")
+                })
+        }
+
+        // Fetch schedule data for a specific lab room
+        function fetchSchedules(labno) {
+            // Get schedules from the DOM for now
+            const roomCard = document.querySelector(
+                `.room-card[data-room="${labno}"]`
+            )
+            if (!roomCard) {
+                scheduleLoading.classList.add("hidden")
+                scheduleList.innerHTML =
+                    "<p class='text-center text-gray-500'>No schedules found for this room.</p>"
+                scheduleList.classList.remove("hidden")
+                return
+            }
+
+            // Extract schedules from the card - in a real app, this would be an API call
+            setTimeout(() => {
+                const dayColors = {
+                    MONDAY: "blue",
+                    TUESDAY: "yellow",
+                    WEDNESDAY: "green",
+                    THURSDAY: "red",
+                    FRIDAY: "purple",
+                    SATURDAY: "pink",
+                    SUNDAY: "gray",
+                }
+
+                // Map short day codes to full names
+                const dayFullNames = {
+                    m: "MONDAY",
+                    t: "TUESDAY",
+                    w: "WEDNESDAY",
+                    th: "THURSDAY",
+                    f: "FRIDAY",
+                    sat: "SATURDAY",
+                    sun: "SUNDAY",
+                    monday: "MONDAY",
+                    tuesday: "TUESDAY",
+                    wednesday: "WEDNESDAY",
+                    thursday: "THURSDAY",
+                    friday: "FRIDAY",
+                    saturday: "SATURDAY",
+                    sunday: "SUNDAY",
+                }
+
+                // Define some common time slots for demonstration
+                const timeSlots = {
+                    MONDAY: ["7:30 AM - 10:30 AM", "1:00 PM - 4:00 PM"],
+                    TUESDAY: ["8:00 AM - 11:00 AM", "2:00 PM - 5:00 PM"],
+                    WEDNESDAY: ["7:30 AM - 10:30 AM", "1:00 PM - 4:00 PM"],
+                    THURSDAY: ["8:00 AM - 11:00 AM", "2:00 PM - 5:00 PM"],
+                    FRIDAY: ["9:00 AM - 12:00 PM", "3:00 PM - 6:00 PM"],
+                    SATURDAY: ["9:00 AM - 12:00 PM"],
+                    SUNDAY: [],
+                }
+
+                const days = roomCard.dataset.days.split(",")
+                scheduleList.innerHTML = ""
+
+                if (
+                    days.length === 0 ||
+                    (days.length === 1 && days[0] === "")
+                ) {
+                    scheduleList.innerHTML =
+                        "<p class='text-center text-gray-500'>No schedules found for this room.</p>"
+                } else {
+                    days.forEach(day => {
+                        const dayCode = day.trim().toLowerCase()
+                        const dayName =
+                            dayFullNames[dayCode] || dayCode.toUpperCase()
+                        const color = dayColors[dayName] || "gray"
+
+                        // Get time slots for this day
+                        const slots = timeSlots[dayName] || [
+                            "7:30 AM - 4:30 PM",
+                        ]
+
+                        slots.forEach((timeSlot, index) => {
+                            const dayItem = document.createElement("div")
+                            dayItem.className =
+                                "schedule-item p-3 bg-gray-50 rounded-lg"
+                            dayItem.innerHTML = `
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 rounded-full mr-2 bg-${color}-500"></div>
+                                        <span class="font-medium">${
+                                            dayName.charAt(0) +
+                                            dayName.slice(1).toLowerCase()
+                                        }</span>
+                                    </div>
+                                    <span class="text-sm text-gray-600">${timeSlot}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="text-sm font-medium">Laboratory Session ${
+                                        index + 1
+                                    }</p>
+                                    <p class="text-xs text-gray-600">CCS Faculty</p>
+                                </div>
+                            `
+                            scheduleList.appendChild(dayItem)
+                        })
+                    })
+                }
+
+                scheduleLoading.classList.add("hidden")
+                scheduleList.classList.remove("hidden")
+            }, 500)
+        }
+
+        // Render PC status grid
+        function renderPcStatus(pcStatusData, totalPcs) {
+            pcStatusGrid.innerHTML = ""
+
+            // If no total PCs or total is 0, show a message
+            if (!totalPcs || totalPcs === 0) {
+                pcStatusGrid.innerHTML = `
+                    <div class="col-span-full py-8 text-center">
+                        <p class="text-gray-500">No PC information available for this room.</p>
+                    </div>
+                `
+                return
+            }
+
+            // If no PC status data, create placeholders for all PCs
+            if (!pcStatusData || pcStatusData.length === 0) {
+                renderEmptyPcStatus(totalPcs)
+                return
+            }
+
+            // Create PC status items
+            pcStatusData.forEach(pc => {
+                const pcElement = document.createElement("div")
+                pcElement.className = `pc-item ${
+                    pc.is_available
+                        ? "bg-green-100 border-green-500"
+                        : "bg-red-100 border-red-500"
+                } 
+                border-2 rounded-lg p-3 flex flex-col items-center justify-center transition-colors duration-300`
+
+                pcElement.innerHTML = `
+                    <div class="text-xl font-bold ${
+                        pc.is_available ? "text-green-600" : "text-red-600"
+                    }">${pc.pc_number}</div>
+                    <div class="text-xs mt-1 ${
+                        pc.is_available ? "text-green-800" : "text-red-800"
+                    }">${pc.is_available ? "Available" : "Occupied"}</div>
+                `
+
+                pcStatusGrid.appendChild(pcElement)
+            })
+        }
+
+        // Render empty PC status grid with placeholders
+        function renderEmptyPcStatus(totalPcs) {
+            pcStatusGrid.innerHTML = ""
+
+            // Create placeholders for all PCs (1-50 by default)
+            for (let i = 1; i <= totalPcs; i++) {
+                const pcElement = document.createElement("div")
+                // Randomly assign status for demonstration
+                const isAvailable = Math.random() > 0.3
+
+                pcElement.className = `pc-item ${
+                    isAvailable
+                        ? "bg-green-100 border-green-500"
+                        : "bg-red-100 border-red-500"
+                } 
+                border-2 rounded-lg p-2 flex flex-col items-center justify-center transition-colors duration-300`
+
+                pcElement.innerHTML = `
+                    <div class="text-xl font-bold ${
+                        isAvailable ? "text-green-600" : "text-red-600"
+                    }">${i}</div>
+                    <div class="text-xs mt-1 ${
+                        isAvailable ? "text-green-800" : "text-red-800"
+                    }">${isAvailable ? "Available" : "Occupied"}</div>
+                `
+
+                pcStatusGrid.appendChild(pcElement)
+            }
+        }
+
+        // Add event listeners to "View PC Status" links
+        document.querySelectorAll(".view-pc-status").forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault()
+                const labno = this.getAttribute("data-labno")
+                openPcStatusModal(labno)
+            })
+        })
+
+        // Add event listeners to "See More" links
+        document.querySelectorAll(".view-schedules").forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault()
+                const labno = this.getAttribute("data-labno")
+                openScheduleModal(labno)
+            })
+        })
+    })
+</script>
 {% endblock %}
