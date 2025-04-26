@@ -337,6 +337,17 @@ def lab():
     
     return render_template('student/schedule.html', pagetitle=pagetitle, lab_rooms=lab_rooms)
         
+@app.route('/resources')
+def resources():
+    pagetitle = 'Resources'
+    
+    sql_resources = "SELECT * FROM resources ORDER BY updated_at DESC"
+    sql_materials = "SELECT * FROM materials ORDER BY updated_at DESC"
+    
+    resources = getallprocess(sql_resources)
+    materials = getallprocess(sql_materials) 
+    
+    return render_template('student/resources.html', pagetitle=pagetitle, resources=resources, materials=materials)
 
 @app.route('/reservation/<int:id>', methods=['DELETE'])
 def delete_reservation(id):
@@ -688,6 +699,101 @@ def get_pc_status(lab_no):
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/download/<resource_type>/<int:resource_id>')
+def download_resource(resource_type, resource_id):
+    if not session.get('logged_in'):
+        flash("Please log in to download resources", "error")
+        return redirect(url_for('login'))
+    
+    try:
+        if resource_type == 'resource':
+            # Get resource details from database
+            sql = "SELECT title, type, link FROM resources WHERE id = ? AND is_active = 1"
+            resource = getallprocess(sql, (resource_id,))
+            
+            if not resource or len(resource) == 0:
+                flash("Resource not found or inactive", "error")
+                return redirect(url_for('resources'))
+            
+            file_path = resource[0]['link']
+            title = resource[0]['title']
+            
+        elif resource_type == 'material':
+            # Get material details from database
+            sql = "SELECT title, category, file_path FROM materials WHERE id = ? AND is_active = 1"
+            material = getallprocess(sql, (resource_id,))
+            
+            if not material or len(material) == 0:
+                flash("Material not found or inactive", "error")
+                return redirect(url_for('resources'))
+            
+            file_path = material[0]['file_path']
+            title = material[0]['title']
+            
+        else:
+            flash("Invalid resource type", "error")
+            return redirect(url_for('resources'))
+        
+        # Check if file path exists
+        if not file_path:
+            flash("No file available for download", "error")
+            return redirect(url_for('resources'))
+        
+        # Handle different file path formats
+        if file_path.startswith('http://') or file_path.startswith('https://'):
+            # For external URLs, redirect to the URL
+            return redirect(file_path)
+        else:
+            # For local files
+            try:
+                # If file_path doesn't start with /, add the application root path
+                if not file_path.startswith('/'):
+                    file_path = os.path.join(app.root_path, file_path)
+                
+                # Check if file exists
+                if not os.path.exists(file_path):
+                    flash(f"File not found: {file_path}", "error")
+                    return redirect(url_for('resources'))
+                
+                # Get file extension for content type
+                file_ext = os.path.splitext(file_path)[1].lower()
+                
+                # Try to guess the mime type
+                mimetype = None
+                if file_ext in ['.pdf']:
+                    mimetype = 'application/pdf'
+                elif file_ext in ['.doc', '.docx']:
+                    mimetype = 'application/msword'
+                elif file_ext in ['.xls', '.xlsx']:
+                    mimetype = 'application/vnd.ms-excel'
+                elif file_ext in ['.ppt', '.pptx']:
+                    mimetype = 'application/vnd.ms-powerpoint'
+                elif file_ext in ['.zip', '.rar']:
+                    mimetype = 'application/octet-stream'
+                elif file_ext in ['.txt']:
+                    mimetype = 'text/plain'
+                elif file_ext in ['.jpg', '.jpeg']:
+                    mimetype = 'image/jpeg'
+                elif file_ext in ['.png']:
+                    mimetype = 'image/png'
+                    
+                # Serve the file
+                from flask import send_file
+                return send_file(
+                    file_path,
+                    mimetype=mimetype,
+                    as_attachment=True,
+                    download_name=f"{title}{file_ext}" if title else os.path.basename(file_path)
+                )
+                
+            except Exception as e:
+                flash(f"Error downloading file: {str(e)}", "error")
+                return redirect(url_for('resources'))
+    
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for('resources'))
 
 if __name__ == '__main__':
     app.run(debug=True)

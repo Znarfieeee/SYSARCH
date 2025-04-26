@@ -6,7 +6,7 @@
         <link rel="icon" type="image/x-icon" href="./static/favicon.ico" />
         <link
             rel="stylesheet"
-            href="{{ url_for('static', filename='css/main.css') }}" />
+            href="/static/css/main.css" />
         <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
         <link
             rel="stylesheet"
@@ -19,7 +19,7 @@
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
             rel="stylesheet" />
-        <title>Sit-in | {{ pagetitle }}</title>
+        <title>Sit-in | Resources</title>
         <style>
             body {
                 font-family: "Inter", sans-serif;
@@ -417,47 +417,47 @@
                     <path class="line" d="M7 16 27 16"></path>
                 </svg>
             </label>
-            <a href="{{ url_for('home') }}"
+            <a href="/home"
                 ><img src="../static/img/ccs_logo.png" class="h-10 w-auto ml-6"
             /></a>
-            <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
+            <h2 class="text-2xl font-semibold ml-2">Resources</h2>
         </header>
         <div
             id="sidebar"
             class="fixed h-screen w-64 bg-white/30 backdrop-blur-lg shadow-lg -translate-x-full transition-all duration-500 ease-in-out flex flex-col">
             <div class="flex-1">
                 <a
-                    href="{{ url_for('home') }}"
+                    href="/home"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in mt-15">
                     <img src="/static/img/dashboard.png" class="size-5 mx-4" />
                     <span>Dashboard</span>
                 </a>
                 <a
-                    href="{{ url_for('history')}}"
+                    href="/history"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                     <img src="/static/img/history.png" class="size-5 mx-4" />
                     <span>History</span>
                 </a>
                 <a
-                    href="{{ url_for('sitin') }}"
+                    href="/sitin"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                     <img src="/static/img/pc.png" class="size-5 mx-4" />
                     <span>Sit-in</span>
                 </a>
                 <a
-                    href="{{ url_for('reservation')}}"
+                    href="/reservation"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                     <img src="/static/img/booking.png" class="size-5 mx-4" />
                     <span>Reservation</span>
                 </a>
                 <a
-                    href="{{ url_for('lab')}}"
+                    href="/schedule"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                     <img src="/static/img/schedule.png" class="size-5 mx-4" />
                     <span>Schedule</span>
                 </a>
                 <a
-                    href="{{ url_for('resources')}}"
+                    href="/resources"
                     class="flex items-center text-black p-5 hover:bg-gray-200 transition ease-in">
                     <img src="/static/img/resource.png" class="size-5 mx-4" />
                     <span>Resources</span>
@@ -471,16 +471,285 @@
             </div>
         </div>
 
-        {% block content %} {% endblock %} {% with messages =
-        get_flashed_messages(with_categories=true) %} {% if messages %}
-        <div class="flash-messages">
-            {% for category, message in messages %}
-            <div class="flash {{ category }}">
-                <span>{{ message }}</span>
+        
+<div
+    id="main-container"
+    class="flex flex-col min-h-screen py-10 px-6 mx-auto max-w-7xl bg-gray-100">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Resources & Materials</h1>
+        <p class="text-gray-600 mt-2">
+            Access helpful resources and laboratory materials
+        </p>
+    </div>
+
+    <!-- Resources Section -->
+    <section class="mb-10">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">Online Resources</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+            <div
+                class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        
+                        <div
+                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                            <svg
+                                class="w-6 h-6 text-blue-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                JavaScript Programming
+                            </h3>
+                            <span class="text-sm text-gray-500 capitalize"
+                                >document</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a
+                            href="#"
+                            onclick="showDownloadConfirmation('JavaScript Programming', '/api/download/resource/4', 'resource'); return false;"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ">
+                             Download
+                            Document 
+                            <svg
+                                class="ml-2 -mr-1 h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="mt-4 text-right">
+                        <p class="text-xs text-gray-500">
+                            Updated: 2025-04-25 11:09:35
+                        </p>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+                
         </div>
-        {% endif %} {% endwith %}
+    </section>
+
+    <!-- Materials Section -->
+    <section>
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">
+            Laboratory Materials
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div
+                class="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                <svg
+                    class="w-16 h-16 text-gray-400 mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">
+                    No materials available
+                </h3>
+                <p class="text-gray-500">
+                    Check back later for new laboratory materials
+                </p>
+            </div>
+            
+        </div>
+    </section>
+</div>
+
+<!-- Download Confirmation Modal -->
+<div
+    id="download-modal"
+    class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center transition-all duration-300">
+    <div
+        id="download-modal-content"
+        class="bg-white shadow-lg p-6 rounded-xl w-[450px] max-h-[80vh] transform scale-75 opacity-0 transition-all duration-300 relative overflow-y-auto">
+        <button
+            onclick="closeDownloadModal()"
+            class="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700">
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <div class="text-center mb-4">
+            <div
+                class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                <svg
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Confirm Download</h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-500" id="download-message">
+                    Are you sure you want to download this resource?
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-5 sm:mt-6 flex justify-center space-x-3">
+            <button
+                onclick="closeDownloadModal()"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-300">
+                Cancel
+            </button>
+            <a
+                id="confirm-download-btn"
+                href="#"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                Download
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let downloadLink = ""
+    let downloadType = ""
+
+    function showDownloadConfirmation(title, link, type) {
+        // Check if link is empty or "None"
+        if (!link || link === "None" || link === "undefined") {
+            alert("This resource doesn't have a valid download link.")
+            return false
+        }
+
+        downloadLink = link
+        downloadType = type
+
+        const messageElement = document.getElementById("download-message")
+        const downloadButton = document.getElementById("confirm-download-btn")
+
+        // Update message based on resource type
+        messageElement.textContent = `Are you sure you want to download "${title}"?`
+
+        // Update download button
+        downloadButton.href = link
+
+        // Show modal
+        const modal = document.getElementById("download-modal")
+        const modalContent = document.getElementById("download-modal-content")
+
+        modal.classList.remove("hidden")
+        setTimeout(() => {
+            modalContent.classList.remove("scale-75", "opacity-0")
+            modalContent.classList.add("scale-100", "opacity-100")
+        }, 50)
+    }
+
+    function closeDownloadModal() {
+        const modal = document.getElementById("download-modal")
+        const modalContent = document.getElementById("download-modal-content")
+
+        modalContent.classList.remove("scale-100", "opacity-100")
+        modalContent.classList.add("scale-75", "opacity-0")
+
+        setTimeout(() => {
+            modal.classList.add("hidden")
+        }, 300)
+    }
+
+    // Handle download button click
+    document
+        .getElementById("confirm-download-btn")
+        .addEventListener("click", function (e) {
+            // You can add tracking or logging here if needed
+            closeDownloadModal()
+
+            // Validate URL before attempting download
+            if (
+                !downloadLink ||
+                downloadLink === "None" ||
+                downloadLink === "undefined"
+            ) {
+                alert("Download link is not valid")
+                return false
+            }
+
+            // For files that might not automatically download, force download
+            setTimeout(() => {
+                const link = document.createElement("a")
+                link.href = downloadLink
+
+                // Add proper URL prefix if missing
+                if (
+                    downloadLink &&
+                    !downloadLink.startsWith("http") &&
+                    !downloadLink.startsWith("/")
+                ) {
+                    link.href = "/" + downloadLink
+                }
+
+                link.setAttribute("download", "")
+                link.setAttribute("target", "_blank")
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            }, 300)
+        })
+</script>
+
+  
+        <div class="flash-messages">
+            
+            <div class="flash error">
+                <span>Resource not found or inactive</span>
+            </div>
+            
+            <div class="flash error">
+                <span>Resource not found or inactive</span>
+            </div>
+            
+        </div>
+         
         <!-- From Uiverse.io by vinodjangid07 -->
         <div id="loader" class="loader-container">
             <div class="loader">
