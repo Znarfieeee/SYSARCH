@@ -50,6 +50,8 @@ def login():
         if user:
             flash("Log in successful.", "success")
             session['logged_in'] = True
+            
+            # Simplify - just use points directly from users table
             session['user'] = {
                 "idno": user[0]['idno'],
                 "firstname": user[0]['firstname'],
@@ -62,6 +64,7 @@ def login():
                 "sessions": user[0]['no_session'],
                 "yr_lvl": user[0]['yr_lvl'],
                 "photo": user[0]['photo'],
+                "points": int(user[0]['points']) if 'points' in user[0] else 0,
                 "role": user[0]['role']
             }
             if session['user']['role'] == 'staff' or session['user']['role'] == 'admin':
@@ -168,7 +171,23 @@ def home():
     else:
         announcements = []
     
-    user = session.get('user')
+    user = session['user']
+    
+    # Get points DIRECTLY from users table - this is the most reliable source
+    user_sql = "SELECT points, no_session FROM users WHERE idno = ?"
+    user_data = getallprocess(user_sql, (user['idno'],))
+    
+    if user_data and len(user_data) > 0:
+        # Convert to integer to avoid type issues
+        user['points'] = int(user_data[0]['points']) if user_data[0]['points'] is not None else 0
+        user['sessions'] = int(user_data[0]['no_session']) if user_data[0]['no_session'] is not None else 0
+    else:
+        user['points'] = 0
+        user['sessions'] = 0
+        
+    # Update the session with the latest points
+    session['user'] = user
+    
     return render_template("student/dashboard.html", user=user, pagetitle=pagetitle, announcements=announcements)
     
 @app.route('/history')
@@ -211,6 +230,16 @@ def reservation():
     
     return render_template('student/reservation.html', pagetitle=pagetitle)
 
+@app.route('/schedule')
+def lab():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    pagetitle = 'Schedule'
+    
+    return render_template('student/schedule.html', pagetitle=pagetitle)
+        
+
 @app.route('/reservation/<int:id>', methods=['DELETE'])
 def delete_reservation(id):
     try:
@@ -235,6 +264,10 @@ def editStudent():
     yr_lvl = request.form.get('yearLevel')
     email = request.form.get('email')
     password = request.form.get('password')
+    
+    # Save the current points value before updating
+    current_points = session['user'].get('points', 0)
+    current_sessions = session['user'].get('sessions', 0)
             
     if 'photo' in request.files and photo.filename != '':
         if photo and allowed_file(photo.filename):
@@ -265,11 +298,10 @@ def editStudent():
             "middlename": middlename or '',
             "yr_lvl": yr_lvl,
             "email": email,
-            "password": password if password else session['user']['password']
+            "password": password if password else session['user']['password'],
+            "points": current_points,
+            "sessions": current_sessions
         })
-    
-    
-    print(session['user'])
     
     if success:
         flash("Account Profile updated.", "success")
@@ -278,7 +310,6 @@ def editStudent():
     else:
         flash("Account Profile update failed.", "error")
         
-
     return redirect(url_for('home'))
 
 

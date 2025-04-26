@@ -1,316 +1,641 @@
-{% extends 'home.html'%}
-{% block content %}
-    
-    <div class="flex justify-center min-h-screen overflow-hidden">
-        <div id="container" class="relative w-full min-w-4xl max-h-[90vh] grid grid-cols-2 grid-rows-[auto_1fr] gap-4 px-30 pt-5">
-            <!-- Account Info -->
-            <div id="acc-modal" class="inset-0 duration-300 transform origin-top-left relative hover:-translate-y-1.5 z-50">
-                <div id="account-info" class="rise-up flex flex-col justify-center section bg-white md:p-8 rounded-lg shadow-md cursor-pointer md:h-[320px] relative duration-300 hover:bg-gray-100">
-                    <!-- acc header -->
-                    <div id="acc-header" class="flex w-full items-center space-y-4 space-x-4">
-                        <div class="userPhoto" class="relative size-18 overflow-hidden bg-gray-600">
-                            {% if user.photo %}
-                                <img src="{{ user.photo }}" alt="User Photo" class="ring-2 ring-offset-4 ring-gray-400 size-24 rounded-full dark:bg-gray-600 object-cover">
-                            {% else%}
-                                <img src="/static/user_img/default/def-user.png" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
+{% extends 'home.html'%} {% block content %}
+
+<div class="flex justify-center min-h-screen bg-gray-100 overflow-hidden">
+    <div
+        id="container"
+        class="relative w-full min-w-4xl max-h-[90vh] grid grid-cols-2 grid-rows-[auto_1fr] gap-6 px-30 pt-8">
+        <!-- Account Info -->
+        <div
+            id="acc-modal"
+            class="inset-0 duration-300 transform origin-top-left relative hover:-translate-y-1.5 hover:shadow-lg z-50">
+            <div
+                id="account-info"
+                class="rise-up flex flex-col justify-center section bg-white md:p-8 rounded-xl shadow-lg cursor-pointer md:h-[320px] relative duration-300 hover:bg-gray-50 border border-gray-100">
+                <!-- acc header -->
+                <div
+                    id="acc-header"
+                    class="flex w-full items-center space-y-4 space-x-4">
+                    <div
+                        class="userPhoto"
+                        class="relative size-18 overflow-hidden bg-gray-600">
+                        {% if user.photo %}
+                        <img
+                            src="{{ user.photo }}"
+                            alt="User Photo"
+                            class="ring-2 ring-offset-4 ring-indigo-300 size-24 rounded-full dark:bg-gray-600 object-cover shadow-md" />
+                        {% else%}
+                        <img
+                            src="/static/user_img/default/def-user.png"
+                            class="size-24 rounded-full dark:bg-gray-600 object-cover ring-2 ring-offset-4 ring-indigo-300 shadow-md" />
+                        {% endif %}
+                    </div>
+                    <div
+                        id="box"
+                        class="flex flex-row justify-between w-[80%] items-center space-y-0">
+                        <div
+                            id="userFullName"
+                            class="font-bold text-2xl text-center text-gray-800">
+                            {% if user.middlename.upper() != "NONE" %}
+                            <h2>
+                                {{ user.firstname | upper }} {{ user.middlename
+                                | default('') | upper }} {{ user.lastname |
+                                upper }}
+                            </h2>
+                            {% else %}
+                            <h2>
+                                {{ user.firstname.upper() }} {{
+                                user.lastname.upper() }}
+                            </h2>
                             {% endif %}
                         </div>
-                        <div id="box" class="flex flex-row justify-between w-[80%] items-center space-y-0">
-                            <div id="userFullName" class="font-bold text-2xl text-center">
-                                {% if user.middlename.upper() != "NONE" %}
-                                    <h2>{{ user.firstname | upper }} 
-                                        {{ user.middlename | default('') | upper }}
-                                        {{ user.lastname | upper }}</h2>
-                                {% else %}
-                                    <h2>{{ user.firstname.upper() }} {{ user.lastname.upper() }}</h2>
-                                {% endif %}
-                            </div>
-                            <button class="size-5">
-                                <img id="edit-btn" class="opacity-0 transition duration-500 ease-in-out" src="/static/img/edit.png">
-                            </button>
-                        </div>
-                    </div>               
-                    <div class="flex flex-row gap-2 md:gap-8 mt-2 w-[90%] mx-auto">
-                        <div class="content w-full md:w-1/2">
-                            <div class="userID flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
-                                <p class="font-medium w-[50%]">ID No:</p>
-                                <p class="font-bold text-base w-[50%]">{{ user.idno }}</p>
-                            </div>
-                            <div class="userCourse flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
-                                <p class="font-medium  w-[50%]">Course:</p>
-                                <p class=" editable font-bold text-base  w-[50%]">{{ user.course.upper() }}</p>
-                            </div>
-                            <div class="userLevel flex flex-col md:flex-row gap-2 md:gap-4">
-                                <p class="font-medium w-[50%]">Year Level:</p>
-                                <p class="editable font-bold text-base  w-[50%]">{{ user.yr_lvl }}</p>
-                            </div>
-                        </div>
-                        <div class="content2 w-full md:w-1/2">
-                            <div class="userSessions flex flex-row items-center gap-2 md:gap-4 pb-4">
-                                <p class="font-medium  w-[50%]">No. of Sessions:</p>
-                                <p class="font-bold text-base w-[50%]">{{ user.sessions }}</p>
-                            </div>
-                            <div class="userEmail flex flex-col md:flex-row gap-2 md:gap-4">
-                                <p class="font-medium  w-[50%]">Email:</p>
-                                <p class="editable font-semibold text-sm  w-[50%] truncate">{{ user.email }}</p>
-                            </div>
-                        </div>
+                        <button class="size-5">
+                            <img
+                                id="edit-btn"
+                                class="opacity-0 transition duration-500 ease-in-out"
+                                src="/static/img/edit.png" />
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Announcements -->
-            <div class="rise-up section row-span-2 bg-white p-5 rounded-lg shadow-md max-h-[655px] ">
-                <div id="header" class=" flex flex-col items-center">
-                    <h2 class="text-2xl font-bold ">Announcements</h2>
-                    <hr class="w-[80%] bg-zinc-500 mt-5 border-none h-[1px]">
-                </div>
-                <div id="tableContainer" class="relative overflow-y-auto max-h-[560px] pb-6 overflow-x-hidden">
-                    {% for announcement in announcements %}
-                        <div class="bg-white shadow-md border-l-4 border-gray-400 p-4 rounded-lg mb-4 announcement cursor-pointer hover:-translate-y-1.5 duration-500" >
-                            <div id="header" class="flex justify-between">
-                                <h2 class="font-semibold text-xl announcement-title">{{ announcement.title }}</h2>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-4 announcement-date">
-                                {{ announcement.created_at | datetimeformat("%B %d, %Y %I:%M %p") }}
+                <div class="flex flex-row gap-2 md:gap-8 mt-5 w-[90%] mx-auto">
+                    <div class="content w-full md:w-1/2">
+                        <div
+                            class="userID flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                ID No:
                             </p>
-                            <p class="text-sm line-clamp-1 announcement-content">{{ announcement.content }}</p>
+                            <p
+                                class="font-bold text-base w-[50%] text-gray-800">
+                                {{ user.idno }}
+                            </p>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Laboratory Rules -->
-             <div id="lab-modal" class=" duration-300 transform origin-bottom-left relative hover:-translate-y-1.5">
-                <div id="lab-info" class="rise-up section bg-white rounded-lg shadow-md cursor-pointer h-[320px] overflow-hidden duration-300 hover:bg-gray-100">
-                    <div id="lab-box" class="flex flex-col w-full max-w-lg mx-auto">
-                        <div id="lab-header" class="flex justify-between items-center py-4">
-                            <img src="../static/img/uc-logo.PNG" class="h-15 w-auto pt-2">
-                            <h2 class="text-lg font-bold text-center">LABORATORY RULES & REGULATIONS</h2>
-                            <img src="../static/img/ccs_logo.png" class="h-12 w-auto">
+                        <div
+                            class="userCourse flex flex-col md:flex-row gap-2 md:gap-4 pb-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                Course:
+                            </p>
+                            <p
+                                class="editable font-bold text-base w-[50%] text-gray-800">
+                                {{ user.course.upper() }}
+                            </p>
                         </div>
-                        <div id="lab-content" class="relative text-sm pr-3 leading-6 text-justify">
-                            <p class="mb-4">To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
-                            <ol class="list-decimal pl-5 space-y-2">
-                                <li>Maintain silence, proper decorum, and discipline inside the laboratory. Mobile phones, walkmans, and other personal equipment must be switched off.</li>
-                                <li>Games are not allowed inside the lab. This includes computer-related games, card games, and others that may disturb the operation of the lab.</li>
-                                <li>Surfing the Internet is allowed only with the permission of the instructor. Downloading and installing software are strictly prohibited.</li>
-                                <li>Accessing websites not related to the course (especially pornographic and illicit sites) is strictly prohibited.</li>
-                                <li>Deleting computer files and changing the setup of the computer is a major offense.</li>
-                                <li>Observe computer time usage carefully. A fifteen-minute allowance is given for each use. Otherwise, the unit will be given to those who wish to "sit in".</li>
-                                <li>Observe proper decorum while inside the laboratory.
-                                    <ul class="list-disc pl-5">
-                                        <li>Do not enter the lab unless the instructor is present.</li>
-                                        <li>All bags, knapsacks, and similar items must be deposited at the counter.</li>
-                                        <li>Follow the seating arrangement of your instructor.</li>
-                                        <li>At the end of class, all software programs must be closed.</li>
-                                        <li>Return all chairs to their proper places after use.</li>
-                                    </ul>
-                                </li>
-                                <li>Chewing gum, eating, drinking, smoking, and other forms of vandalism are prohibited inside the lab.</li>
-                                <li>Anyone causing a continual disturbance will be asked to leave the lab. Acts or gestures offensive to the community, including public displays of physical intimacy, are not tolerated.</li>
-                                <li>Persons exhibiting hostile or threatening behavior, such as yelling, swearing, or disregarding requests from lab personnel, will be asked to leave.</li>
-                                <li>For serious offenses, lab personnel may call the Civil Security Office (CSU) for assistance.</li>
-                                <li>Any technical problem or difficulty must be addressed to the laboratory supervisor, student assistant, or instructor immediately.</li>
-                            </ol>
-                    
-                            <h3 class="font-bold mt-4">DISCIPLINARY ACTION</h3>
-                            <ul class="list-disc pl-5">
-                                <li><b>First Offense:</b> The Head, Dean, or OIC recommends suspension from classes for the offender.</li>
-                                <li><b>Second and Subsequent Offenses:</b> A heavier sanction will be recommended to the Guidance Center.</li>
-                            </ul>
+                        <div
+                            class="userLevel flex flex-col md:flex-row gap-2 md:gap-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                Year Level:
+                            </p>
+                            <p
+                                class="editable font-bold text-base w-[50%] text-gray-800">
+                                {{ user.yr_lvl }}
+                            </p>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Account Info Edit Modal -->
-            <div id="editModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
-                <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[500px] transform scale-75 opacity-0 transition-all duration-300 overflow-hidden">
-                    <form action="/edit" method="POST" enctype="multipart/form-data">
-                        <h2 class="text-2xl font-bold text-center mb-4">Edit Account Information</h2>
-                        <div class="self-center relative size-24 overflow-hidden group mx-auto mb-4 transition ease-in-out duration-500 hover:ring-2 hover:ring-offset-4 hover:ring-gray-600 rounded-full">
-                            {% if user.photo %}
-                                <img id="userPhotoPreview" src="{{ user.photo }}" alt="User Photo" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
-                            {% else%}
-                                <img id="userPhotoPreview" src="/static/user_img/default/def-user.png" class="size-24 rounded-full dark:bg-gray-600 object-cover ">
-                            {% endif %}
-                            <div class="absolute inset-0 bg-black/50 size-24 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <span class="text-white text-sm font-semibold text-center">Upload Photo?</span>
+                    <div class="content2 w-full md:w-1/2">
+                        <div
+                            class="userSessions flex flex-row items-center gap-2 md:gap-4 pb-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                Points:
+                            </p>
+                            <div class="flex items-center w-[50%]">
+                                <p
+                                    class="font-bold text-base mr-2 text-indigo-600">
+                                    {{ user.points if user.points is not none
+                                    else 0 }}
+                                </p>
+                                <div class="relative group">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4 text-gray-500"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path
+                                            fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div
+                                        class="absolute left-0 bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-md py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                                        Points earned from attending lab
+                                        sessions and activities.
+                                    </div>
+                                </div>
                             </div>
-                            <input type="file" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" name="photo" onchange="previewImage(event)">
                         </div>
-                        <div class="space-y-4">
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text"placeholder="First name" value="{{ user.firstname }}" name="firstname" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Middle name" value="{{ user.middlename }}" name="middlename">
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 uppercase p-2" type="text" placeholder="Last name" value="{{ user.lastname }}" name="lastname" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="YEAR LEVEL" value="{{ user.yr_lvl }}" name="yearLevel" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="text" placeholder="EMAIL ADDRESS" value="{{ user.email }}" name="email" required>
-                            <input class="w-full border-b-2 border-gray-500 focus:outline-none focus:border-blue-500 p-2" type="password" placeholder="NEW PASSWORD" name="password">
+                        <div
+                            class="userSessions flex flex-row items-center gap-2 md:gap-4 pb-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                Sessions:
+                            </p>
+                            <div class="flex items-center w-[50%]">
+                                <p
+                                    class="font-bold text-base mr-2 text-indigo-600">
+                                    {{ user.sessions if user.sessions is not
+                                    none else 0 }}
+                                </p>
+                                <div class="relative group">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4 text-gray-500"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path
+                                            fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div
+                                        class="absolute left-0 bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-md py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                                        Number of remaining lab sessions you can
+                                        attend this semester.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div id="action-btn" class="flex justify-between mt-6 text-sm">
-                            <button id="cancel-btn" type="button" onclick="closeModal()" class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-red-500/50">Cancel</button>
-                            <button id="save-btn" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 cursor-pointer transition ease-in-out duration-500 shadow-xl hover:shadow-indigo-500/50">Save</button>
+                        <div
+                            class="userEmail flex flex-col md:flex-row gap-2 md:gap-4">
+                            <p class="font-medium w-[50%] text-gray-600">
+                                Email:
+                            </p>
+                            <p
+                                class="editable font-semibold text-sm w-[50%] truncate text-gray-800">
+                                {{ user.email }}
+                            </p>
                         </div>
-                    </form> 
-                </div>
-             </div>
-
-             <!-- Announcement Modal -->
-             <div id="announcementModal" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
-                <div id="announcementModalContent" class="bg-white shadow-md p-8 rounded-xl w-[600px] max-h-[80vh] transform scale-75 opacity-0 transition-all duration-300 relative">
-                    <button onclick="closeAnnouncementModal()" class="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                    <h2 id="announcementTitle" class="text-2xl font-bold mb-4"></h2>
-                    <p id="announcementDate" class="text-sm text-gray-400 mb-6"></p>
-                    <div id="announcementContent" class="text-base overflow-y-auto max-h-[50vh] pr-4"></div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Announcements -->
+        <div
+            class="rise-up section row-span-2 bg-white p-6 rounded-xl shadow-lg max-h-[655px] border border-gray-100">
+            <div id="header" class="flex flex-col items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Announcements</h2>
+                <hr class="w-[80%] bg-indigo-200 mt-5 border-none h-[2px]" />
+            </div>
+            <div
+                id="tableContainer"
+                class="relative overflow-y-auto max-h-[560px] pb-6 overflow-x-hidden mt-4">
+                {% for announcement in announcements %}
+                <div
+                    class="bg-white shadow-md border-l-4 border-indigo-400 p-5 rounded-lg mb-5 announcement cursor-pointer hover:-translate-y-1 duration-300 hover:shadow-lg transition-all">
+                    <div id="header" class="flex justify-between">
+                        <h2
+                            class="font-semibold text-xl announcement-title text-gray-800">
+                            {{ announcement.title }}
+                        </h2>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4 announcement-date">
+                        {{ announcement.created_at | datetimeformat("%B %d, %Y
+                        %I:%M %p") }}
+                    </p>
+                    <p
+                        class="text-sm line-clamp-2 announcement-content text-gray-600">
+                        {{ announcement.content }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Laboratory Rules -->
+        <div
+            id="lab-modal"
+            class="duration-300 transform origin-bottom-left relative hover:-translate-y-1.5 hover:shadow-lg">
+            <div
+                id="lab-info"
+                class="rise-up section bg-white rounded-xl shadow-lg cursor-pointer h-[320px] overflow-hidden duration-300 hover:bg-gray-50 border border-gray-100">
+                <div
+                    id="lab-box"
+                    class="flex flex-col w-full max-w-lg mx-auto p-2">
+                    <div
+                        id="lab-header"
+                        class="flex justify-between items-center py-4">
+                        <img
+                            src="../static/img/uc-logo.PNG"
+                            class="h-15 w-auto pt-2" />
+                        <h2 class="text-lg font-bold text-center text-gray-800">
+                            LABORATORY RULES & REGULATIONS
+                        </h2>
+                        <img
+                            src="../static/img/ccs_logo.png"
+                            class="h-12 w-auto" />
+                    </div>
+                    <div
+                        id="lab-content"
+                        class="relative text-sm pr-3 leading-6 text-justify text-gray-600">
+                        <p class="mb-4">
+                            To avoid embarrassment and maintain camaraderie with
+                            your friends and superiors at our laboratories,
+                            please observe the following:
+                        </p>
+                        <ol class="list-decimal pl-5 space-y-2">
+                            <li>
+                                Maintain silence, proper decorum, and discipline
+                                inside the laboratory. Mobile phones, walkmans,
+                                and other personal equipment must be switched
+                                off.
+                            </li>
+                            <li>
+                                Games are not allowed inside the lab. This
+                                includes computer-related games, card games, and
+                                others that may disturb the operation of the
+                                lab.
+                            </li>
+                            <li>
+                                Surfing the Internet is allowed only with the
+                                permission of the instructor. Downloading and
+                                installing software are strictly prohibited.
+                            </li>
+                            <li>
+                                Accessing websites not related to the course
+                                (especially pornographic and illicit sites) is
+                                strictly prohibited.
+                            </li>
+                            <li>
+                                Deleting computer files and changing the setup
+                                of the computer is a major offense.
+                            </li>
+                            <li>
+                                Observe computer time usage carefully. A
+                                fifteen-minute allowance is given for each use.
+                                Otherwise, the unit will be given to those who
+                                wish to "sit in".
+                            </li>
+                            <li>
+                                Observe proper decorum while inside the
+                                laboratory.
+                                <ul class="list-disc pl-5">
+                                    <li>
+                                        Do not enter the lab unless the
+                                        instructor is present.
+                                    </li>
+                                    <li>
+                                        All bags, knapsacks, and similar items
+                                        must be deposited at the counter.
+                                    </li>
+                                    <li>
+                                        Follow the seating arrangement of your
+                                        instructor.
+                                    </li>
+                                    <li>
+                                        At the end of class, all software
+                                        programs must be closed.
+                                    </li>
+                                    <li>
+                                        Return all chairs to their proper places
+                                        after use.
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                Chewing gum, eating, drinking, smoking, and
+                                other forms of vandalism are prohibited inside
+                                the lab.
+                            </li>
+                            <li>
+                                Anyone causing a continual disturbance will be
+                                asked to leave the lab. Acts or gestures
+                                offensive to the community, including public
+                                displays of physical intimacy, are not
+                                tolerated.
+                            </li>
+                            <li>
+                                Persons exhibiting hostile or threatening
+                                behavior, such as yelling, swearing, or
+                                disregarding requests from lab personnel, will
+                                be asked to leave.
+                            </li>
+                            <li>
+                                For serious offenses, lab personnel may call the
+                                Civil Security Office (CSU) for assistance.
+                            </li>
+                            <li>
+                                Any technical problem or difficulty must be
+                                addressed to the laboratory supervisor, student
+                                assistant, or instructor immediately.
+                            </li>
+                        </ol>
+
+                        <h3 class="font-bold mt-4">DISCIPLINARY ACTION</h3>
+                        <ul class="list-disc pl-5">
+                            <li>
+                                <b>First Offense:</b> The Head, Dean, or OIC
+                                recommends suspension from classes for the
+                                offender.
+                            </li>
+                            <li>
+                                <b>Second and Subsequent Offenses:</b> A heavier
+                                sanction will be recommended to the Guidance
+                                Center.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Info Edit Modal -->
+        <div
+            id="editModal"
+            class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
+            <div
+                id="modalContent"
+                class="bg-white shadow-lg p-6 rounded-xl w-[500px] transform scale-75 opacity-0 transition-all duration-300 overflow-hidden">
+                <form
+                    action="/edit"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <h2
+                        class="text-2xl font-bold text-center mb-6 text-gray-800">
+                        Edit Account Information
+                    </h2>
+                    <div
+                        class="self-center relative size-24 overflow-hidden group mx-auto mb-6 transition ease-in-out duration-500 hover:ring-2 hover:ring-offset-4 hover:ring-indigo-400 rounded-full">
+                        {% if user.photo %}
+                        <img
+                            id="userPhotoPreview"
+                            src="{{ user.photo }}"
+                            alt="User Photo"
+                            class="size-24 rounded-full dark:bg-gray-600 object-cover" />
+                        {% else%}
+                        <img
+                            id="userPhotoPreview"
+                            src="/static/user_img/default/def-user.png"
+                            class="size-24 rounded-full dark:bg-gray-600 object-cover" />
+                        {% endif %}
+                        <div
+                            class="absolute inset-0 bg-black/50 size-24 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span
+                                class="text-white text-sm font-semibold text-center"
+                                >Upload Photo?</span
+                            >
+                        </div>
+                        <input
+                            type="file"
+                            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            name="photo"
+                            onchange="previewImage(event)" />
+                    </div>
+                    <div class="space-y-4">
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 uppercase p-3 rounded-md bg-gray-50"
+                            type="text"
+                            placeholder="First name"
+                            value="{{ user.firstname }}"
+                            name="firstname"
+                            required />
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 uppercase p-3 rounded-md bg-gray-50"
+                            type="text"
+                            placeholder="Middle name"
+                            value="{{ user.middlename }}"
+                            name="middlename" />
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 uppercase p-3 rounded-md bg-gray-50"
+                            type="text"
+                            placeholder="Last name"
+                            value="{{ user.lastname }}"
+                            name="lastname"
+                            required />
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 p-3 rounded-md bg-gray-50"
+                            type="text"
+                            placeholder="YEAR LEVEL"
+                            value="{{ user.yr_lvl }}"
+                            name="yearLevel"
+                            required />
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 p-3 rounded-md bg-gray-50"
+                            type="text"
+                            placeholder="EMAIL ADDRESS"
+                            value="{{ user.email }}"
+                            name="email"
+                            required />
+                        <input
+                            class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-indigo-500 p-3 rounded-md bg-gray-50"
+                            type="password"
+                            placeholder="NEW PASSWORD"
+                            name="password" />
+                    </div>
+                    <div
+                        id="action-btn"
+                        class="flex justify-between mt-8 text-sm">
+                        <button
+                            id="cancel-btn"
+                            type="button"
+                            onclick="closeModal()"
+                            class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg w-24 cursor-pointer transition ease-in-out duration-300 shadow-md hover:shadow-red-500/30">
+                            Cancel
+                        </button>
+                        <button
+                            id="save-btn"
+                            type="submit"
+                            class="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg w-24 cursor-pointer transition ease-in-out duration-300 shadow-md hover:shadow-indigo-500/30">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Announcement Modal -->
+        <div
+            id="announcementModal"
+            class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
+            <div
+                id="announcementModalContent"
+                class="bg-white shadow-lg p-8 rounded-xl w-[600px] max-h-[80vh] transform scale-75 opacity-0 transition-all duration-300 relative">
+                <button
+                    onclick="closeAnnouncementModal()"
+                    class="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700">
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <h2
+                    id="announcementTitle"
+                    class="text-2xl font-bold mb-4 text-gray-800"></h2>
+                <p id="announcementDate" class="text-sm text-gray-400 mb-6"></p>
+                <div
+                    id="announcementContent"
+                    class="text-base overflow-y-auto max-h-[50vh] pr-4 text-gray-600"></div>
+            </div>
+        </div>
     </div>
-    <script>
-        const edit = document.getElementById('edit-btn');
-        const close = document.getElementById('close-btn');
-        const actionbtn = document.getElementById('action-btn');
-        const accInfo = document.getElementById('account-info');
-        const modal = document.getElementById('editModal');
-        const modalContent = document.getElementById('modalContent');
-        let originalPhotoSrc = document.getElementById('userPhotoPreview').src;
+</div>
+<script>
+    const edit = document.getElementById("edit-btn")
+    const accInfo = document.getElementById("account-info")
+    const modal = document.getElementById("editModal")
+    const modalContent = document.getElementById("modalContent")
+    let originalPhotoSrc = document.getElementById("userPhotoPreview").src
 
-        // Open Edit Modal
-        document.getElementById('edit-btn').addEventListener('click', function (event) {
-
-            modal.classList.remove('hidden');
+    // Smooth entrance animations on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        const elements = document.querySelectorAll(".rise-up")
+        elements.forEach((element, index) => {
             setTimeout(() => {
-                modalContent.classList.remove('scale-75', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 50);
-        }); 
+                element.classList.add("animate-rise")
+            }, index * 150) // Stagger the animations
+        })
+    })
 
-        //close Edit Modal
-        function closeModal() {
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-75', 'opacity-0');
+    // Open Edit Modal with improved animation
+    document
+        .getElementById("edit-btn")
+        .addEventListener("click", function (event) {
+            modal.classList.remove("hidden")
             setTimeout(() => {
-                modal.classList.add('hidden');
-                document.querySelector('#editModal form').reset();
-                document.getElementById('userPhotoPreview').src = originalPhotoSrc;
-            }, 300);
+                modalContent.classList.remove("scale-75", "opacity-0")
+                modalContent.classList.add("scale-100", "opacity-100")
+            }, 50)
+            event.stopPropagation()
+        })
+
+    //close Edit Modal
+    function closeModal() {
+        modalContent.classList.remove("scale-100", "opacity-100")
+        modalContent.classList.add("scale-75", "opacity-0")
+        setTimeout(() => {
+            modal.classList.add("hidden")
+            document.querySelector("#editModal form").reset()
+            document.getElementById("userPhotoPreview").src = originalPhotoSrc
+        }, 300)
+    }
+
+    // Preview Image upon upload || change
+    function previewImage(event) {
+        const reader = new FileReader()
+        reader.onload = function () {
+            const output = document.getElementById("userPhotoPreview")
+            output.src = reader.result
+        }
+        reader.readAsDataURL(event.target.files[0])
+    }
+
+    // for Account Info Modal
+    document.getElementById("acc-modal").addEventListener("click", function () {
+        this.classList.toggle("scale-170") // Tailwind's 125% scale class
+        this.classList.toggle("w-full")
+        this.classList.toggle("h-full") // Adjust height if needed
+        this.classList.toggle("translate-x-30")
+        this.classList.toggle("translate-y-10")
+        this.classList.toggle("hover:-translate-y-1.5")
+
+        accInfo.classList.toggle("bg-white")
+        accInfo.classList.toggle("bg-white/30")
+        accInfo.classList.toggle("p-5")
+        accInfo.classList.toggle("p-8")
+        accInfo.classList.toggle("backdrop-blur-sm")
+        accInfo.classList.toggle("hover:bg-gray-50")
+
+        edit.classList.toggle("cursor-pointer")
+        edit.classList.toggle("opacity-0")
+
+        event.stopPropagation()
+    })
+
+    // for Lab Rules Modal with improved scrolling behavior
+    document.getElementById("lab-modal").addEventListener("click", function () {
+        const labInfo = document.getElementById("lab-info")
+        const labCont = document.getElementById("lab-content")
+
+        this.classList.toggle("scale-150")
+        this.classList.toggle("z-50")
+        this.classList.toggle("w-full")
+        this.classList.toggle("h-full")
+        this.classList.toggle("translate-x-40")
+        this.classList.toggle("translate-y-[-120px]")
+        this.classList.toggle("hover:-translate-y-1.5")
+
+        labInfo.classList.toggle("bg-white")
+        labInfo.classList.toggle("bg-white/20")
+        labInfo.classList.toggle("backdrop-blur-sm")
+        labInfo.classList.toggle("hover:bg-gray-50")
+
+        // Scroll behavior
+        const notExpanded = labInfo.classList.contains("overflow-hidden")
+
+        if (notExpanded) {
+            labInfo.classList.remove("overflow-hidden", "h-[320px]")
+            labInfo.classList.add(
+                "overflow-y-auto",
+                "h-[430px]",
+                "transition-all",
+                "duration-300"
+            )
+        } else {
+            labInfo.scrollTo({ top: 0, behavior: "smooth" })
+
+            setTimeout(() => {
+                labInfo.classList.remove("overflow-y-auto", "h-[430px]")
+                labInfo.classList.add("overflow-hidden", "h-[320px]")
+            }, 200)
         }
 
-        // Preview Image upon upload || change
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById('userPhotoPreview');
-                output.src = reader.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-        
-        // for Account Info Modal
-        const accModal = document.getElementById('acc-modal',).addEventListener('click', function() {
-            this.classList.toggle('scale-170'); // Tailwind's 125% scale class
-            // this.classList.toggle('z-50'); // Bring to front
-            this.classList.toggle('w-full');
-            this.classList.toggle('h-full'); // Adjust height if needed
-            this.classList.toggle('translate-x-30')
-            this.classList.toggle('translate-y-10')
-            this.classList.toggle('hover:-translate-y-1.5')
+        event.stopPropagation()
+    })
 
-            accInfo.classList.toggle('bg-white');
-            accInfo.classList.toggle('bg-white/30');
-            accInfo.classList.toggle('p-5');
-            accInfo.classList.toggle('p-8');
-            accInfo.classList.toggle('backdrop-blur-sm');
-            accInfo.classList.toggle('hover:bg-gray-100');
-            
-            edit.classList.toggle('cursor-pointer');
-            edit.classList.toggle('opacity-0');
+    document.getElementById("save-btn").addEventListener("click", e => {
+        modalContent.classList.remove("scale-100", "opacity-100")
+        modalContent.classList.add("scale-75", "opacity-0")
+    })
 
-            event.stopPropagation();
-        });
+    // Add hover effects to announcements
+    const announcements = document.querySelectorAll(".announcement")
+    announcements.forEach(announcement => {
+        announcement.addEventListener("mouseenter", function () {
+            this.classList.add("shadow-md")
+        })
+        announcement.addEventListener("mouseleave", function () {
+            this.classList.remove("shadow-md")
+        })
+    })
 
+    // Close Announcement Modal with improved animation
+    function closeAnnouncementModal() {
+        const announcementModalContent = document.getElementById(
+            "announcementModalContent"
+        )
+        const announcementModal = document.getElementById("announcementModal")
+        announcementModalContent.classList.remove("scale-100", "opacity-100")
+        announcementModalContent.classList.add("scale-75", "opacity-0")
+        setTimeout(() => {
+            announcementModal.classList.add("hidden")
+        }, 300)
+    }
 
-        // for Lab Rules Modal
-        const labModal = document.getElementById('lab-modal').addEventListener('click', function() {
-            const labInfo = document.getElementById('lab-info');
-            const labCont = document.getElementById('lab-content');
+    // Add event listeners to announcements
+    document.querySelectorAll(".announcement").forEach(announcement => {
+        announcement.addEventListener("click", function () {
+            const title = this.querySelector(".announcement-title").textContent
+            const date = this.querySelector(".announcement-date").textContent
+            const content = this.querySelector(
+                ".announcement-content"
+            ).textContent
+            openAnnouncementModal(title, date, content)
+        })
+    })
 
-            this.classList.toggle('scale-150');
-            this.classList.toggle('z-50');
-            this.classList.toggle('w-full');
-            this.classList.toggle('h-full');
-            this.classList.toggle('translate-x-40')
-            this.classList.toggle('translate-y-[-120px]')
-            this.classList.toggle('hover:-translate-y-1.5')
-            
-
-            labInfo.classList.toggle('bg-white');
-            labInfo.classList.toggle('bg-white/20');
-            labInfo.classList.toggle('backdrop-blur-sm');
-            labInfo.classList.toggle('hover:bg-gray-100');
-            
-            // Scroll behavior
-            const notExpanded = labInfo.classList.contains('overflow-hidden');
-            
-            if (notExpanded) {
-                labInfo.classList.remove('overflow-hidden', 'h-[320px]');
-                labInfo.classList.add('overflow-y-auto', 'h-[430px]');
-            }else{
-                labInfo.scrollTo({top: 0, behavior: 'smooth'});
-
-                setTimeout(() => {
-                    labInfo.classList.remove('overflow-y-auto', 'h-[430px]');
-                    labInfo.classList.add('overflow-hidden', 'h-[320px]');
-                })
-            }
-            
-            event.stopPropagation();
-        });
-    
-        document.getElementById('save-btn').addEventListener('click', (e) => {
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-75', 'opacity-0');
-        });
-
-        // Close Announcement Modal
-        function closeAnnouncementModal() {
-            const announcementModalContent = document.getElementById('announcementModalContent');
-            const announcementModal = document.getElementById('announcementModal');
-            announcementModalContent.classList.remove('scale-100', 'opacity-100');
-            announcementModalContent.classList.add('scale-75', 'opacity-0');
-            setTimeout(() => {
-                announcementModal.classList.add('hidden');
-            }, 300);
-        }
-
-        // Add event listeners to announcements
-        document.querySelectorAll('.announcement').forEach(announcement => {
-            announcement.addEventListener('click', function () {
-                const title = this.querySelector('.announcement-title').textContent;
-                const date = this.querySelector('.announcement-date').textContent;
-                const content = this.querySelector('.announcement-content').textContent;
-                openAnnouncementModal(title, date, content);
-            });
-        });
-
-        function openAnnouncementModal(title, date, content) {
-            const modal = document.getElementById('announcementModal');
-            const modalContent = document.getElementById('announcementModalContent');
-            
-            document.getElementById('announcementTitle').textContent = title;
-            document.getElementById('announcementDate').textContent = date;
-            document.getElementById('announcementContent').textContent = content;
-            
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-75', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 50);
-        }
-    </script>
+    function openAnnouncementModal(title, date, content) {
+        const modal = document.getElementById("announcementModal")
+        const modalContent = document.getElementById("announcementModalContent")
+        document.getElementById("announcementTitle").textContent = title
+        document.getElementById("announcementDate").textContent = date
+        document.getElementById("announcementContent").textContent = content
+        modal.classList.remove("hidden")
+        setTimeout(() => {
+            modalContent.classList.remove("scale-75", "opacity-0")
+            modalContent.classList.add("scale-100", "opacity-100")
+        }, 50)
+    }
+</script>
 {% endblock %}
