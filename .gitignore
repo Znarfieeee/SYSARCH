@@ -14,3 +14,4 @@ __pycache__/
 # Ignore environment files
 .env
 .qodo
+.vscode

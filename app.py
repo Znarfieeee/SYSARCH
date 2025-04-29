@@ -494,7 +494,7 @@ def book():
                 return redirect(url_for('reservation'))
         
         # Check PC availability (if data exists)
-        pc_sql = "SELECT is_available FROM pc_status WHERE lab_no = ? AND pc_number = ?"
+        pc_sql = "SELECT is_available FROM pc_status WHERE lab_no = ? AND pc_number =?"
         pc_data = getallprocess(pc_sql, (labno, pcno))
         
         # Only check PC availability if data exists
@@ -695,8 +695,13 @@ def add_feedback():
         comments = data.get('comments')
         issues = ','.join(data.get('issues', [])).upper() if data.get('issues') else 'No Issues'
         
-        # Get labno from active_sitin
-        sql = "SELECT labno FROM active_sitin WHERE id = ?"
+        # Get labno from active_sitin - modified to work with completed sit-ins
+        sql = """
+            SELECT labno 
+            FROM active_sitin 
+            WHERE id = ? 
+            AND (status = 'active' OR status = 'done')
+        """
         result = getallprocess(sql, (sitin_id,))
         if not result:
             return jsonify({
@@ -717,8 +722,24 @@ def add_feedback():
                 }
             }), 400
         
-        success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
-                           comments=comments, issues=issues, idno=idno, labno=labno)
+        # Check if feedback already exists for this sit-in
+        check_sql = "SELECT id FROM feedbacks WHERE sitin_id = ?"
+        existing_feedback = getallprocess(check_sql, (sitin_id,))
+        
+        if existing_feedback:
+            # Update existing feedback instead of creating a new one
+            update_sql = """
+                UPDATE feedbacks 
+                SET rating = ?, comments = ?, issues = ?, updated_at = datetime('now')
+                WHERE sitin_id = ?
+            """
+            success = postprocess(update_sql, (rating, comments, issues, sitin_id))
+            feedback_action = "updated"
+        else:
+            # Create new feedback
+            success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
+                            comments=comments, issues=issues, idno=idno, labno=labno)
+            feedback_action = "submitted"
         
         if not success:
             return jsonify({
@@ -727,7 +748,7 @@ def add_feedback():
             }), 500
         
         return jsonify({
-            'message': 'Feedback submitted successfully!', 
+            'message': f'Feedback {feedback_action} successfully!', 
             'status': 'success'
         }), 200
     
@@ -941,6 +962,53 @@ def get_user_sessions():
         error_details = traceback.format_exc()
         app.logger.error(f"User sessions error: {str(e)}\n{error_details}")
         return jsonify({'error': str(e), 'details': error_details}), 500
+
+@app.route('/api/sitin/successful')
+def get_successful_sitins():
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        idno = session['user']['idno']
+        
+        # Get successful sit-ins with feedback status
+        sql = """
+            SELECT 
+                a.id,
+                a.start_time,
+                a.labno,
+                a.purpose,
+                CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END as has_feedback
+            FROM active_sitin a
+            LEFT JOIN feedbacks f ON a.id = f.sitin_id
+            WHERE a.idno = ? AND a.status = 'done'
+            ORDER BY a.start_time DESC
+        """
+        sitins = getallprocess(sql, (idno,))
+        
+        if sitins:
+            return jsonify([dict(row) for row in sitins])
+        return jsonify([])
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/sitin/<int:sitin_id>/end', methods=['POST'])
+def end_sitin(sitin_id):
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        # Update sit-in status to 'done'
+        sql = "UPDATE active_sitin SET status = 'done', end_time = datetime('now') WHERE id = ? AND idno = ?"
+        success = postprocess(sql, (sitin_id, session['user']['idno']))
+        
+        if success:
+            return jsonify({'message': 'Sit-in session ended successfully'})
+        return jsonify({'error': 'Failed to end sit-in session'}), 400
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
