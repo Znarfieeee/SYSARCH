@@ -1,60 +1,98 @@
 {% extends 'home.html' %} {% block content %}
-<div class="container flex flex-col mx-auto w-[80%] py-8 rise-up gap-6">
-    <!-- Active Sit-in Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 h-[30%]">
-        <div class="flex justify-between items-center content-center mb-4">
-            <h2 class="text-2xl font-bold">Current Active Sit-in</h2>
+<div class="container mx-auto w-[95%] py-4 space-y-4 h-screen flex flex-col">
+    <!-- Sit-ins History Section -->
+    <div class="bg-white rounded-xl shadow-lg p-4 flex-1 flex flex-col min-h-0">
+        <div class="flex justify-between items-center content-center mb-2">
+            <h2 class="text-xl font-bold text-gray-800">Sit-ins History</h2>
         </div>
-        <div id="activeSitinSection">
-            <!-- Active sit-in content will be loaded here -->
-            <div class="animate-pulse">
-                <div class="flex items-center justify-center space-x-2">
-                    <div
-                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div
-                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
-                    <div
-                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
-                </div>
-                <p class="text-center text-gray-500">
-                    Loading active sit-in...
-                </p>
-            </div>
+        <div id="successfulSitinsSection" class="overflow-auto flex-1">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-50 sticky top-0 z-10">
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time
+                        </th>
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab No
+                        </th>
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Purpose
+                        </th>
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="successfulSitinsTableBody">
+                    <!-- Successful sit-ins will be loaded here -->
+                    <tr>
+                        <td colspan="6" class="py-4">
+                            <div class="animate-pulse">
+                                <div
+                                    class="flex items-center justify-center space-x-2">
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                                    <div
+                                        class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                                </div>
+                                <p class="text-center text-gray-500">
+                                    Loading sit-ins...
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <!-- Approved Reservations Section -->
-    <div
-        class="bg-white rounded-lg shadow overflow-hidden w-full mx-auto rise-up p-6">
-        <div id="header" class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Approved Reservations</h2>
+    <div class="bg-white rounded-xl shadow-lg p-4 flex-1 flex flex-col min-h-0">
+        <div id="header" class="flex justify-between items-center mb-2">
+            <h2 class="text-xl font-bold text-gray-800">
+                Approved Reservations
+            </h2>
             <div class="cursor-pointer">
                 <a
                     href="{{ url_for('reservation') }}"
-                    class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg transition-colors duration-300 text-sm">
                     Make a Reservation
                 </a>
             </div>
         </div>
 
-        <div id="reservationsSection" class="overflow-x-auto overflow-y-auto">
+        <div id="reservationsSection" class="overflow-auto flex-1">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="bg-gray-50 sticky top-0 z-10">
                         <th
-                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Date
                         </th>
                         <th
-                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Time
                         </th>
                         <th
-                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Lab No
                         </th>
                         <th
-                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="px-6 py-2 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Purpose
                         </th>
                     </tr>
@@ -69,10 +107,10 @@
 
 <div
     id="feedback-container"
-    class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden flex items-center justify-center">
+    class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden flex items-center justify-center z-50">
     <div
         id="feedback-content"
-        class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
         <form id="feedbackForm" class="space-y-6">
             <input type="hidden" id="sitInId" name="sitInId" />
             <input type="hidden" id="labno" name="labno" value="{{ labno }}" />
@@ -205,7 +243,7 @@
             <!-- Submit Button -->
             <button
                 type="submit"
-                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
                 Submit Feedback
             </button>
         </form>
@@ -213,8 +251,8 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Load active sit-in session on page load
-        loadActiveSitIn()
+        // Load successful sit-ins on page load
+        loadSuccessfulSitins()
         fetch("/get_reservations")
             .then(response => response.json())
             .then(data => {
@@ -258,70 +296,90 @@
             })
     })
 
-    async function loadActiveSitIn() {
-        const activeSitinSection = document.getElementById("activeSitinSection")
+    async function loadSuccessfulSitins() {
+        const successfulSitinsTableBody = document.getElementById(
+            "successfulSitinsTableBody"
+        )
 
         try {
-            const response = await fetch("/api/sitin/active")
+            const response = await fetch("/api/sitin/successful")
             const data = await response.json()
 
             if (data && data.length > 0) {
-                const sitin = data[0]
-
-                activeSitinSection.innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600">Date</p>
-                            <p class="font-semibold">${new Date(
+                successfulSitinsTableBody.innerHTML = data
+                    .map(
+                        sitin => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">${new Date(
                                 sitin.start_time
                             ).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "2-digit",
                                 year: "numeric",
-                            })}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Start Time</p>
-                            <p class="font-semibold">${new Date(
+                            })}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">${new Date(
                                 sitin.start_time
                             ).toLocaleTimeString("en-US", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: true,
-                            })}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Lab</p>
-                            <p class="font-semibold">Lab ${sitin.labno}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Purpose</p>
-                            <p class="font-semibold">${sitin.purpose}</p>
-                        </div>
-                        <div>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300"
-                                onclick="showFeedback()">
-                                Show Feedback
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `
+                            })}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${
+                                sitin.labno
+                            }</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">${
+                                sitin.purpose
+                            }</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full ${
+                                    sitin.has_feedback
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-yellow-100 text-yellow-800"
+                                }">
+                                    ${
+                                        sitin.has_feedback
+                                            ? "Feedback Submitted"
+                                            : "Pending Feedback"
+                                    }
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-start">
+                                ${
+                                    !sitin.has_feedback
+                                        ? `
+                                    <button onclick="showFeedback('${sitin.id}')" 
+                                        class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors duration-300 text-sm">
+                                        Give Feedback
+                                    </button>
+                                `
+                                        : `
+                                    <span class="text-gray-500 text-sm">Feedback submitted</span>
+                                `
+                                }
+                            </td>
+                        </tr>
+                    `
+                    )
+                    .join("")
             } else {
-                activeSitinSection.innerHTML = `
-                <p class="text-center text-gray-500">No active sit-in session.</p>
-            `
+                successfulSitinsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-500 py-4">No successful sit-ins found.</td>
+                    </tr>
+                `
             }
         } catch (error) {
             console.error("Error:", error)
-            activeSitinSection.innerHTML = `
-            <p class="text-center text-red-500">Error loading active sit-in data.</p>
-        `
+            successfulSitinsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-red-500 py-4">Error loading sit-ins.</td>
+                </tr>
+            `
         }
     }
 
-    function showFeedback() {
+    function showFeedback(sitinId) {
+        document.getElementById("sitInId").value = sitinId
         document.getElementById("feedback-container").classList.remove("hidden")
     }
 
@@ -353,8 +411,19 @@
                 ).map(cb => cb.value),
             }
 
+            // Validate required fields
+            if (!formData.rating) {
+                showNotification("Please select a rating", "error")
+                return
+            }
+
+            if (!formData.comments) {
+                showNotification("Please provide comments", "error")
+                return
+            }
+
             try {
-                // First submit feedback
+                // Submit feedback
                 const feedbackResponse = await fetch("/api/feedback", {
                     method: "POST",
                     headers: {
@@ -362,7 +431,7 @@
                     },
                     body: JSON.stringify(formData),
                 })
-                console.log(formData.labno)
+
                 const feedbackResult = await feedbackResponse.json()
 
                 if (!feedbackResponse.ok) {
@@ -371,39 +440,61 @@
                     )
                 }
 
-                // If feedback was successful, end the session
-                const endSessionResponse = await fetch(
-                    `/api/sitin/${formData.sitin_id}/end`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
-                )
-
-                const endSessionResult = await endSessionResponse.json()
-
-                if (!endSessionResponse.ok) {
-                    throw new Error(
-                        endSessionResult.message || "Failed to end session"
-                    )
-                }
-
-                // If everything succeeded, close feedback and reload
+                // Close the feedback form and show success message
                 showNotification(
-                    "Session ended and feedback submitted successfully!",
+                    feedbackResult.message ||
+                        "Feedback submitted successfully!",
                     "success"
                 )
                 document
                     .getElementById("feedback-container")
                     .classList.add("hidden")
+
+                // Reload the page to update the table
                 window.location.reload()
             } catch (error) {
                 console.error("Error:", error)
                 showNotification(error.message, "error")
             }
         })
+
+    // Add function to display notifications if it doesn't exist
+    if (typeof showNotification !== "function") {
+        function showNotification(message, type = "info") {
+            // Create notification container if it doesn't exist
+            let notificationContainer = document.getElementById(
+                "notification-container"
+            )
+            if (!notificationContainer) {
+                notificationContainer = document.createElement("div")
+                notificationContainer.id = "notification-container"
+                notificationContainer.className = "fixed bottom-4 right-4 z-50"
+                document.body.appendChild(notificationContainer)
+            }
+
+            // Create notification element
+            const notification = document.createElement("div")
+            notification.className = `p-4 mb-2 rounded-lg shadow-lg transition-opacity duration-500 ${
+                type === "success"
+                    ? "bg-green-500 text-white"
+                    : type === "error"
+                    ? "bg-red-500 text-white"
+                    : "bg-blue-500 text-white"
+            }`
+            notification.textContent = message
+
+            // Add notification to container
+            notificationContainer.appendChild(notification)
+
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.add("opacity-0")
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification)
+                }, 500)
+            }, 3000)
+        }
+    }
 </script>
 
 {% endblock %}

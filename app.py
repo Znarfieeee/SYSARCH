@@ -3,6 +3,7 @@ from dbhelper import *
 import urllib.request, os
 from werkzeug.utils import secure_filename
 from staff_app import staff_app
+from datetime import datetime  # Ensure datetime is properly imported
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = "!@#$%12345"
@@ -337,6 +338,17 @@ def lab():
     
     return render_template('student/schedule.html', pagetitle=pagetitle, lab_rooms=lab_rooms)
         
+@app.route('/resources')
+def resources():
+    pagetitle = 'Resources'
+    
+    sql_resources = "SELECT * FROM resources ORDER BY updated_at DESC"
+    sql_materials = "SELECT * FROM materials ORDER BY updated_at DESC"
+    
+    resources = getallprocess(sql_resources)
+    materials = getallprocess(sql_materials) 
+    
+    return render_template('student/resources.html', pagetitle=pagetitle, resources=resources, materials=materials)
 
 @app.route('/reservation/<int:id>', methods=['DELETE'])
 def delete_reservation(id):
@@ -435,24 +447,95 @@ def get_reservations():
 
 @app.route('/book', methods=['POST'])
 def book():
-    idno = session.get('idno') or session['user']['idno']
-    date = request.form.get('date')
-    time_start = request.form.get('time-start')
-    time_end = request.form.get('time-end')
-    labno = request.form.get('labno')
-    purpose = request.form.get('purpose')
-    status = "pending"
-
-    success = addprocess('reservations', idno=idno, date=date, 
+    try:
+        idno = session.get('idno') or session['user']['idno']
+        date = request.form.get('date')
+        time_start = request.form.get('time-start')
+        time_end = request.form.get('time-end')
+        labno = request.form.get('labno')
+        purpose = request.form.get('purpose')
+        pcno = request.form.get('pcno')  # Get PC number from form
+        status = "pending"
+        
+        # Validate required fields
+        if not all([date, time_start, time_end, labno, purpose, pcno]):
+            missing_fields = []
+            if not date: missing_fields.append("date")
+            if not time_start: missing_fields.append("start time")
+            if not time_end: missing_fields.append("end time")
+            if not labno: missing_fields.append("laboratory")
+            if not purpose: missing_fields.append("purpose")
+            if not pcno: missing_fields.append("PC number")
+            
+            flash(f"Reservation failed. Missing required fields: {', '.join(missing_fields)}", "error")
+            return redirect(url_for('reservation'))
+        
+        # Validate time
+        try:
+            # Convert to time objects for comparison
+            t_start = datetime.strptime(time_start, '%H:%M').time()
+            t_end = datetime.strptime(time_end, '%H:%M').time()
+            
+            if t_start >= t_end:
+                flash("End time must be after start time", "error")
+                return redirect(url_for('reservation'))
+        except ValueError:
+            flash("Invalid time format", "error")
+            return redirect(url_for('reservation'))
+            
+        # Check remaining sessions
+        user_sql = "SELECT no_session FROM users WHERE idno = ?"
+        user_data = getallprocess(user_sql, (idno,))
+        
+        if user_data and len(user_data) > 0:
+            sessions = int(user_data[0]['no_session']) if user_data[0]['no_session'] is not None else 0
+            if sessions <= 0:
+                flash("You have no remaining sessions", "error")
+                return redirect(url_for('reservation'))
+        
+        # Check PC availability (if data exists)
+        pc_sql = "SELECT is_available FROM pc_status WHERE lab_no = ? AND pc_number =?"
+        pc_data = getallprocess(pc_sql, (labno, pcno))
+        
+        # Only check PC availability if data exists
+        if pc_data and len(pc_data) > 0:
+            is_available = bool(pc_data[0]['is_available']) if 'is_available' in pc_data[0] else False
+            if not is_available:
+                flash("Selected PC is not available", "error")
+                return redirect(url_for('reservation'))
+        else:
+            # Log that we're proceeding without PC status data
+            app.logger.warning(f"No PC status data found for PC {pcno} in lab {labno}. Proceeding with reservation.")
+        
+        # Check if PC is already reserved for the same time period
+        existing_reservation_sql = """
+            SELECT id FROM reservations 
+            WHERE labno = ? AND pc_number = ? AND date = ? AND status != 'denied'
+            AND ((time_start <= ? AND time_end > ?) OR (time_start < ? AND time_end >= ?) OR (time_start >= ? AND time_end <= ?))
+        """
+        existing_reservation = getallprocess(existing_reservation_sql, 
+            (labno, pcno, date, time_start, time_start, time_end, time_end, time_start, time_end))
+            
+        if existing_reservation and len(existing_reservation) > 0:
+            flash("This PC is already reserved for the selected time period", "error")
+            return redirect(url_for('reservation'))
+        
+        # Add additional data to reservations
+        success = addprocess('reservations', idno=idno, date=date, 
                          time_start=time_start, time_end=time_end, 
-                         labno=labno, purpose=purpose, status=status)
-    
-    if success:
-        flash("Reservation successful.", "success")
-    else:
-        flash("Reservation failed.", "error")
+                         labno=labno, purpose=purpose, status=status,
+                         pc_number=pcno)
+        
+        if success:
+            flash("Reservation successful.", "success")
+        else:
+            flash("Reservation failed.", "error")
 
-    return redirect(url_for('reservation'))
+        return redirect(url_for('reservation'))
+    except Exception as e:
+        app.logger.error(f"Reservation error: {str(e)}")
+        flash(f"An error occurred: {str(e)}", "error")
+        return redirect(url_for('reservation'))
 
 @app.route('/api/sitin/active')
 def get_active_sitins_route():
@@ -612,8 +695,13 @@ def add_feedback():
         comments = data.get('comments')
         issues = ','.join(data.get('issues', [])).upper() if data.get('issues') else 'No Issues'
         
-        # Get labno from active_sitin
-        sql = "SELECT labno FROM active_sitin WHERE id = ?"
+        # Get labno from active_sitin - modified to work with completed sit-ins
+        sql = """
+            SELECT labno 
+            FROM active_sitin 
+            WHERE id = ? 
+            AND (status = 'active' OR status = 'done')
+        """
         result = getallprocess(sql, (sitin_id,))
         if not result:
             return jsonify({
@@ -634,8 +722,24 @@ def add_feedback():
                 }
             }), 400
         
-        success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
-                           comments=comments, issues=issues, idno=idno, labno=labno)
+        # Check if feedback already exists for this sit-in
+        check_sql = "SELECT id FROM feedbacks WHERE sitin_id = ?"
+        existing_feedback = getallprocess(check_sql, (sitin_id,))
+        
+        if existing_feedback:
+            # Update existing feedback instead of creating a new one
+            update_sql = """
+                UPDATE feedbacks 
+                SET rating = ?, comments = ?, issues = ?, updated_at = datetime('now')
+                WHERE sitin_id = ?
+            """
+            success = postprocess(update_sql, (rating, comments, issues, sitin_id))
+            feedback_action = "updated"
+        else:
+            # Create new feedback
+            success = addprocess('feedbacks', sitin_id=sitin_id, rating=rating, 
+                            comments=comments, issues=issues, idno=idno, labno=labno)
+            feedback_action = "submitted"
         
         if not success:
             return jsonify({
@@ -644,7 +748,7 @@ def add_feedback():
             }), 500
         
         return jsonify({
-            'message': 'Feedback submitted successfully!', 
+            'message': f'Feedback {feedback_action} successfully!', 
             'status': 'success'
         }), 200
     
@@ -656,7 +760,7 @@ def add_feedback():
             'details': str(e)
         }), 500
 
-@app.route('/api/pc-status/<lab_no>')
+@app.route('/api/pc-status/<int:lab_no>')
 def get_pc_status(lab_no):
     try:
         # Get PC status for this lab room
@@ -677,15 +781,232 @@ def get_pc_status(lab_no):
         """
         count_data = getallprocess(count_sql, (lab_no,))
         
+        # Convert Row objects to dictionaries for proper JSON serialization
+        pc_status_json = []
+        if pc_status_data:
+            for row in pc_status_data:
+                pc_dict = dict(row)
+                # Ensure consistent boolean value for is_available
+                if 'is_available' in pc_dict:
+                    pc_dict['is_available'] = bool(pc_dict['is_available'])
+                pc_status_json.append(pc_dict)
+        
+        # Check if we got any data at all
+        if not pc_status_json:
+            # If no data exists for this lab, create some dummy entries for testing
+            # This is only used in development/testing - should be removed in production
+            if app.debug:
+                # Create 10 dummy PCs with random availability
+                import random
+                for i in range(1, 11):
+                    pc_status_json.append({
+                        'pc_number': i,
+                        'is_available': bool(random.choice([0, 1])),
+                        'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    })
+        
+        # Extract count data safely, providing defaults if missing
+        total_pcs = 0
+        available_pcs = 0
+        
+        if count_data and len(count_data) > 0:
+            count_dict = dict(count_data[0])
+            total_pcs = int(count_dict.get('total_pcs', 0) or 0)
+            available_pcs = int(count_dict.get('available_pcs', 0) or 0)
+        elif pc_status_json:  # If we have PC data but no count data
+            total_pcs = len(pc_status_json)
+            available_pcs = sum(1 for pc in pc_status_json if pc.get('is_available'))
+            
+        # Prepare result with proper type handling
         result = {
             'lab_no': lab_no,
-            'pc_status': pc_status_data or [],
-            'total_pcs': count_data[0]['total_pcs'] if count_data and 'total_pcs' in count_data[0] else 0,
-            'available_pcs': count_data[0]['available_pcs'] if count_data and 'available_pcs' in count_data[0] else 0,
+            'pc_status': pc_status_json,
+            'total_pcs': total_pcs,
+            'available_pcs': available_pcs,
             'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
         
         return jsonify(result)
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        app.logger.error(f"PC status error for lab {lab_no}: {str(e)}\n{error_details}")
+        return jsonify({
+            'error': str(e),
+            'lab_no': lab_no,
+            'pc_status': [],
+            'total_pcs': 0,
+            'available_pcs': 0,
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }), 500
+
+@app.route('/api/download/<resource_type>/<int:resource_id>')
+def download_resource(resource_type, resource_id):
+    if not session.get('logged_in'):
+        flash("Please log in to download resources", "error")
+        return redirect(url_for('login'))
+    
+    try:
+        if resource_type == 'resource':
+            # Get resource details from database
+            sql = "SELECT title, type, link FROM resources WHERE id = ? AND is_active = 1"
+            resource = getallprocess(sql, (resource_id,))
+            
+            if not resource or len(resource) == 0:
+                flash("Resource not found or inactive", "error")
+                return redirect(url_for('resources'))
+            
+            file_path = resource[0]['link']
+            title = resource[0]['title']
+            
+        elif resource_type == 'material':
+            # Get material details from database
+            sql = "SELECT title, category, file_path FROM materials WHERE id = ? AND is_active = 1"
+            material = getallprocess(sql, (resource_id,))
+            
+            if not material or len(material) == 0:
+                flash("Material not found or inactive", "error")
+                return redirect(url_for('resources'))
+            
+            file_path = material[0]['file_path']
+            title = material[0]['title']
+            
+        else:
+            flash("Invalid resource type", "error")
+            return redirect(url_for('resources'))
+        
+        # Check if file path exists
+        if not file_path:
+            flash("No file available for download", "error")
+            return redirect(url_for('resources'))
+        
+        # Handle different file path formats
+        if file_path.startswith('http://') or file_path.startswith('https://'):
+            # For external URLs, redirect to the URL
+            return redirect(file_path)
+        else:
+            # For local files
+            try:
+                # If file_path doesn't start with /, add the application root path
+                if not file_path.startswith('/'):
+                    file_path = os.path.join(app.root_path, file_path)
+                
+                # Check if file exists
+                if not os.path.exists(file_path):
+                    flash(f"File not found: {file_path}", "error")
+                    return redirect(url_for('resources'))
+                
+                # Get file extension for content type
+                file_ext = os.path.splitext(file_path)[1].lower()
+                
+                # Try to guess the mime type
+                mimetype = None
+                if file_ext in ['.pdf']:
+                    mimetype = 'application/pdf'
+                elif file_ext in ['.doc', '.docx']:
+                    mimetype = 'application/msword'
+                elif file_ext in ['.xls', '.xlsx']:
+                    mimetype = 'application/vnd.ms-excel'
+                elif file_ext in ['.ppt', '.pptx']:
+                    mimetype = 'application/vnd.ms-powerpoint'
+                elif file_ext in ['.zip', '.rar']:
+                    mimetype = 'application/octet-stream'
+                elif file_ext in ['.txt']:
+                    mimetype = 'text/plain'
+                elif file_ext in ['.jpg', '.jpeg']:
+                    mimetype = 'image/jpeg'
+                elif file_ext in ['.png']:
+                    mimetype = 'image/png'
+                    
+                # Serve the file
+                from flask import send_file
+                return send_file(
+                    file_path,
+                    mimetype=mimetype,
+                    as_attachment=True,
+                    download_name=f"{title}{file_ext}" if title else os.path.basename(file_path)
+                )
+                
+            except Exception as e:
+                flash(f"Error downloading file: {str(e)}", "error")
+                return redirect(url_for('resources'))
+    
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for('resources'))
+
+@app.route('/api/user/sessions')
+def get_user_sessions():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        user = session.get('user')
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Get the latest session count from the database
+        sql = "SELECT no_session FROM users WHERE idno = ?"
+        result = getallprocess(sql, (user['idno'],))
+        
+        if result and len(result) > 0:
+            sessions = result[0]['no_session']
+            # Update the session data
+            user['sessions'] = sessions
+            session['user'] = user
+            return jsonify({'sessions': sessions})
+        else:
+            return jsonify({'sessions': user.get('sessions', 0)})
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        app.logger.error(f"User sessions error: {str(e)}\n{error_details}")
+        return jsonify({'error': str(e), 'details': error_details}), 500
+
+@app.route('/api/sitin/successful')
+def get_successful_sitins():
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        idno = session['user']['idno']
+        
+        # Get successful sit-ins with feedback status
+        sql = """
+            SELECT 
+                a.id,
+                a.start_time,
+                a.labno,
+                a.purpose,
+                CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END as has_feedback
+            FROM active_sitin a
+            LEFT JOIN feedbacks f ON a.id = f.sitin_id
+            WHERE a.idno = ? AND a.status = 'done'
+            ORDER BY a.start_time DESC
+        """
+        sitins = getallprocess(sql, (idno,))
+        
+        if sitins:
+            return jsonify([dict(row) for row in sitins])
+        return jsonify([])
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/sitin/<int:sitin_id>/end', methods=['POST'])
+def end_sitin(sitin_id):
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        # Update sit-in status to 'done'
+        sql = "UPDATE active_sitin SET status = 'done', end_time = datetime('now') WHERE id = ? AND idno = ?"
+        success = postprocess(sql, (sitin_id, session['user']['idno']))
+        
+        if success:
+            return jsonify({'message': 'Sit-in session ended successfully'})
+        return jsonify({'error': 'Failed to end sit-in session'}), 400
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
