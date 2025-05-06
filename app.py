@@ -1,9 +1,15 @@
-from flask import Flask, render_template, redirect, session, url_for, request, flash, jsonify
+from flask import Flask, render_template, redirect, session, url_for, request, flash, jsonify, send_file
 from dbhelper import *
 import urllib.request, os
 from werkzeug.utils import secure_filename
 from staff_app import staff_app
 from datetime import datetime  # Ensure datetime is properly imported
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import io
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = "!@#$%12345"
@@ -922,7 +928,6 @@ def download_resource(resource_type, resource_id):
                     mimetype = 'image/png'
                     
                 # Serve the file
-                from flask import send_file
                 return send_file(
                     file_path,
                     mimetype=mimetype,
@@ -1013,6 +1018,112 @@ def end_sitin(sitin_id):
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/schedule/download')
+def download_schedule():
+    if not session.get('logged_in'):
+        flash("Please log in to download the schedule", "error")
+        return redirect(url_for('login'))
+    
+    try:
+        # Get filter parameters
+        day_filter = request.args.get('day', 'all')
+        time_filter = request.args.get('time', 'all')
+        room_filter = request.args.get('room', '')
+        
+        # Build the SQL query with filters
+        sql = """
+        SELECT ls.labno, ls.day, ls.time, ls.created_at
+        FROM lab_schedule ls
+        WHERE 1=1
+        """
+        params = []
+        
+        if day_filter != 'all':
+            sql += " AND LOWER(ls.day) = LOWER(?)"
+            params.append(day_filter)
+        
+        if time_filter != 'all':
+            start_time, end_time = time_filter.split('-')
+            sql += " AND ls.time BETWEEN ? AND ?"
+            params.extend([start_time, end_time])
+        
+        if room_filter:
+            sql += " AND ls.labno = ?"
+            params.append(room_filter)
+        
+        sql += " ORDER BY ls.day, ls.time, ls.labno"
+        
+        # Get the schedule data
+        schedule_data = getallprocess(sql, tuple(params))
+        
+        if not schedule_data:
+            flash("No schedule data found for the selected filters", "error")
+            return redirect(url_for('lab'))
+        
+        # Create a PDF in memory
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        
+        # Add title
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30
+        )
+        elements.append(Paragraph("Laboratory Schedule", title_style))
+        elements.append(Spacer(1, 20))
+        
+        # Create the table data
+        data = [['Laboratory', 'Day', 'Time']]
+        for row in schedule_data:
+            data.append([
+                f"Room {row['labno']}",
+                row['day'],
+                row['time']
+            ])
+        
+        # Create the table
+        table = Table(data, colWidths=[2*inch, 2*inch, 2*inch])
+        
+        # Add table style
+        table_style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ])
+        table.setStyle(table_style)
+        elements.append(table)
+        
+        # Build the PDF
+        doc.build(elements)
+        
+        # Prepare the response
+        buffer.seek(0)
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"laboratory_schedule_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Error generating schedule PDF: {str(e)}")
+        flash("Error generating schedule PDF", "error")
+        return redirect(url_for('lab'))
 
 if __name__ == '__main__':
     app.run(debug=True)
