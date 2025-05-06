@@ -505,9 +505,13 @@
         })
 
         // PC Status Modal Functions
+        let pcStatusUpdateInterval = null
+        let currentLabNo = null
+
         function openPcStatusModal(labno) {
             pcStatusModal.classList.remove("hidden")
             modalRoomNumber.textContent = labno
+            currentLabNo = labno
 
             // Show loading state
             pcStatusGrid.classList.add("hidden")
@@ -519,16 +523,207 @@
 
                 // Fetch PC status data
                 fetchPcStatus(labno)
+
+                // Start periodic updates every 5 seconds
+                pcStatusUpdateInterval = setInterval(() => {
+                    fetchPcStatus(labno)
+                }, 5000)
             }, 50)
         }
 
         window.closePcStatusModal = function () {
+            // Clear the update interval when closing the modal
+            if (pcStatusUpdateInterval) {
+                clearInterval(pcStatusUpdateInterval)
+                pcStatusUpdateInterval = null
+            }
+            currentLabNo = null
+
             pcStatusContent.classList.remove("scale-100", "opacity-100")
             pcStatusContent.classList.add("scale-75", "opacity-0")
             setTimeout(() => {
                 pcStatusModal.classList.add("hidden")
                 pcStatusGrid.innerHTML = "" // Clear the grid
             }, 300)
+        }
+
+        // Fetch PC status data for a specific lab room
+        function fetchPcStatus(labno) {
+            // Only fetch if the modal is open and the lab number matches
+            if (
+                !pcStatusModal.classList.contains("hidden") &&
+                currentLabNo === labno
+            ) {
+                // Call the API endpoint
+                fetch(`/api/pc-status/${labno}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok")
+                        }
+                        return response.json()
+                    })
+                    .then(data => {
+                        // Update the last updated time
+                        const lastUpdated = data.last_updated
+                            ? new Date(data.last_updated)
+                            : new Date()
+                        lastUpdatedTime.textContent =
+                            lastUpdated.toLocaleTimeString()
+
+                        // Generate PC status display
+                        renderPcStatus(
+                            data.pc_status || [],
+                            data.total_pcs || 50
+                        )
+
+                        // Update room card availability status
+                        updateRoomCardStatus(
+                            labno,
+                            data.pc_status || [],
+                            data.total_pcs || 50
+                        )
+
+                        // Hide loading, show grid
+                        pcStatusLoading.classList.add("hidden")
+                        pcStatusGrid.classList.remove("hidden")
+                    })
+                    .catch(error => {
+                        console.error("Error fetching PC status:", error)
+                        // Don't show error state, just keep the current display
+                    })
+            }
+        }
+
+        // Function to update room card availability status
+        function updateRoomCardStatus(labno, pcStatusData, totalPcs) {
+            const roomCard = document.querySelector(
+                `.room-card[data-room="${labno}"]`
+            )
+            if (!roomCard) return
+
+            const statusElement = roomCard.querySelector(
+                ".flex.items-center.mb-3"
+            )
+            if (!statusElement) return
+
+            // Check if all PCs are occupied
+            const allOccupied =
+                pcStatusData.length > 0 &&
+                pcStatusData.every(pc => !pc.is_available)
+            const availablePCs = pcStatusData.filter(
+                pc => pc.is_available
+            ).length
+
+            let statusHTML = `
+                <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-gray-700 text-sm">
+            `
+
+            if (totalPcs === 0) {
+                statusHTML += "Available"
+            } else if (allOccupied) {
+                statusHTML += "Fully Occupied"
+            } else if (availablePCs < totalPcs * 0.2) {
+                statusHTML += "Limited Availability"
+            } else {
+                statusHTML += `Available (${availablePCs} PCs)`
+            }
+
+            statusHTML += "</p>"
+            statusElement.innerHTML = statusHTML
+        }
+
+        // Render PC status grid
+        function renderPcStatus(pcStatusData, totalPcs) {
+            pcStatusGrid.innerHTML = ""
+
+            // If no total PCs or total is 0, show a message
+            if (!totalPcs || totalPcs === 0) {
+                pcStatusGrid.innerHTML = `
+                    <div class="col-span-full py-8 text-center">
+                        <p class="text-gray-500">No PC information available for this room.</p>
+                    </div>
+                `
+                return
+            }
+
+            // If no PC status data, create placeholders for all PCs
+            if (!pcStatusData || pcStatusData.length === 0) {
+                renderEmptyPcStatus(totalPcs)
+                return
+            }
+
+            // Check if all PCs are occupied
+            const allOccupied = pcStatusData.every(pc => !pc.is_available)
+
+            if (allOccupied) {
+                pcStatusGrid.innerHTML = `
+                    <div class="col-span-full py-8 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <h3 class="text-xl font-bold text-red-600 mb-2">Fully Occupied</h3>
+                            <p class="text-gray-600">All PCs in this laboratory are currently in use.</p>
+                        </div>
+                    </div>
+                `
+                return
+            }
+
+            // Create PC status items
+            pcStatusData.forEach(pc => {
+                const pcElement = document.createElement("div")
+                pcElement.className = `pc-item ${
+                    pc.is_available
+                        ? "bg-green-100 border-green-500"
+                        : "bg-red-100 border-red-500"
+                } 
+                border-2 rounded-lg p-3 flex flex-col items-center justify-center transition-colors duration-300`
+
+                pcElement.innerHTML = `
+                    <div class="text-xl font-bold ${
+                        pc.is_available ? "text-green-600" : "text-red-600"
+                    }">${pc.pc_number}</div>
+                    <div class="text-xs mt-1 ${
+                        pc.is_available ? "text-green-800" : "text-red-800"
+                    }">${pc.is_available ? "Available" : "Occupied"}</div>
+                `
+
+                pcStatusGrid.appendChild(pcElement)
+            })
+        }
+
+        // Render empty PC status grid with placeholders
+        function renderEmptyPcStatus(totalPcs) {
+            pcStatusGrid.innerHTML = ""
+
+            // Create placeholders for all PCs (1-50 by default)
+            for (let i = 1; i <= totalPcs; i++) {
+                const pcElement = document.createElement("div")
+                // Randomly assign status for demonstration
+                const isAvailable = Math.random() > 0.3
+
+                pcElement.className = `pc-item ${
+                    isAvailable
+                        ? "bg-green-100 border-green-500"
+                        : "bg-red-100 border-red-500"
+                } 
+                border-2 rounded-lg p-2 flex flex-col items-center justify-center transition-colors duration-300`
+
+                pcElement.innerHTML = `
+                    <div class="text-xl font-bold ${
+                        isAvailable ? "text-green-600" : "text-red-600"
+                    }">${i}</div>
+                    <div class="text-xs mt-1 ${
+                        isAvailable ? "text-green-800" : "text-red-800"
+                    }">${isAvailable ? "Available" : "Occupied"}</div>
+                `
+
+                pcStatusGrid.appendChild(pcElement)
+            }
         }
 
         // Schedule Modal Functions
@@ -556,51 +751,6 @@
                 scheduleModal.classList.add("hidden")
                 scheduleList.innerHTML = "" // Clear the list
             }, 300)
-        }
-
-        // Fetch PC status data for a specific lab room
-        function fetchPcStatus(labno) {
-            // Show loading state
-            pcStatusGrid.classList.add("hidden")
-            pcStatusLoading.classList.remove("hidden")
-
-            // Call the API endpoint
-            fetch(`/api/pc-status/${labno}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok")
-                    }
-                    return response.json()
-                })
-                .then(data => {
-                    // Update the last updated time
-                    const lastUpdated = data.last_updated
-                        ? new Date(data.last_updated)
-                        : new Date()
-                    lastUpdatedTime.textContent =
-                        lastUpdated.toLocaleTimeString()
-
-                    // Generate PC status display
-                    renderPcStatus(data.pc_status || [], data.total_pcs || 50)
-
-                    // Hide loading, show grid
-                    pcStatusLoading.classList.add("hidden")
-                    pcStatusGrid.classList.remove("hidden")
-                })
-                .catch(error => {
-                    console.error("Error fetching PC status:", error)
-
-                    // Generate empty PC status display
-                    renderEmptyPcStatus(50)
-
-                    // Update the last updated time
-                    const now = new Date()
-                    lastUpdatedTime.textContent = now.toLocaleTimeString()
-
-                    // Hide loading, show grid
-                    pcStatusLoading.classList.add("hidden")
-                    pcStatusGrid.classList.remove("hidden")
-                })
         }
 
         // Fetch schedule data for a specific lab room
@@ -709,79 +859,6 @@
                 scheduleLoading.classList.add("hidden")
                 scheduleList.classList.remove("hidden")
             }, 500)
-        }
-
-        // Render PC status grid
-        function renderPcStatus(pcStatusData, totalPcs) {
-            pcStatusGrid.innerHTML = ""
-
-            // If no total PCs or total is 0, show a message
-            if (!totalPcs || totalPcs === 0) {
-                pcStatusGrid.innerHTML = `
-                    <div class="col-span-full py-8 text-center">
-                        <p class="text-gray-500">No PC information available for this room.</p>
-                    </div>
-                `
-                return
-            }
-
-            // If no PC status data, create placeholders for all PCs
-            if (!pcStatusData || pcStatusData.length === 0) {
-                renderEmptyPcStatus(totalPcs)
-                return
-            }
-
-            // Create PC status items
-            pcStatusData.forEach(pc => {
-                const pcElement = document.createElement("div")
-                pcElement.className = `pc-item ${
-                    pc.is_available
-                        ? "bg-green-100 border-green-500"
-                        : "bg-red-100 border-red-500"
-                } 
-                border-2 rounded-lg p-3 flex flex-col items-center justify-center transition-colors duration-300`
-
-                pcElement.innerHTML = `
-                    <div class="text-xl font-bold ${
-                        pc.is_available ? "text-green-600" : "text-red-600"
-                    }">${pc.pc_number}</div>
-                    <div class="text-xs mt-1 ${
-                        pc.is_available ? "text-green-800" : "text-red-800"
-                    }">${pc.is_available ? "Available" : "Occupied"}</div>
-                `
-
-                pcStatusGrid.appendChild(pcElement)
-            })
-        }
-
-        // Render empty PC status grid with placeholders
-        function renderEmptyPcStatus(totalPcs) {
-            pcStatusGrid.innerHTML = ""
-
-            // Create placeholders for all PCs (1-50 by default)
-            for (let i = 1; i <= totalPcs; i++) {
-                const pcElement = document.createElement("div")
-                // Randomly assign status for demonstration
-                const isAvailable = Math.random() > 0.3
-
-                pcElement.className = `pc-item ${
-                    isAvailable
-                        ? "bg-green-100 border-green-500"
-                        : "bg-red-100 border-red-500"
-                } 
-                border-2 rounded-lg p-2 flex flex-col items-center justify-center transition-colors duration-300`
-
-                pcElement.innerHTML = `
-                    <div class="text-xl font-bold ${
-                        isAvailable ? "text-green-600" : "text-red-600"
-                    }">${i}</div>
-                    <div class="text-xs mt-1 ${
-                        isAvailable ? "text-green-800" : "text-red-800"
-                    }">${isAvailable ? "Available" : "Occupied"}</div>
-                `
-
-                pcStatusGrid.appendChild(pcElement)
-            }
         }
 
         // Add event listeners to "View PC Status" links
