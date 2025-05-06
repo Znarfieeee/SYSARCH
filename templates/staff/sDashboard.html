@@ -515,19 +515,7 @@
 
                 // Load the corresponding leaderboard
                 const type = this.id.split("-")[0]
-
-                // Add loading animation
-                const leaderboardList =
-                    document.getElementById("leaderboard-list")
-                leaderboardList.classList.add("loading-transition")
-
-                // Load the leaderboard with a slight delay for transition effect
-                setTimeout(() => {
-                    loadLeaderboard(type)
-                    setTimeout(() => {
-                        leaderboardList.classList.remove("loading-transition")
-                    }, 300)
-                }, 100)
+                loadLeaderboard(type)
             })
         })
 
