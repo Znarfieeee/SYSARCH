@@ -62,10 +62,10 @@ def login():
                 "email": user[0]['email'],
                 "password": user[0]['password'],
                 "course": user[0]['course'],
-                "sessions": user[0]['no_session'],
+                "sessions": int(user[0]['no_session']) if user[0]['no_session'] is not None and user[0]['no_session'] != 'None' else 0,
                 "yr_lvl": user[0]['yr_lvl'],
                 "photo": user[0]['photo'],
-                "points": int(user[0]['points']) if 'points' in user[0] else 0,
+                "points": int(user[0]['points']) if 'points' in user[0] and user[0]['points'] is not None else 0,
                 "role": user[0]['role']
             }
             if session['user']['role'] == 'staff' or session['user']['role'] == 'admin':
@@ -179,9 +179,11 @@ def home():
     user_data = getallprocess(user_sql, (user['idno'],))
     
     if user_data and len(user_data) > 0:
-        # Convert to integer to avoid type issues
+        # Convert to integer to avoid type issues, handle None values properly
         user['points'] = int(user_data[0]['points']) if user_data[0]['points'] is not None else 0
-        user['sessions'] = int(user_data[0]['no_session']) if user_data[0]['no_session'] is not None else 0
+        # Handle no_session properly - check for both None and 'None' string
+        no_session = user_data[0]['no_session']
+        user['sessions'] = int(no_session) if no_session is not None and no_session != 'None' else 0
     else:
         user['points'] = 0
         user['sessions'] = 0
@@ -488,7 +490,8 @@ def book():
         user_data = getallprocess(user_sql, (idno,))
         
         if user_data and len(user_data) > 0:
-            sessions = int(user_data[0]['no_session']) if user_data[0]['no_session'] is not None else 0
+            no_session = user_data[0]['no_session']
+            sessions = int(no_session) if no_session is not None and no_session != 'None' else 0
             if sessions <= 0:
                 flash("You have no remaining sessions", "error")
                 return redirect(url_for('reservation'))
@@ -950,7 +953,8 @@ def get_user_sessions():
         result = getallprocess(sql, (user['idno'],))
         
         if result and len(result) > 0:
-            sessions = result[0]['no_session']
+            no_session = result[0]['no_session']
+            sessions = int(no_session) if no_session is not None and no_session != 'None' else 0
             # Update the session data
             user['sessions'] = sessions
             session['user'] = user

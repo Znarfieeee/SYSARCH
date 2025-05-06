@@ -390,6 +390,11 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <button
+                    id="selectAllBtn"
+                    class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200">
+                    Select All
+                </button>
                 <input
                     type="text"
                     id="pcSearch"
@@ -411,6 +416,7 @@
     let isEdit = false
     let currentEditId = null
     let currentLabPCs = []
+    let isSelectAllAvailable = true // Track the current state for select all
 
     function openAddScheduleModal() {
         isEdit = false
@@ -601,6 +607,11 @@
                 pcGrid.innerHTML = ""
                 currentLabPCs = []
 
+                // Reset select all button state
+                isSelectAllAvailable = true
+                document.getElementById("selectAllBtn").textContent =
+                    "Make All Unavailable"
+
                 for (let i = 1; i <= 50; i++) {
                     const pc = data.data.find(p => p.pc_number === i) || {
                         pc_number: i,
@@ -700,6 +711,97 @@
     document.getElementById("pcSearch").addEventListener("input", function (e) {
         filterPCs(e.target.value)
     })
+
+    async function toggleAllPCs() {
+        const labNo = document.getElementById("labFilter").value
+        if (!labNo) {
+            alert("Please select a laboratory first")
+            return
+        }
+
+        try {
+            // Update UI immediately
+            const pcDivs = document.querySelectorAll(".pc-item")
+            pcDivs.forEach(div => {
+                div.className = `pc-item ${
+                    isSelectAllAvailable ? "available" : "unavailable"
+                }`
+                div.setAttribute(
+                    "data-is-available",
+                    isSelectAllAvailable ? "1" : "0"
+                )
+            })
+
+            // Update the currentLabPCs array
+            currentLabPCs.forEach(pc => {
+                pc.is_available = isSelectAllAvailable
+            })
+
+            // Update the button text
+            const selectAllBtn = document.getElementById("selectAllBtn")
+            selectAllBtn.textContent = isSelectAllAvailable
+                ? "Make All Unavailable"
+                : "Make All Available"
+
+            // Toggle the state
+            isSelectAllAvailable = !isSelectAllAvailable
+
+            // Update the stats
+            updateLabStatus()
+
+            // Process updates in batches of 5 for better performance
+            const batchSize = 5
+            const totalPCs = currentLabPCs.length
+
+            for (let i = 0; i < totalPCs; i += batchSize) {
+                const batch = currentLabPCs.slice(i, i + batchSize)
+                const batchPromises = batch.map(pc =>
+                    fetch("/staff/laboratory/pc/toggle", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            lab_no: labNo,
+                            pc_number: pc.pc_number,
+                            is_available: !isSelectAllAvailable, // Use the opposite since we already toggled
+                        }),
+                    })
+                )
+
+                // Wait for this batch to complete before moving to the next
+                await Promise.all(batchPromises)
+            }
+        } catch (error) {
+            console.error("Error updating PC statuses:", error)
+            alert("Error updating PC statuses. Please try again.")
+
+            // Revert UI changes if there was an error
+            const pcDivs = document.querySelectorAll(".pc-item")
+            pcDivs.forEach(div => {
+                const originalStatus =
+                    div.getAttribute("data-is-available") === "1"
+                div.className = `pc-item ${
+                    originalStatus ? "available" : "unavailable"
+                }`
+            })
+
+            // Revert button state
+            isSelectAllAvailable = !isSelectAllAvailable
+            const selectAllBtn = document.getElementById("selectAllBtn")
+            selectAllBtn.textContent = isSelectAllAvailable
+                ? "Make All Unavailable"
+                : "Make All Available"
+
+            // Update stats
+            updateLabStatus()
+        }
+    }
+
+    // Add event listener for the select all button
+    document
+        .getElementById("selectAllBtn")
+        .addEventListener("click", toggleAllPCs)
 </script>
 
 <style>
