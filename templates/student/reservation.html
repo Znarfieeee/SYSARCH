@@ -578,102 +578,151 @@
     }
 
     // New function to load PC status and populate PC dropdown
+    let pcStatusUpdateInterval = null
+    let currentLabNo = null
+
     async function loadPcStatus(labNo) {
         if (!labNo) return
+
+        // Clear any existing interval
+        if (pcStatusUpdateInterval) {
+            clearInterval(pcStatusUpdateInterval)
+        }
+        currentLabNo = labNo
 
         const pcSelect = document.getElementById("pcno")
         const pcContainer = document.getElementById("pc-no-container")
 
         pcSelect.innerHTML =
             '<option value="" disabled selected>Loading PCs...</option>'
-
-        // Show the PC selection container early to provide feedback
         pcContainer.classList.remove("hidden")
 
-        try {
-            const response = await fetch(`/api/pc-status/${labNo}`)
-            let pcStatusMap = {}
-
-            if (response.ok) {
-                const data = await response.json()
-
-                // Create a map of PC numbers to their availability status
-                if (data && data.pc_status && Array.isArray(data.pc_status)) {
-                    data.pc_status.forEach(pc => {
-                        // Convert values to ensure consistent boolean handling
-                        const isAvailable =
-                            pc.is_available === true ||
-                            pc.is_available === 1 ||
-                            pc.is_available === "1" ||
-                            pc.is_available === "true"
-                        pcStatusMap[pc.pc_number] = isAvailable
-                    })
-                }
-            }
-
-            // Always clear and populate with all PCs 1-50
-            pcSelect.innerHTML =
-                '<option value="" disabled selected>Select PC Number</option>'
-
-            // Generate PC options from 1-50
-            for (let i = 1; i <= 50; i++) {
-                const option = document.createElement("option")
-                option.value = i
-
-                // Style based on availability - default to available if no status found
-                const isAvailable = i in pcStatusMap ? pcStatusMap[i] : true
-
-                if (isAvailable) {
-                    option.textContent = `PC ${i} - Available`
-                    option.style.color = "#10b981" // Green color for available PCs
-                    option.style.fontWeight = "500"
-                } else {
-                    option.textContent = `PC ${i} - In Use`
-                    option.style.color = "#ef4444" // Red color for unavailable PCs
-                    option.style.fontWeight = "500"
-                    option.disabled = true
-                }
-
-                pcSelect.appendChild(option)
-            }
-
-            // Update available sessions info
+        // Function to update PC status
+        const updatePCStatus = async () => {
             try {
-                const userInfo = await fetch("/api/user/sessions")
-                if (userInfo.ok) {
-                    const sessionData = await userInfo.json()
-                    if (sessionData && sessionData.sessions !== undefined) {
-                        document.getElementById(
-                            "remaining-sessions"
-                        ).textContent = sessionData.sessions
+                const response = await fetch(`/api/pc-status/${labNo}`)
+                let pcStatusMap = {}
+                let hasAvailablePCs = false
+
+                if (response.ok) {
+                    const data = await response.json()
+
+                    // Create a map of PC numbers to their availability status
+                    if (
+                        data &&
+                        data.pc_status &&
+                        Array.isArray(data.pc_status)
+                    ) {
+                        data.pc_status.forEach(pc => {
+                            const isAvailable =
+                                pc.is_available === true ||
+                                pc.is_available === 1 ||
+                                pc.is_available === "1" ||
+                                pc.is_available === "true"
+                            pcStatusMap[pc.pc_number] = isAvailable
+                            if (isAvailable) hasAvailablePCs = true
+                        })
+                    }
+
+                    // Update laboratory dropdown
+                    const labSelect = document.getElementById("labno")
+                    const currentLabOption = labSelect.querySelector(
+                        `option[value="${labNo}"]`
+                    )
+
+                    if (currentLabOption) {
+                        if (!hasAvailablePCs) {
+                            currentLabOption.textContent = `Laboratory ${labNo} - No Available PCs`
+                            currentLabOption.style.color = "#ef4444" // Red color
+                            currentLabOption.disabled = true
+
+                            // Hide PC selection container
+                            document
+                                .getElementById("pc-no-container")
+                                .classList.add("hidden")
+
+                            // Show notification
+                            showNotification(
+                                "This laboratory has no available PCs",
+                                "error"
+                            )
+                        } else {
+                            currentLabOption.textContent = `Laboratory ${labNo}`
+                            currentLabOption.style.color = "" // Reset color
+                            currentLabOption.disabled = false
+
+                            // Show PC selection container
+                            document
+                                .getElementById("pc-no-container")
+                                .classList.remove("hidden")
+                        }
+                    }
+
+                    // Update PC dropdown
+                    pcSelect.innerHTML =
+                        '<option value="" disabled selected>Select PC Number</option>'
+
+                    // Generate PC options from 1-50
+                    for (let i = 1; i <= 50; i++) {
+                        const option = document.createElement("option")
+                        option.value = i
+
+                        // Style based on availability - default to available if no status found
+                        const isAvailable =
+                            i in pcStatusMap ? pcStatusMap[i] : true
+
+                        if (isAvailable) {
+                            option.textContent = `PC ${i} - Available`
+                            option.style.color = "#10b981" // Green color for available PCs
+                            option.style.fontWeight = "500"
+                        } else {
+                            option.textContent = `PC ${i} - In Use`
+                            option.style.color = "#ef4444" // Red color for unavailable PCs
+                            option.style.fontWeight = "500"
+                            option.disabled = true
+                        }
+
+                        pcSelect.appendChild(option)
+                    }
+
+                    // Update available sessions info
+                    try {
+                        const userInfo = await fetch("/api/user/sessions")
+                        if (userInfo.ok) {
+                            const sessionData = await userInfo.json()
+                            if (
+                                sessionData &&
+                                sessionData.sessions !== undefined
+                            ) {
+                                document.getElementById(
+                                    "remaining-sessions"
+                                ).textContent = sessionData.sessions
+                                document.getElementById(
+                                    "modal-remaining-sessions"
+                                ).textContent = sessionData.sessions
+                            }
+                        }
+                    } catch (sessionError) {
+                        console.error(
+                            "Error fetching user sessions:",
+                            sessionError
+                        )
                     }
                 }
-            } catch (sessionError) {
-                console.error("Error fetching user sessions:", sessionError)
-                // Non-critical error, so we don't show error message to user
-            }
-        } catch (error) {
-            console.error("Error loading PC status:", error)
-
-            // Even if there's an error, still display all PCs 1-50
-            pcSelect.innerHTML =
-                '<option value="" disabled selected>Select PC Number</option>'
-
-            for (let i = 1; i <= 50; i++) {
-                const option = document.createElement("option")
-                option.value = i
-                option.textContent = `PC ${i}`
-                pcSelect.appendChild(option)
-            }
-
-            // Show notification to user about the error
-            if (typeof showNotification === "function") {
+            } catch (error) {
+                console.error("Error loading PC status:", error)
                 showNotification(
-                    `PC status information unavailable. All PCs shown.`,
+                    "Error updating PC status. Please try again.",
                     "error"
                 )
             }
         }
+
+        // Initial update
+        await updatePCStatus()
+
+        // Set up periodic updates every 5 seconds
+        pcStatusUpdateInterval = setInterval(updatePCStatus, 5000)
     }
 
     const monthYear = document.getElementById("current-month-year")
@@ -783,6 +832,13 @@
 
     // Close Add reservation modal
     function closeModal() {
+        // Clear the PC status update interval
+        if (pcStatusUpdateInterval) {
+            clearInterval(pcStatusUpdateInterval)
+            pcStatusUpdateInterval = null
+        }
+        currentLabNo = null
+
         modalContent.classList.remove("scale-100", "opacity-100")
         modalContent.classList.add("scale-20", "opacity-0")
         setTimeout(() => {
@@ -790,7 +846,59 @@
         }, 300)
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to check and update laboratory availability
+        async function checkLaboratoryAvailability() {
+            const labSelect = document.getElementById("labno")
+            const labOptions = labSelect.querySelectorAll(
+                "option:not([disabled])"
+            )
+
+            for (const option of labOptions) {
+                if (option.value) {
+                    // Skip the default "Select Laboratory" option
+                    try {
+                        const response = await fetch(
+                            `/api/pc-status/${option.value}`
+                        )
+                        if (response.ok) {
+                            const data = await response.json()
+                            let hasAvailablePCs = false
+
+                            if (
+                                data &&
+                                data.pc_status &&
+                                Array.isArray(data.pc_status)
+                            ) {
+                                hasAvailablePCs = data.pc_status.some(
+                                    pc =>
+                                        pc.is_available === true ||
+                                        pc.is_available === 1 ||
+                                        pc.is_available === "1" ||
+                                        pc.is_available === "true"
+                                )
+                            }
+
+                            if (!hasAvailablePCs) {
+                                option.textContent = `Laboratory ${option.value} - No Available PCs`
+                                option.style.color = "#ef4444" // Red color
+                                option.disabled = true
+                            }
+                        }
+                    } catch (error) {
+                        console.error(
+                            `Error checking availability for lab ${option.value}:`,
+                            error
+                        )
+                    }
+                }
+            }
+        }
+
+        // Check laboratory availability when page loads
+        checkLaboratoryAvailability()
+
+        // Rest of your existing DOMContentLoaded code...
         fetch("/get_reservations")
             .then(response => response.json())
             .then(data => {
