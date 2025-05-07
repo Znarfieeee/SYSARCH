@@ -1,72 +1,126 @@
-{% extends 'staff.html' %}
-{% block content %}
+{% extends 'staff.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
     <!-- Header and Navigation Section -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-12 gap-4 rise-up">
         <div class="w-full md:w-64">
             <div class="relative">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search reservations..." 
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search reservations..."
                     class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onkeyup="filterReservations()"
-                >
+                    onkeyup="filterReservations()" />
                 <span class="absolute right-3 top-2.5 text-gray-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </span>
             </div>
         </div>
-        
+
         <!-- Navigation Buttons -->
         <div class="radio-inputs flex flex-wrap justify-center gap-2">
-            <a href="/staff/students" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">All Students</span>
             </a>
-            <a href="/staff/students/current" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students/current"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">Current Sit-in</span>
             </a>
             <a href="/staff/students/pending" class="radio">
-                <input type="radio" name="radio" checked="">
+                <input type="radio" name="radio" checked="" />
                 <span class="name">Pending Reservations</span>
             </a>
-            <a href="/staff/students/total" class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
-                <input type="radio" name="radio">
+            <a
+                href="/staff/students/total"
+                class="radio cursor-pointer hover:bg-white transition duration-300 ease-in-out delay-50 hover:rounded-lg">
+                <input type="radio" name="radio" />
                 <span class="name">Total Sit-in</span>
             </a>
         </div>
         <!-- Add Reservation Button -->
-        <button onclick="showAddReservationModal()" 
-                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
-                        transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Add Reservation
-        </button>
+        <div class="flex flex-row gap-2">
+            <button
+                onclick="showLogModal()"
+                class="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
+                <i class="fas fa-history"></i>
+            </button>
+            <button
+                onclick="showAddReservationModal()"
+                class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out flex items-center gap-2 cursor-pointer">
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Reservation
+            </button>
+            <!-- Add this after the "Add Reservation" button in the header section -->
+        </div>
     </div>
 
     <!-- Pending Reservations Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
-        <div class="overflow-x-auto max-h-[70vh] overflow-y-auto" id="tableContainer">
+    <div
+        class="bg-white rounded-lg shadow overflow-hidden w-[90%] mx-auto rise-up">
+        <div
+            class="overflow-x-auto max-h-[70vh] overflow-y-auto"
+            id="tableContainer">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID Number
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Time
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Purpose
+                        </th>
+                        <th
+                            class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Lab
+                        </th>
+                        <th
+                            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200" id="reservationsTableBody">
+                <tbody
+                    class="bg-white divide-y divide-gray-200"
+                    id="reservationsTableBody">
                     <!-- Content will be loaded dynamically -->
                 </tbody>
             </table>
@@ -74,19 +128,37 @@
     </div>
 
     <!-- Modal for Adding Reservation -->
-    <div id="modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
-        <div id="modalContent" class="bg-gray-200 shadow-md p-5 rounded-lg w-[30%] transform scale-20 opacity-0 transition-all duration-300">
-            <form action="/api/book" method="POST" name="reservation-form" id="reservation-form"> 
-                <input type="hidden" id="selectedDate" name="date">
+    <div
+        id="modal"
+        class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
+        <div
+            id="modalContent"
+            class="bg-gray-200 shadow-md p-5 rounded-lg w-[30%] transform scale-20 opacity-0 transition-all duration-300">
+            <form
+                action="/api/book"
+                method="POST"
+                name="reservation-form"
+                id="reservation-form">
+                <input type="hidden" id="selectedDate" name="date" />
                 <h1 class="font-bold text-2xl text-center">Reservation</h1>
                 <h2 id="thisday" class="text-lg text-center mb-8"></h2>
                 <div id="reserve-container" class="flex flex-col gap-4 mx-auto">
                     <div class="input-group">
-                        <input required="" type="text" name="idno" autocomplete="off" class="input w-full">
+                        <input
+                            required=""
+                            type="text"
+                            name="idno"
+                            autocomplete="off"
+                            class="input w-full" />
                         <label class="user-label bg-gray-200">Student ID</label>
                     </div>
                     <div class="input-group">
-                        <input required="" type="date" name="resdate" autocomplete="off" class="input w-full">
+                        <input
+                            required=""
+                            type="date"
+                            name="resdate"
+                            autocomplete="off"
+                            class="input w-full" />
                         <label class="user-label bg-gray-200">Date</label>
                     </div>
                     <div class="input-group">
@@ -97,40 +169,71 @@
                             <option value="528">528</option>
                             <option value="530">530</option>
                             <option value="542">542</option>
-                            <option value="Mac Laboratory">Mac Laboratory</option>
+                            <option value="Mac Laboratory">
+                                Mac Laboratory
+                            </option>
                         </select>
                         <label class="user-label bg-gray-200">Laboratory</label>
                     </div>
                     <div class="input-group">
                         <select name="purpose" class="input w-full" required>
                             <option value="" disabled selected></option>
-                            <option value="Java programming">Java Programming</option>
+                            <option value="Java programming">
+                                Java Programming
+                            </option>
                             <option value="C programming">C Programming</option>
-                            <option value="C# programming">C# Programming</option>
-                            <option value="Php programming">Php Programming</option>
-                            <option value="Python programming">Python Programming</option>
-                            <option value="Javascript programming">Javascript Programming</option>
-                            <option value="ASP.Net programming">ASP.Net Programming</option>
+                            <option value="C# programming">
+                                C# Programming
+                            </option>
+                            <option value="Php programming">
+                                Php Programming
+                            </option>
+                            <option value="Python programming">
+                                Python Programming
+                            </option>
+                            <option value="Javascript programming">
+                                Javascript Programming
+                            </option>
+                            <option value="ASP.Net programming">
+                                ASP.Net Programming
+                            </option>
                         </select>
                         <label class="user-label bg-gray-200">Purpose</label>
                     </div>
                     <div class="flex flex-row justify-between w-full gap-4">
                         <div class="input-group w-full">
-                            <input required="" type="time" name="time-start" autocomplete="off" class="input w-full">
-                            <label class="user-label bg-gray-200">Start Time</label>
+                            <input
+                                required=""
+                                type="time"
+                                name="time-start"
+                                autocomplete="off"
+                                class="input w-full" />
+                            <label class="user-label bg-gray-200"
+                                >Start Time</label
+                            >
                         </div>
                         <div class="input-group w-full">
-                            <input required="" type="time" name="time-end" autocomplete="off" class="input w-full">
-                            <label class="user-label bg-gray-200">End Time</label>
+                            <input
+                                required=""
+                                type="time"
+                                name="time-end"
+                                autocomplete="off"
+                                class="input w-full" />
+                            <label class="user-label bg-gray-200"
+                                >End Time</label
+                            >
                         </div>
                     </div>
                     <div class="flex justify-between mt-6 text-sm">
-                        <button type="button" onclick="closeModal()" 
-                                class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        <button
+                            type="button"
+                            onclick="closeModal()"
+                            class="bg-red-500 hover:bg-red-700 text-white p-2 rounded-lg w-20 transition duration-300">
                             Cancel
                         </button>
-                        <button type="submit" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
+                        <button
+                            type="submit"
+                            class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg w-20 transition duration-300">
                             Save
                         </button>
                     </div>
@@ -138,33 +241,92 @@
             </form>
         </div>
     </div>
+
+    <!-- Log Modal -->
+    <div
+        id="logModal"
+        class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-999 flex justify-center items-center transition-all duration-300">
+        <div
+            id="logModalContent"
+            class="bg-white shadow-md p-5 rounded-lg w-[80%] max-h-[80vh] transform scale-20 opacity-0 transition-all duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Reservation Logs</h2>
+                <button
+                    onclick="closeLogModal()"
+                    class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="overflow-x-auto max-h-[60vh]">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID Number
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Time
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Lab
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        id="logTableBody"
+                        class="bg-white divide-y divide-gray-200">
+                        <!-- Logs will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', loadPendingReservations);
+    document.addEventListener("DOMContentLoaded", loadPendingReservations)
 
-function filterReservations() {
-    const searchInput = document.getElementById('searchInput');
-    const filter = searchInput.value.toLowerCase();
-    const rows = document.getElementsByClassName('reservation-row');
+    function filterReservations() {
+        const searchInput = document.getElementById("searchInput")
+        const filter = searchInput.value.toLowerCase()
+        const rows = document.getElementsByClassName("reservation-row")
 
-    for (let row of rows) {
-        const idno = row.children[0].textContent.toLowerCase();
-        const name = row.children[1].textContent.toLowerCase();
-        const purpose = row.children[4].textContent.toLowerCase();
+        for (let row of rows) {
+            const idno = row.children[0].textContent.toLowerCase()
+            const name = row.children[1].textContent.toLowerCase()
+            const purpose = row.children[4].textContent.toLowerCase()
 
-        if (idno.includes(filter) || name.includes(filter) || purpose.includes(filter)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+            if (
+                idno.includes(filter) ||
+                name.includes(filter) ||
+                purpose.includes(filter)
+            ) {
+                row.style.display = ""
+            } else {
+                row.style.display = "none"
+            }
         }
     }
-}
 
-async function loadPendingReservations() {
-    const tableBody = document.getElementById('reservationsTableBody');
-    // Show loading state
-    tableBody.innerHTML = `
+    async function loadPendingReservations() {
+        const tableBody = document.getElementById("reservationsTableBody")
+        // Show loading state
+        tableBody.innerHTML = `
         <tr id="loadingRow" class="animate-pulse">
             <td colspan="7" class="px-6 py-4">
                 <div class="flex flex-col items-center justify-center py-12">
@@ -176,160 +338,274 @@ async function loadPendingReservations() {
                     <div class="text-center text-gray-500">Loading data...</div>
                 </div>
             </td>
-        </tr>`;
+        </tr>`
 
-    try {
-        const response = await fetch('/api/reservation_students');
-        const data = await response.json();
-        
-        // Clear loading state
-        tableBody.innerHTML = '';
-        
-        if (data.length === 0) {
-            tableBody.innerHTML = `
+        try {
+            const response = await fetch("/api/reservation_students")
+            const data = await response.json()
+
+            // Clear loading state
+            tableBody.innerHTML = ""
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" class="px-6 py-4 text-center">
                         <p class="text-2xl text-gray-500 text-center p-4">No pending reservations found</p>
                     </td>
-                </tr>`;
-            return;
-        }
+                </tr>`
+                return
+            }
 
-        // Render data
-        data.forEach(reservation => {
-            const date = new Date(reservation.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            const row = document.createElement('tr');
-            row.className = 'reservation-row hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.idno}</td>
+            // Render data
+            data.forEach(reservation => {
+                const date = new Date(reservation.date).toLocaleDateString(
+                    "en-US",
+                    {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                    }
+                )
+
+                const row = document.createElement("tr")
+                row.className = "reservation-row hover:bg-gray-50"
+                row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.idno
+                }</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.firstname.toUpperCase()} ${reservation.lastname.toUpperCase()}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.time_start} - ${reservation.time_end}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.purpose}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${reservation.labno}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.date
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.time_start
+                } - ${reservation.time_end}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.purpose
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${
+                    reservation.labno
+                }</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">
                     <div class="flex flex-col md:flex-row gap-2 justify-center">
-                        <button onclick="updateReservationStatus(${reservation.reservation_id}, 'approved')" 
+                        <button onclick="updateReservationStatus(${
+                            reservation.reservation_id
+                        }, 'approved')" 
                                 class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-300">
                             Approve
                         </button>
-                        <button onclick="updateReservationStatus(${reservation.reservation_id}, 'denied')" 
+                        <button onclick="updateReservationStatus(${
+                            reservation.reservation_id
+                        }, 'denied')" 
                                 class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
                             Deny
                         </button>
                     </div>
                 </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        tableBody.innerHTML = `
+            `
+                tableBody.appendChild(row)
+            })
+        } catch (error) {
+            tableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="px-6 py-4 text-center text-red-500">
                     Error loading data. Please try again.
                 </td>
-            </tr>`;
-        console.error('Error:', error);
-    }
-}
-
-async function updateReservationStatus(reservationId, status) {
-    try {
-        const confirmed = await confirmAction(`Are you sure you want to ${status} this reservation?`);
-        if (!confirmed) return;
-
-        const response = await fetch(`/api/reservation/${reservationId}/status`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            showNotification(data.message, data.status);
-            loadPendingReservations();
-        } else {
-            showNotification(data.error || "Failed to update reservation", "error");
+            </tr>`
+            console.error("Error:", error)
         }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification("An unexpected error occurred", "error");
     }
-}
 
-function showAddReservationModal() {
-    const modal = document.getElementById('modal');
-    const modalContent = document.getElementById('modalContent');
-    modal.classList.toggle('hidden');
-    modalContent.classList.remove('scale-20', 'opacity-0');
-    modalContent.classList.add('scale-100', 'opacity-100');
-}    
+    async function updateReservationStatus(reservationId, status) {
+        try {
+            const confirmed = await confirmAction(
+                `Are you sure you want to ${status} this reservation?`
+            )
+            if (!confirmed) return
 
-function closeModal() {
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    modalContent.classList.add('scale-20', 'opacity-0');
-    setTimeout(() => {
-        modal.classList.toggle('hidden');
-        document.getElementById('reservation-form').reset();
-    }, 300);
-}
+            const response = await fetch(
+                `/api/reservation/${reservationId}/status`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ status }),
+                }
+            )
 
-document.getElementById('reservation-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    
-    try {
-        const response = await fetch('/api/book', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-        
-        if (response.ok) {
-            showNotification(data.message || "Reservation added successfully", "success");
-            setTimeout(() => {
-                closeModal();
-                loadPendingReservations();
-            }, 1000);
-        } else {
-            showNotification(data.error || "Failed to add reservation", "error");
+            const data = await response.json()
+            if (response.ok) {
+                showNotification(data.message, data.status)
+                if (status === "approved") {
+                    // Redirect to current sit-in page after approval
+                    window.location.href = "/staff/students/current"
+                } else {
+                    loadPendingReservations()
+                }
+            } else {
+                showNotification(
+                    data.error || "Failed to update reservation",
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification("An unexpected error occurred", "error")
         }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification("An unexpected error occurred", "error");
-    }
-});
-
-function showNotification(message, type = "success") {
-    // Remove any existing notifications
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
     }
 
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
+    function showAddReservationModal() {
+        const modal = document.getElementById("modal")
+        const modalContent = document.getElementById("modalContent")
+        modal.classList.toggle("hidden")
+        modalContent.classList.remove("scale-20", "opacity-0")
+        modalContent.classList.add("scale-100", "opacity-100")
+    }
 
-    // Add to document
-    document.body.appendChild(notification);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.5s ease-in-out forwards';
+    function closeModal() {
+        modalContent.classList.remove("scale-100", "opacity-100")
+        modalContent.classList.add("scale-20", "opacity-0")
         setTimeout(() => {
-            notification.remove();
-        }, 500);
-    }, 3000);
-}
+            modal.classList.toggle("hidden")
+            document.getElementById("reservation-form").reset()
+        }, 300)
+    }
+
+    document
+        .getElementById("reservation-form")
+        .addEventListener("submit", async e => {
+            e.preventDefault()
+            const formData = new FormData(e.target)
+
+            try {
+                const response = await fetch("/api/book", {
+                    method: "POST",
+                    body: formData,
+                })
+
+                const data = await response.json()
+
+                if (response.ok) {
+                    showNotification(
+                        data.message || "Reservation added successfully",
+                        "success"
+                    )
+                    setTimeout(() => {
+                        closeModal()
+                        loadPendingReservations()
+                    }, 1000)
+                } else {
+                    showNotification(
+                        data.error || "Failed to add reservation",
+                        "error"
+                    )
+                }
+            } catch (error) {
+                console.error("Error:", error)
+                showNotification("An unexpected error occurred", "error")
+            }
+        })
+
+    function showNotification(message, type = "success") {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector(".notification")
+        if (existingNotification) {
+            existingNotification.remove()
+        }
+
+        // Create notification element
+        const notification = document.createElement("div")
+        notification.className = `notification ${type}`
+        notification.textContent = message
+
+        // Add to document
+        document.body.appendChild(notification)
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = "slideOut 0.5s ease-in-out forwards"
+            setTimeout(() => {
+                notification.remove()
+            }, 500)
+        }, 3000)
+    }
+
+    function showLogModal() {
+        const modal = document.getElementById("logModal")
+        const modalContent = document.getElementById("logModalContent")
+        modal.classList.remove("hidden")
+        modalContent.classList.remove("scale-20", "opacity-0")
+        modalContent.classList.add("scale-100", "opacity-100")
+        loadReservationLogs()
+    }
+
+    function closeLogModal() {
+        const modalContent = document.getElementById("logModalContent")
+        modalContent.classList.remove("scale-100", "opacity-100")
+        modalContent.classList.add("scale-20", "opacity-0")
+        setTimeout(() => {
+            document.getElementById("logModal").classList.add("hidden")
+        }, 300)
+    }
+
+    async function loadReservationLogs() {
+        const tableBody = document.getElementById("logTableBody")
+        tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce200"></div>
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce400"></div>
+                </div>
+            </td>
+        </tr>`
+
+        try {
+            const response = await fetch("/api/reservation/logs")
+            const data = await response.json()
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                        No reservation logs found
+                    </td>
+                </tr>`
+                return
+            }
+
+            tableBody.innerHTML = ""
+            data.forEach(log => {
+                const row = document.createElement("tr")
+                row.className = "hover:bg-gray-50"
+
+                const statusClass =
+                    log.status === "approved"
+                        ? "text-green-600"
+                        : "text-red-600"
+
+                row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${log.idno}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${log.firstname} ${log.lastname}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${log.date}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${log.time_start} - ${log.time_end}</td>
+                <td class="px-6 py-4 whitespace-nowrap">Lab ${log.labno}</td>
+                <td class="px-6 py-4 whitespace-nowrap ${statusClass}">${log.status}</td>
+            `
+                tableBody.appendChild(row)
+            })
+        } catch (error) {
+            console.error("Error loading logs:", error)
+            tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-4 text-center text-red-500">
+                    Error loading logs. Please try again.
+                </td>
+            </tr>`
+        }
+    }
 </script>
 {% endblock %}

@@ -309,33 +309,43 @@
         </tr>`
 
         try {
-            const response = await fetch("/api/sitin/active")
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
+            // Get both active sit-ins and approved reservations
+            const [activeResponse, approvedResponse] = await Promise.all([
+                fetch("/api/sitin/active"),
+                fetch("/api/reservation_students"),
+            ])
+
+            if (!activeResponse.ok || !approvedResponse.ok) {
+                throw new Error(
+                    `HTTP error! status: ${
+                        activeResponse.status || approvedResponse.status
+                    }`
+                )
             }
 
-            const data = await response.json()
+            const activeData = await activeResponse.json()
+            const approvedData = await approvedResponse.json()
+
+            // Filter approved reservations that haven't started yet
+            const approvedReservations = approvedData.filter(
+                res => res.status === "approved"
+            )
 
             // Clear loading state
             tableBody.innerHTML = ""
 
-            if (!data || data.length === 0) {
+            if (!activeData.length && !approvedReservations.length) {
                 tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" class="px-6 py-4 text-center">
-                        <p class="text-2xl text-gray-500 text-center p-4">No students currently sitting in</p>
+                        <p class="text-2xl text-gray-500 text-center p-4">No active sit-ins or approved reservations</p>
                     </td>
                 </tr>`
-
-                // Update statistics to ensure 0 current sit-ins
-                if (typeof updateStatistics === "function") {
-                    updateStatistics()
-                }
                 return
             }
-            // TODO to add Start button to start sit in
-            // Render data
-            data.forEach(student => {
+
+            // First, render active sit-ins
+            activeData.forEach(student => {
                 const row = document.createElement("tr")
                 row.className = "sitin-row hover:bg-gray-50"
                 row.innerHTML = `
@@ -362,39 +372,65 @@
                     student.purpose
                 }</td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">
-                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${
-                            student.status === "active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                        }">
-                        ${
-                            student.status
-                                ? student.status.charAt(0).toUpperCase() +
-                                  student.status.slice(1)
-                                : "Unknown"
-                        }
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-start">
-                    ${
-                        student.status === "active"
-                            ? `
-                        <div class="flex gap-2">
-                            <button onclick="endSitIn(${student.id})" 
-                                    class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
-                                End
-                            </button>
-                            <button onclick="rewardStudent(${student.id})" 
-                                    class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-300">
-                                Reward
-                            </button>
-                        </div>
-                    `
-                            : ""
-                    }
+                    <div class="flex gap-2">
+                        <button onclick="endSitIn(${student.id})" 
+                                class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                            End Session
+                        </button>
+                        <button onclick="rewardStudent(${student.id})" 
+                                class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                            Reward
+                        </button>
+                    </div>
                 </td>
-            `
+                `
+                tableBody.appendChild(row)
+            })
+
+            // Then, render approved reservations
+            approvedReservations.forEach(reservation => {
+                const row = document.createElement("tr")
+                row.className = "sitin-row hover:bg-gray-50"
+                row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.idno
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${reservation.firstname.toUpperCase()} ${reservation.lastname.toUpperCase()}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.course
+                        ? reservation.course.toUpperCase()
+                        : "N/A"
+                } - ${reservation.yr_lvl || "N/A"}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">Lab ${
+                    reservation.labno
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.time_start
+                } - ${reservation.time_end}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">${
+                    reservation.purpose
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending Start
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-start">
+                    <div class="flex gap-2">
+                        <button onclick="startSession(${
+                            reservation.reservation_id
+                        })" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                            Start Session
+                        </button>
+                    </div>
+                </td>
+                `
                 tableBody.appendChild(row)
             })
         } catch (error) {
@@ -405,11 +441,6 @@
                 </td>
             </tr>`
             console.error("Error:", error)
-
-            // Update statistics to ensure proper display on error
-            if (typeof updateStatistics === "function") {
-                updateStatistics()
-            }
         }
     }
 
@@ -470,6 +501,61 @@
         } catch (error) {
             console.error("Error:", error)
             showNotification("An unexpected error occurred", "error")
+        }
+    }
+
+    async function startSession(reservationId) {
+        const confirmed = await confirmAction(
+            "Are you sure you want to start this session?"
+        )
+        if (!confirmed) return
+
+        try {
+            // First get the reservation details
+            const reservationResponse = await fetch(
+                `/api/reservation/${reservationId}`
+            )
+            if (!reservationResponse.ok) {
+                const errorData = await reservationResponse.json()
+                throw new Error(
+                    errorData.message || "Failed to get reservation details"
+                )
+            }
+            const reservationData = await reservationResponse.json()
+
+            const data = {
+                idno: reservationData.idno,
+                labno: reservationData.labno,
+                end_time: reservationData.time_end,
+                purpose: reservationData.purpose,
+                reservation_id: reservationId,
+                status: "active",
+            }
+
+            const response = await fetch("/api/sitin/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+
+            const result = await response.json()
+            if (response.ok) {
+                showNotification(result.message, "success")
+                loadCurrentSitIns() // Refresh the list
+            } else {
+                showNotification(
+                    result.message || "Failed to start session",
+                    "error"
+                )
+            }
+        } catch (error) {
+            console.error("Error:", error)
+            showNotification(
+                error.message || "An unexpected error occurred",
+                "error"
+            )
         }
     }
 

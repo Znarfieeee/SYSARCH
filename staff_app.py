@@ -1047,11 +1047,40 @@ def get_reservation_count():
 @staff_app.route('/api/reservation_students', methods=['GET'])
 def get_reservation_students():
     try:
-        students = get_pending_reservations()
-        return jsonify([dict(student) for student in students] if students else [])
+        # Get approved reservations that do not have an active sit-in
+        sql = """
+            SELECT 
+                r.id as reservation_id,
+                r.idno,
+                r.date,
+                r.time_start,
+                r.time_end,
+                r.purpose,
+                r.status,
+                r.labno,
+                u.firstname,
+                u.lastname,
+                u.course,
+                u.yr_lvl
+            FROM reservations r
+            JOIN users u ON r.idno = u.idno
+            WHERE r.status = 'approved'
+            AND NOT EXISTS (
+                SELECT 1 FROM active_sitin a
+                WHERE a.reservation_id = r.id AND a.status = 'active'
+            )
+            ORDER BY r.date ASC, r.time_start ASC
+        """
+        approved_reservations = getallprocess(sql)
+
+        # Optionally, you can also include pending reservations if needed
+        # pending_reservations = get_pending_reservations()
+        # reservations = (approved_reservations or []) + (pending_reservations or [])
+
+        return jsonify([dict(res) for res in approved_reservations] if approved_reservations else [])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
 @staff_app.route('/api/students/total_sitins', methods=['GET'])
 def get_students_total_sitins():
     try:
@@ -1540,3 +1569,18 @@ def staff_leaderboard():
     if not session.get('user') or session['user']['role'] != 'staff':
         return redirect(url_for('login'))
     return render_template('staff/leaderboard.html')
+
+@staff_app.route('/api/reservation/<int:reservation_id>', methods=['GET'])
+def get_reservation_details_route(reservation_id):
+    try:
+        if not session.get('logged_in'):
+            return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+            
+        reservation = get_reservation_details(reservation_id)
+        if not reservation:
+            return jsonify({'message': 'Reservation not found', 'status': 'error'}), 404
+            
+        return jsonify(dict(reservation[0]))
+        
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
