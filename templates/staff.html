@@ -774,34 +774,33 @@
                 display: flex;
             }
             .container {
-  cursor: pointer;
-}
+                cursor: pointer;
+            }
 
-.container1 input {
-  display: none;
-}
+            .container1 input {
+                display: none;
+            }
 
-.container1 svg {
-  overflow: visible;
-}
+            .container1 svg {
+                overflow: visible;
+            }
 
-.path {
-  fill: none;
-  stroke: #3f3f3f;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease;
-  stroke-dasharray: 241 9999999;
-  stroke-dashoffset: 0;
-}
+            .path {
+                fill: none;
+                stroke: #3f3f3f;
+                stroke-width: 6;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                transition: stroke-dasharray 0.5s ease,
+                    stroke-dashoffset 0.5s ease;
+                stroke-dasharray: 241 9999999;
+                stroke-dashoffset: 0;
+            }
 
-.container1 input:checked ~ svg .path {
-  stroke-dasharray: 70.5096664428711 9999999;
-  stroke-dashoffset: -262.2723388671875;
-}
-
-  
+            .container1 input:checked ~ svg .path {
+                stroke-dasharray: 70.5096664428711 9999999;
+                stroke-dashoffset: -262.2723388671875;
+            }
         </style>
     </head>
     <body class="overflow-hidden bg-gray-200">
@@ -821,6 +820,32 @@
             </label>
             <img src="/static/img/ccs_logo.png" class="h-10 w-auto ml-6" />
             <h2 class="text-2xl font-semibold ml-2">{{ pagetitle }}</h2>
+            <!-- Add notification badge -->
+            <div class="ml-auto relative">
+                <button
+                    id="notificationBtn"
+                    class="relative p-2 hover:bg-gray-600 rounded-full transition-colors">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span
+                        id="notificationBadge"
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden"
+                        >0</span
+                    >
+                </button>
+                <!-- Dropdown for notifications -->
+                <div
+                    id="notificationDropdown"
+                    class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                    <div class="p-4 border-b">
+                        <h3 class="font-semibold text-gray-800">
+                            Pending Reservations
+                        </h3>
+                    </div>
+                    <div id="notificationList" class="max-h-96 overflow-y-auto">
+                        <!-- Notifications will be populated here -->
+                    </div>
+                </div>
+            </div>
         </header>
         <div
             id="sidebar"
@@ -1174,6 +1199,134 @@
             const loader = document.getElementById("loader")
             if (loader) {
                 loader.style.display = "none"
+            }
+        })
+
+        // Add this to your existing script section
+        let notificationCheckInterval
+
+        function checkPendingReservations() {
+            fetch("/api/reservation_count")
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById("notificationBadge")
+                    if (data.count > 0) {
+                        badge.textContent = data.count
+                        badge.classList.remove("hidden")
+                    } else {
+                        badge.classList.add("hidden")
+                    }
+                })
+                .catch(error =>
+                    console.error("Error checking reservations:", error)
+                )
+        }
+
+        function loadPendingReservations() {
+            fetch("/api/reservation_students")
+                .then(response => response.json())
+                .then(data => {
+                    const notificationList =
+                        document.getElementById("notificationList")
+                    notificationList.innerHTML = ""
+
+                    if (data.length === 0) {
+                        notificationList.innerHTML =
+                            '<div class="p-4 text-gray-500 text-center">No pending reservations</div>'
+                        return
+                    }
+
+                    data.forEach(reservation => {
+                        const notificationItem = document.createElement("div")
+                        notificationItem.className =
+                            "p-4 border-b hover:bg-gray-50 cursor-pointer"
+                        notificationItem.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-gray-800">${reservation.firstname} ${reservation.lastname}</p>
+                                    <p class="text-sm text-gray-600">Lab ${reservation.labno}</p>
+                                    <p class="text-sm text-gray-500">${reservation.date} ${reservation.time_start} - ${reservation.time_end}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="handleReservation(${reservation.id}, 'approved')" class="text-green-600 hover:text-green-800">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="handleReservation(${reservation.id}, 'denied')" class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                        notificationList.appendChild(notificationItem)
+                    })
+                })
+                .catch(error =>
+                    console.error("Error loading reservations:", error)
+                )
+        }
+
+        function handleReservation(id, status) {
+            fetch(`/api/reservation/${id}/status`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status: status }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        showNotification(data.message, "success")
+                        loadPendingReservations()
+                        checkPendingReservations()
+                    } else {
+                        showNotification(data.message, "error")
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error)
+                    showNotification(
+                        "Failed to update reservation status",
+                        "error"
+                    )
+                })
+        }
+
+        // Toggle notification dropdown
+        document
+            .getElementById("notificationBtn")
+            .addEventListener("click", function (e) {
+                e.stopPropagation()
+                const dropdown = document.getElementById("notificationDropdown")
+                dropdown.classList.toggle("hidden")
+                if (!dropdown.classList.contains("hidden")) {
+                    loadPendingReservations()
+                }
+            })
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+            const dropdown = document.getElementById("notificationDropdown")
+            const button = document.getElementById("notificationBtn")
+            if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+                dropdown.classList.add("hidden")
+            }
+        })
+
+        // Start checking for new reservations when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            checkPendingReservations()
+            // Check every 30 seconds
+            notificationCheckInterval = setInterval(
+                checkPendingReservations,
+                30000
+            )
+        })
+
+        // Clean up interval when page is unloaded
+        window.addEventListener("beforeunload", function () {
+            if (notificationCheckInterval) {
+                clearInterval(notificationCheckInterval)
             }
         })
     </script>

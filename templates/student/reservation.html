@@ -720,9 +720,6 @@
 
         // Initial update
         await updatePCStatus()
-
-        // Set up periodic updates every 5 seconds
-        pcStatusUpdateInterval = setInterval(updatePCStatus, 5000)
     }
 
     const monthYear = document.getElementById("current-month-year")

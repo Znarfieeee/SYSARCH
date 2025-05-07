@@ -456,7 +456,12 @@ def get_reservations():
 @app.route('/book', methods=['POST'])
 def book():
     try:
-        idno = session.get('idno') or session['user']['idno']
+        # Get idno directly from session['user']
+        if not session.get('logged_in') or 'user' not in session:
+            flash("Please log in to make a reservation", "error")
+            return redirect(url_for('login'))
+            
+        idno = session['user']['idno']
         date = request.form.get('date')
         time_start = request.form.get('time-start')
         time_end = request.form.get('time-end')
@@ -508,18 +513,24 @@ def book():
         
         # Only check PC availability if data exists
         if pc_data and len(pc_data) > 0:
-            is_available = bool(pc_data[0]['is_available']) if 'is_available' in pc_data[0] else False
+            # Convert is_available to boolean properly
+            is_available = pc_data[0]['is_available']
+            if isinstance(is_available, str):
+                is_available = is_available.lower() in ['true', '1', 'yes']
+            else:
+                is_available = bool(is_available)
+                
             if not is_available:
                 flash("Selected PC is not available", "error")
                 return redirect(url_for('reservation'))
         else:
-            # Log that we're proceeding without PC status data
-            app.logger.warning(f"No PC status data found for PC {pcno} in lab {labno}. Proceeding with reservation.")
+            # If no PC status data exists, assume PC is available
+            app.logger.info(f"No PC status data found for PC {pcno} in lab {labno}. Assuming PC is available.")
         
         # Check if PC is already reserved for the same time period
         existing_reservation_sql = """
             SELECT id FROM reservations 
-            WHERE labno = ? AND pc_number = ? AND date = ? AND status != 'denied'
+            WHERE labno = ? AND pcno = ? AND date = ? AND status != 'denied'
             AND ((time_start <= ? AND time_end > ?) OR (time_start < ? AND time_end >= ?) OR (time_start >= ? AND time_end <= ?))
         """
         existing_reservation = getallprocess(existing_reservation_sql, 
@@ -533,7 +544,7 @@ def book():
         success = addprocess('reservations', idno=idno, date=date, 
                          time_start=time_start, time_end=time_end, 
                          labno=labno, purpose=purpose, status=status,
-                         pc_number=pcno)
+                         pcno=pcno)
         
         if success:
             flash("Reservation successful.", "success")
@@ -1124,6 +1135,116 @@ def download_schedule():
         app.logger.error(f"Error generating schedule PDF: {str(e)}")
         flash("Error generating schedule PDF", "error")
         return redirect(url_for('lab'))
+
+@app.route('/api/reservation/status', methods=['GET'])
+def get_reservation_status_count():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+    
+    try:
+        idno = session['user']['idno']
+        sql = """
+            SELECT COUNT(*) as count 
+            FROM reservations 
+            WHERE idno = ? 
+            AND status IN ('approved', 'denied')
+            AND is_notified = 0
+        """
+        result = getallprocess(sql, (idno,))
+        
+        if result:
+            return jsonify({'count': result[0]['count']})
+        return jsonify({'count': 0})
+        
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@app.route('/api/reservation/notifications', methods=['GET'])
+def get_reservation_notifications():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+    
+    try:
+        idno = session['user']['idno']
+        sql = """
+            SELECT id, labno, date, time_start, time_end, status, created_at
+            FROM reservations 
+            WHERE idno = ? 
+            AND status IN ('approved', 'denied')
+            AND is_notified = 0
+            ORDER BY created_at DESC
+        """
+        notifications = getallprocess(sql, (idno,))
+        
+        if notifications:
+            # Mark notifications as read
+            sql = """
+                UPDATE reservations 
+                SET is_notified = 1 
+                WHERE idno = ? 
+                AND status IN ('approved', 'denied')
+                AND is_notified = 0
+            """
+            postprocess(sql, (idno,))
+            
+            return jsonify([dict(notification) for notification in notifications])
+        return jsonify([])
+        
+    except Exception as e:
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+@app.route('/api/reservation/logs', methods=['GET'])
+def get_reservation_logs():
+    if not session.get('logged_in'):
+        return jsonify({'message': 'Not authenticated', 'status': 'error'}), 401
+    
+    try:
+        sql = """
+            SELECT r.id, r.idno, r.labno, r.date, r.time_start, r.time_end, r.status, r.updated_at,
+                   u.firstname, u.lastname
+            FROM reservations r
+            JOIN users u ON r.idno = u.idno
+            WHERE r.status IN ('approved', 'denied')
+            ORDER BY r.updated_at DESC
+        """
+        logs = getallprocess(sql)
+        
+        if logs:
+            # Format the data for JSON response
+            formatted_logs = []
+            for log in logs:
+                formatted_log = dict(log)
+                # The dates are already in string format, no need for strftime
+                formatted_log['date'] = log['date']
+                formatted_log['updated_at'] = log['updated_at']
+                formatted_logs.append(formatted_log)
+            
+            return jsonify(formatted_logs)
+        return jsonify([])
+        
+    except Exception as e:
+        app.logger.error(f"Error in get_reservation_logs: {str(e)}")
+        return jsonify({'message': str(e), 'status': 'error'}), 500
+
+# Add is_notified column to reservations table if it doesn't exist
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Check if is_notified column exists
+        cursor.execute("PRAGMA table_info(reservations)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'is_notified' not in columns:
+            cursor.execute("ALTER TABLE reservations ADD COLUMN is_notified INTEGER DEFAULT 0")
+            conn.commit()
+    except Exception as e:
+        print(f"Error initializing database: {str(e)}")
+    finally:
+        conn.close()
+
+# Call init_db when the application starts
+init_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
